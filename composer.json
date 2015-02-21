@@ -3,7 +3,8 @@
     "require": {
         "guzzlehttp/guzzle": "~5.2",
         "rmiller/hal-guzzle-response": "~0.1",
-        "commerceguys/guzzle-5-oauth2-plugin": "dev-guzzle5-support"
+        "commerceguys/guzzle-5-oauth2-plugin": "dev-guzzle5-support",
+        "guzzlehttp/cache-subscriber": "0.1.*@dev"
     },
     "repositories": [
         {

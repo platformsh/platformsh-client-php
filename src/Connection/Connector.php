@@ -8,6 +8,7 @@ use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
 
@@ -184,6 +185,7 @@ class Connector implements ConnectorInterface
             ];
             $client = clone $this->clientPrototype;
             $client->__construct($options);
+            CacheSubscriber::attach($client);
             $this->clients[$endpoint] = $client;
         }
 

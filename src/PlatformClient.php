@@ -51,7 +51,7 @@ class PlatformClient
     {
         $connector = $this->getConnector();
         $data = $this->getAccountInfo($reset);
-        $projects = array();
+        $projects = [];
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh cluster.
             $client = $connector->getClient($project['endpoint']);
