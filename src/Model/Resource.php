@@ -37,6 +37,60 @@ class Resource implements ResourceInterface
     }
 
     /**
+     * @param string          $id
+     * @param string          $collectionUrl
+     * @param ClientInterface $client
+     *
+     * @return static
+     */
+    public static function get($id, $collectionUrl, ClientInterface $client)
+    {
+        $data = $client->get($collectionUrl . '/' . $id)->json();
+        return static::wrap($data, $client);
+    }
+
+    /**
+     * @param string          $url
+     * @param array           $options
+     * @param ClientInterface $client
+     *
+     * @return static
+     */
+    public static function getCollection($url, array $options = [], ClientInterface $client)
+    {
+        $data = $client->get($url, $options)->json();
+        return static::wrapCollection($data, $client);
+    }
+
+    /**
+     * @todo automatically wrap Guzzle responses
+     *
+     * @param array $data
+     * @param ClientInterface $client
+     *
+     * @return static
+     */
+    public static function wrap(array $data, ClientInterface $client)
+    {
+        return new static($data, $client);
+    }
+
+    /**
+     * @todo automatically wrap Guzzle responses
+     *
+     * @param array $data
+     * @param ClientInterface $client
+     *
+     * @return static[]
+     */
+    public static function wrapCollection(array $data, ClientInterface $client)
+    {
+        return array_map(function ($item) use ($client) {
+            return new static($item, $client);
+        }, $data);
+    }
+
+    /**
      * @throws \Exception
      *
      * @return string

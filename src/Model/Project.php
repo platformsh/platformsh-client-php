@@ -6,15 +6,21 @@ class Project extends Resource
 {
 
     /**
+     * @param string $id
+     *
+     * @return Environment
+     */
+    public function getEnvironment($id)
+    {
+        return Environment::get($id, $this->getUri() . '/environments', $this->client);
+    }
+
+    /**
      * @return Environment[]
      */
     public function getEnvironments()
     {
-        // @todo refactor getting json and resource from response automatically
-        $data = $this->client->get($this->getUri() . '/environments')->json();
-        return array_map(function ($element) {
-           return new Environment($element, $this->client);
-        }, $data);
+        return Environment::getCollection($this->getUri() . '/environments', [], $this->client);
     }
 
     public function getUri()

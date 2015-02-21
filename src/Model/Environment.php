@@ -6,14 +6,20 @@ class Environment extends Resource
 {
 
     /**
+     * @param int $limit
+     * @param string $type
+     *
      * @return EnvironmentActivity[]
      */
-    public function getActivities()
+    public function getActivities($limit = 0, $type = null)
     {
-        // @todo refactor getting json and resource from response automatically
-        $data = $this->client->get($this->getUri() . '/activities')->json();
-        return array_map(function ($element) {
-            return new EnvironmentActivity($element, $this->client);
-        }, $data);
+        $options = [];
+        if ($limit) {
+            $options['query']['count'] = $limit;
+        }
+        if ($type) {
+            $options['query']['type'] = $type;
+        }
+        return EnvironmentActivity::getCollection($this->getUri() . '/activities', $options, $this->client);
     }
 }

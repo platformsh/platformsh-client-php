@@ -35,4 +35,9 @@ interface ConnectorInterface
      * @param bool $debug
      */
     public function setDebug($debug);
+
+    /**
+     * @param bool $verifySsl
+     */
+    public function setVerifySsl($verifySsl);
 }

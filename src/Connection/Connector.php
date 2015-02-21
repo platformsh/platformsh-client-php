@@ -7,6 +7,7 @@ use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
 use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
 
@@ -38,6 +39,11 @@ class Connector implements ConnectorInterface
     public function setDebug($debug)
     {
         $this->debug = $debug;
+    }
+
+    public function setVerifySsl($verifySsl)
+    {
+        $this->verifySsl = $verifySsl;
     }
 
     public function __destruct()
@@ -82,7 +88,13 @@ class Connector implements ConnectorInterface
             return;
         }
         $client = clone $this->clientPrototype;
-        $client->__construct(['base_url' => $this->accountsEndpoint]);
+        $client->__construct([
+          'base_url' => $this->accountsEndpoint,
+          'defaults' => [
+            'debug' => $this->debug,
+            'verify' => $this->verifySsl,
+          ],
+        ]);
         $grantType = new PasswordCredentials(
           $client, [
             'client_id' => self::CLIENT_ID,
@@ -90,12 +102,22 @@ class Connector implements ConnectorInterface
             'password' => $password,
           ]
         );
-        $token = $grantType->getToken();
+        try {
+            $token = $grantType->getToken();
+        }
+        catch (BadResponseException $e) {
+            $response = $e->getResponse();
+            if ($response && $response->getStatusCode() === 401) {
+                throw new \Exception("Invalid credentials. Please check your username/password combination");
+            }
+            throw $e;
+        }
         $this->session->set('username', $username);
         $this->session->set('accessToken', $token->getToken());
         $this->session->set('tokenType', $token->getType());
         $this->session->set('expires', $token->getExpires()->getTimestamp());
         $this->session->set('refreshToken', $token->getRefreshToken()->getToken());
+        $this->session->save();
     }
 
     /**
@@ -111,8 +133,8 @@ class Connector implements ConnectorInterface
               'defaults' => [
                 'headers' => ['User-Agent' => $this->getUserAgent()],
                 'debug' => $this->debug,
+                'verify' => $this->verifySsl,
               ],
-              'verify' => $this->verifySsl,
             ];
             $oauth2Client = new Client($options);
             $refreshTokenGrantType = new RefreshToken($oauth2Client, [
