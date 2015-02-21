@@ -6,6 +6,20 @@ class Environment extends Resource
 {
 
     /**
+     * Branch (create a new environment).
+     *
+     * @param string $id
+     * @param string $title
+     *
+     * @return static
+     */
+    public function branch($id, $title = null)
+    {
+        $body = array_filter(['name' => $id, 'title' => $title]);
+        $this->runOperation('branch', 'post', $body);
+    }
+
+    /**
      * @param int $limit
      * @param string $type
      *

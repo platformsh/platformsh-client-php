@@ -101,7 +101,7 @@ class Resource implements ResourceInterface
             $options['body'] = json_encode($body);
         }
         $request = $this->client
-          ->createRequest($method, $this->getLink("#op"), $options);
+          ->createRequest($method, $this->getLink("#$op"), $options);
         $response = $this->client->send($request);
         return (array) $response->json();
     }
