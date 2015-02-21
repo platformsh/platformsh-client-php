@@ -4,8 +4,42 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "762daf4ca66fd49875a50a41fb4a61d0",
+    "hash": "3932c68abd74d7b1ae6f2dee30ee907d",
     "packages": [
+        {
+            "name": "commerceguys/guzzle-5-oauth2-plugin",
+            "version": "dev-guzzle5-support",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
+                "reference": "e08fc92f5f291fca166c4b0c65127c849682a9c6"
+            },
+            "require": {
+                "guzzlehttp/guzzle": "~5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "CommerceGuys\\Guzzle\\Oauth2\\": "src"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bojan Zivanovic"
+                },
+                {
+                    "name": "Damien Tournoud"
+                },
+                {
+                    "name": "Patrick Dawkins"
+                }
+            ],
+            "description": "An OAuth2 plugin for Guzzle 5.x",
+            "time": "2015-02-21 15:14:44"
+        },
         {
             "name": "guzzlehttp/guzzle",
             "version": "5.2.0",
@@ -165,6 +199,54 @@
             "time": "2014-10-12 19:18:40"
         },
         {
+            "name": "nocarrier/hal",
+            "version": "0.9.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/blongden/hal.git",
+                "reference": "4ff57176cb4ebde4245bda979ed662a0f8480b97"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/blongden/hal/zipball/4ff57176cb4ebde4245bda979ed662a0f8480b97",
+                "reference": "4ff57176cb4ebde4245bda979ed662a0f8480b97",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Nocarrier": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ben Longden",
+                    "email": "ben@nocarrier.co.uk",
+                    "homepage": "http://nocarrier.co.uk"
+                }
+            ],
+            "description": "application/hal builder / formatter for PHP 5.3+",
+            "homepage": "https://github.com/blongden/hal",
+            "keywords": [
+                "hal",
+                "hypermedia",
+                "json",
+                "rest",
+                "xml"
+            ],
+            "time": "2014-11-24 11:48:52"
+        },
+        {
             "name": "react/promise",
             "version": "v2.2.0",
             "source": {
@@ -207,12 +289,62 @@
             ],
             "description": "A lightweight implementation of CommonJS Promises/A for PHP",
             "time": "2014-12-30 13:32:42"
+        },
+        {
+            "name": "rmiller/hal-guzzle-response",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/richardmiller/HalGuzzleResponse.git",
+                "reference": "c2b08865fdc8df6acc7eb098f02f3d8c844a3b8e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/richardmiller/HalGuzzleResponse/zipball/c2b08865fdc8df6acc7eb098f02f3d8c844a3b8e",
+                "reference": "c2b08865fdc8df6acc7eb098f02f3d8c844a3b8e",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "~5.0.",
+                "nocarrier/hal": "~0.9",
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "phpspec/phpspec": "~2.1@dev",
+                "rmiller/exemplify-extension": "~0.2",
+                "rmiller/phpspec-run-extension": "~0.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "RMiller\\HalGuzzleResponse\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Richard Miller",
+                    "email": "mrrmiller46@gmail.com"
+                }
+            ],
+            "description": "Adds Hal resources to Guzzle Responses",
+            "homepage": "https://github.com/richardmiller/HalGuzzleResponse",
+            "keywords": [
+                "Guzzle",
+                "hal"
+            ],
+            "time": "2014-11-17 08:32:25"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "commerceguys/guzzle-5-oauth2-plugin": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

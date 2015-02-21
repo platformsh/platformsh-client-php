@@ -1,5 +1,18 @@
 {
     "require": {
-        "guzzlehttp/guzzle": "~5.2"
+        "guzzlehttp/guzzle": "~5.2",
+        "rmiller/hal-guzzle-response": "~0.1",
+        "commerceguys/guzzle-5-oauth2-plugin": "dev-guzzle5-support"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url":  "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Platformsh\\Client\\": "src"
+        }
     }
 }
