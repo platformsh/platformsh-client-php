@@ -8,16 +8,16 @@ interface SessionStorageInterface
 {
 
     /**
-     * @param SessionInterface $session
+     * @throws \Exception
      *
-     * @return bool
+     * @param SessionInterface $session
      */
     public function load(SessionInterface $session);
 
     /**
-     * @param SessionInterface $session
+     * @throws \Exception
      *
-     * @return bool
+     * @param SessionInterface $session
      */
     public function save(SessionInterface $session);
 }

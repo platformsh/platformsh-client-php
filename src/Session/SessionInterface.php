@@ -13,6 +13,11 @@ interface SessionInterface
     public function setStorage(SessionStorageInterface $storage);
 
     /**
+     * @param array $data
+     */
+    public function add(array $data);
+
+    /**
      * @param string $key
      * @param mixed  $value
      */
@@ -53,7 +58,12 @@ interface SessionInterface
     public function load($reload = false);
 
     /**
-     * @return bool
+     * Save the session, if storage is defined.
      */
     public function save();
+
+    /**
+     * Clear the session data.
+     */
+    public function clear();
 }

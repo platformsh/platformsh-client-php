@@ -36,19 +36,23 @@ class Session implements SessionInterface
 
     public function load($reload = false)
     {
-        if ($this->loaded && !$reload) {
-            return true;
-        } elseif (!isset($this->storage)) {
-            return false;
+        if (!$this->loaded || $reload) {
+            if (isset($this->storage)) {
+                $this->storage->load($this);
+                $this->loaded = true;
+            }
         }
+    }
 
-        return $this->loaded = $this->storage->load($this);
+    public function add(array $data)
+    {
+        $this->data = array_merge($this->data, $data);
     }
 
     public function set($key, $value)
     {
         if (is_object($value)) {
-            throw new \InvalidArgumentException('Invalid session data type');
+            throw new \InvalidArgumentException('Invalid session data type: object');
         }
         $this->data[$key] = $value;
     }
@@ -78,13 +82,18 @@ class Session implements SessionInterface
         $this->id = $id;
     }
 
+    public function clear()
+    {
+        $this->data = [];
+    }
+
     public function save()
     {
         if (!isset($this->storage)) {
-            return false;
+            return;
         }
 
-        return $this->storage->save($this);
+        $this->storage->save($this);
     }
 
     public function __destruct()

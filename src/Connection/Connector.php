@@ -22,6 +22,7 @@ class Connector implements ConnectorInterface
     protected $verifySsl = true;
     protected $oauth2Plugin;
     protected $session;
+    protected $loggedOut = false;
 
     /**
      * @param string           $accountsEndpoint
@@ -46,9 +47,18 @@ class Connector implements ConnectorInterface
         $this->verifySsl = $verifySsl;
     }
 
+    public function logOut()
+    {
+        $this->session->clear();
+        $this->loggedOut = true;
+    }
+
     public function __destruct()
     {
-        if ($this->oauth2Plugin) {
+        if ($this->loggedOut) {
+            $this->session->clear();
+        }
+        elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()
                           ->getAccessToken();
@@ -82,8 +92,9 @@ class Connector implements ConnectorInterface
         return "Platform.sh-Client/$version (+$url)";
     }
 
-    public function authenticate($username, $password, $force = false)
+    public function logIn($username, $password, $force = false)
     {
+        $this->loggedOut = false;
         if (!$force && $this->session->get('username') === $username) {
             return;
         }
@@ -112,11 +123,13 @@ class Connector implements ConnectorInterface
             }
             throw $e;
         }
-        $this->session->set('username', $username);
-        $this->session->set('accessToken', $token->getToken());
-        $this->session->set('tokenType', $token->getType());
-        $this->session->set('expires', $token->getExpires()->getTimestamp());
-        $this->session->set('refreshToken', $token->getRefreshToken()->getToken());
+        $this->session->add([
+          'username' =>  $username,
+          'accessToken' => $token->getToken(),
+          'tokenType' => $token->getType(),
+          'expires' => $token->getExpires()->getTimestamp(),
+          'refreshToken' => $token->getRefreshToken()->getToken(),
+        ]);
         $this->session->save();
     }
 
@@ -128,6 +141,9 @@ class Connector implements ConnectorInterface
     protected function getOauth2Plugin()
     {
         if (!$this->oauth2Plugin) {
+            if (!$this->session->get('accessToken') || !$this->session->get('refreshToken')) {
+                throw new \Exception('Not logged in (no access token available)');
+            }
             $options = [
               'base_url' => $this->accountsEndpoint,
               'defaults' => [

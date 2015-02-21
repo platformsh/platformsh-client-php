@@ -39,12 +39,19 @@ class File implements SessionStorageInterface
         return $home;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function save(SessionInterface $session)
     {
+        $data = $session->getData();
         $filename = $this->getFilename($session);
-        $result = file_put_contents($filename, json_encode($session->getData()));
+        if (!$data && file_exists($filename)) {
+            return unlink($filename);
+        }
+        $result = file_put_contents($filename, json_encode($data));
         if ($result === false) {
-            return false;
+            throw new \Exception("Failed to save session to file: $filename");
         }
         chmod($filename, self::FILE_MODE);
 
@@ -83,16 +90,19 @@ class File implements SessionStorageInterface
         return rtrim($dir, '/');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function load(SessionInterface $session)
     {
         $filename = $this->getFilename($session);
         if (file_exists($filename)) {
-            $data = json_decode(file_get_contents($filename), true);
+            $raw = file_get_contents($filename);
+            if ($raw === false) {
+                throw new \Exception("Failed to read file: $filename");
+            }
+            $data = json_decode($raw, true);
             $session->setData($data);
-
-            return true;
         }
-
-        return false;
     }
 }

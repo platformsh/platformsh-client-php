@@ -22,7 +22,12 @@ interface ConnectorInterface
      *   Whether to re-authenticate even if the session appears to be logged
      *   in already.
      */
-    public function authenticate($username, $password, $force = false);
+    public function logIn($username, $password, $force = false);
+
+    /**
+     * Log out.
+     */
+    public function logOut();
 
     /**
      * @param string $endpoint
