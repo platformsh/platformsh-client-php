@@ -4,7 +4,6 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use Nocarrier\Hal;
 
 class Resource implements ResourceInterface
 {
@@ -17,23 +16,14 @@ class Resource implements ResourceInterface
     /** @var array */
     protected $data;
 
-    /** @var Hal */
-    protected $hal;
-
     /**
      * @param array           $data
      * @param ClientInterface $client
-     * @param object          $hal
      */
-    public function __construct(array $data = [], ClientInterface $client = null, $hal = null)
+    public function __construct(array $data = [], ClientInterface $client = null)
     {
-        $this->client = $client ?: new Client();
-
         $this->data = $data;
-
-        $this->hal = $hal ?: new Hal();
-        $this->hal->setUri($this->getUri());
-        $this->hal->setData($data);
+        $this->client = $client ?: new Client();
     }
 
     /**
@@ -91,6 +81,32 @@ class Resource implements ResourceInterface
     }
 
     /**
+     * Execute an operation on the resource.
+     *
+     * This updates the internal 'data' property with the API response.
+     *
+     * @param string $op
+     * @param string $method
+     * @param array $body
+     *
+     * @return array
+     */
+    protected function runOperation($op, $method = 'post', array $body = [])
+    {
+        if (!$this->operationAvailable($op)) {
+            throw new \RuntimeException("Operation not available: $op");
+        }
+        $options = [];
+        if ($body) {
+            $options['body'] = json_encode($body);
+        }
+        $request = $this->client
+          ->createRequest($method, $this->getLink("#op"), $options);
+        $response = $this->client->send($request);
+        return (array) $response->json();
+    }
+
+    /**
      * @throws \Exception
      *
      * @return string
@@ -111,19 +127,23 @@ class Resource implements ResourceInterface
     public function refresh(array $options = [])
     {
         $response = $this->client->get($this->getLink('self'), $options);
-        $data = $response->json();
-        $this->hal->setData($data);
+        $this->data = $response->json();
     }
 
-    public function getLink($rel)
+    protected function operationAvailable($op)
     {
-        $link = $this->hal->getLink($rel);
-        if (!$link) {
-            throw new \InvalidArgumentException("Link not found: $rel");
+        return (bool) $this->getLink("#$op", false);
+    }
+
+    public function getLink($rel, $required = true)
+    {
+        if (!isset($this->data['_links'][$rel]['href'])) {
+            if ($required) {
+                throw new \InvalidArgumentException("Link not found: $rel");
+            }
+            return false;
         }
 
-        /** @var $link \NoCarrier\HalLink */
-
-        return $link->getUri();
+        return $this->data['_links'][$rel]['href'];
     }
 }
