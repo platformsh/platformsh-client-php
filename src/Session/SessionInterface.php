@@ -46,9 +46,11 @@ interface SessionInterface
     public function getId();
 
     /**
+     * @param bool $reload
+     *
      * @return bool
      */
-    public function load();
+    public function load($reload = false);
 
     /**
      * @return bool

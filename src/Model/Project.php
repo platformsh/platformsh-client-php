@@ -10,19 +10,15 @@ class Project extends Resource
      */
     public function getEnvironments()
     {
-        // @todo sort out base url
         // @todo refactor getting json and resource from response automatically
-        $data = $this->client->get($this->hal->getUri() . '/environments')->json();
+        $data = $this->client->get($this->getUri() . '/environments')->json();
         return array_map(function ($element) {
            return new Environment($element, $this->client);
         }, $data);
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function determineUri(array $data)
+    public function getUri()
     {
-        return $data['endpoint'];
+        return $this->data['endpoint'];
     }
 }

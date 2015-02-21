@@ -36,7 +36,7 @@ class PlatformClient
     public function getAccountInfo($reset = false)
     {
         if (!isset($this->accountInfo) || $reset) {
-            $client = $this->getConnector()->getAccountsClient();
+            $client = $this->getConnector()->getClient();
             $this->accountInfo = (array) $client->get('me')->json();
         }
         return $this->accountInfo;
@@ -49,12 +49,14 @@ class PlatformClient
      */
     public function getProjects($reset = false)
     {
-        $client = $this->getConnector()->getAccountsClient();
-        return array_map(
-          function ($element) use ($client) {
-              return new Project($element, $client);
-          },
-          $this->getAccountInfo($reset)['projects']
-        );
+        $connector = $this->getConnector();
+        $data = $this->getAccountInfo($reset);
+        $projects = array();
+        foreach ($data['projects'] as $project) {
+            // Each project has its own endpoint on a Platform.sh cluster.
+            $client = $connector->getClient($project['endpoint']);
+            $projects[] = new Project($project, $client);
+        }
+        return $projects;
     }
 }

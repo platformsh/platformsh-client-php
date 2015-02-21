@@ -15,30 +15,24 @@ class Connector implements ConnectorInterface
 
     const CLIENT_ID = 'platform-cli';
 
+    protected $clientPrototype;
+    protected $clients;
     protected $debug = false;
     protected $verifySsl = true;
     protected $oauth2Plugin;
     protected $session;
 
     /**
-     * @param string           $sessionId
      * @param string           $accountsEndpoint
      * @param SessionInterface $session
-     * @param ClientInterface  $client
+     * @param ClientInterface  $clientPrototype
      */
-    public function __construct($sessionId = 'default', $accountsEndpoint = '', SessionInterface $session = null, ClientInterface $client = null)
+    public function __construct($accountsEndpoint = '', SessionInterface $session = null, ClientInterface $clientPrototype = null)
     {
-        $this->client = $client ?: new Client();
-        $this->accountsEndpoint = $accountsEndpoint ?: 'https://marketplace.commerceguys.com';
+        $this->clientPrototype = $clientPrototype ?: new Client();
+        $this->accountsEndpoint = $accountsEndpoint ?: 'https://marketplace.commerceguys.com/api/platform/';
 
-        if ($session) {
-            $session->setId($sessionId);
-            $this->session = $session;
-        } else {
-            $this->session = new Session($sessionId);
-        }
-
-        $this->session->load();
+        $this->session = $session ?: new Session();
     }
 
     public function setDebug($debug)
@@ -59,8 +53,6 @@ class Connector implements ConnectorInterface
                     ->getTimestamp()
             );
         }
-
-        $this->session->save();
     }
 
     /**
@@ -89,7 +81,7 @@ class Connector implements ConnectorInterface
         if (!$force && $this->session->get('username') === $username) {
             return;
         }
-        $client = clone $this->client;
+        $client = clone $this->clientPrototype;
         $client->__construct(['base_url' => $this->accountsEndpoint]);
         $grantType = new PasswordCredentials(
           $client, [
@@ -138,11 +130,12 @@ class Connector implements ConnectorInterface
         return $this->oauth2Plugin;
     }
 
-    public function getAccountsClient()
+    public function getClient($endpoint = null)
     {
-        if (!isset($this->accountsClient)) {
+        $endpoint = $endpoint ?: $this->accountsEndpoint;
+        if (!isset($this->clients[$endpoint])) {
             $options = [
-              'base_url' => $this->accountsEndpoint . '/api/platform/',
+              'base_url' => $endpoint,
               'defaults' => [
                 'headers' => ['User-Agent' => $this->getUserAgent()],
                 'debug' => $this->debug,
@@ -151,11 +144,11 @@ class Connector implements ConnectorInterface
                 'auth' => 'oauth2',
               ],
             ];
-            $client = clone $this->client;
+            $client = clone $this->clientPrototype;
             $client->__construct($options);
-            $this->accountsClient = $client;
+            $this->clients[$endpoint] = $client;
         }
 
-        return $this->accountsClient;
+        return $this->clients[$endpoint];
     }
 }

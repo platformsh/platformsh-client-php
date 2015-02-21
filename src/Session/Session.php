@@ -9,19 +9,20 @@ class Session implements SessionInterface
 
     protected $id;
     protected $data;
+    protected $loaded = false;
     protected $storage;
-    protected $loadNeededStorage = false;
 
     /**
      * @param string                  $id
      * @param array                   $data
      * @param SessionStorageInterface $storage
      */
-    public function __construct($id, array $data = [], SessionStorageInterface $storage = null)
+    public function __construct($id = 'default', array $data = [], SessionStorageInterface $storage = null)
     {
-        $this->setId($id);
-        $this->setData($data);
+        $this->id = $id;
+        $this->data = $data;
         $this->storage = $storage;
+        $this->load();
     }
 
     /**
@@ -30,21 +31,18 @@ class Session implements SessionInterface
     public function setStorage(SessionStorageInterface $storage)
     {
         $this->storage = $storage;
-        if ($this->loadNeededStorage) {
-            $this->loadNeededStorage = false;
-            $this->load();
-        }
+        $this->load();
     }
 
-    public function load()
+    public function load($reload = false)
     {
-        if (!isset($this->storage)) {
-            $this->loadNeededStorage = true;
-
+        if ($this->loaded && !$reload) {
+            return true;
+        } elseif (!isset($this->storage)) {
             return false;
         }
 
-        return $this->storage->load($this);
+        return $this->loaded = $this->storage->load($this);
     }
 
     public function set($key, $value)
@@ -87,5 +85,10 @@ class Session implements SessionInterface
         }
 
         return $this->storage->save($this);
+    }
+
+    public function __destruct()
+    {
+        $this->save();
     }
 }

@@ -23,4 +23,9 @@ interface ResourceInterface
      * @return array
      */
     public function getData();
+
+    /**
+     * @return string
+     */
+    public function getUri();
 }

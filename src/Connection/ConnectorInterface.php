@@ -25,9 +25,11 @@ interface ConnectorInterface
     public function authenticate($username, $password, $force = false);
 
     /**
+     * @param string $endpoint
+     *
      * @return ClientInterface
      */
-    public function getAccountsClient();
+    public function getClient($endpoint = null);
 
     /**
      * @param bool $debug

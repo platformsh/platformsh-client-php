@@ -27,32 +27,26 @@ class Resource implements ResourceInterface
      */
     public function __construct(array $data = [], ClientInterface $client = null, $hal = null)
     {
-        $uri = $this->determineUri($data);
-
         $this->client = $client ?: new Client();
 
-        $this->hal = $hal ?: new Hal();
-        $this->hal->setUri($uri);
-        $this->hal->setData($data);
-
         $this->data = $data;
+
+        $this->hal = $hal ?: new Hal();
+        $this->hal->setUri($this->getUri());
+        $this->hal->setData($data);
     }
 
     /**
-     * Find out the resource URI from its data.
-     *
-     * @param array $data
-     *
      * @throws \Exception
      *
      * @return string
      */
-    protected function determineUri(array $data)
+    public function getUri()
     {
-        if (isset($data['_links']['self']['href'])) {
-            return $data['_links']['self']['href'];
+        if (!isset($this->data['_links']['self']['href'])) {
+            throw new \Exception('URI not found');
         }
-        throw new \Exception("Cannot determine URI");
+        return $this->data['_links']['self']['href'];
     }
 
     public function getData()
