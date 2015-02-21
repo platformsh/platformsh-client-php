@@ -1,4 +1,5 @@
 {
+    "name": "platformsh/client",
     "require": {
         "guzzlehttp/guzzle": "~5.2",
         "rmiller/hal-guzzle-response": "~0.1",
