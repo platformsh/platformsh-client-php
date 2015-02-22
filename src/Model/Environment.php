@@ -14,12 +14,12 @@ class Environment extends Resource
      * @param string $id The ID of the new environment. Leave blank to generate
      *                   automatically from the title.
      *
-     * @return array
+     * @return Activity
      */
     public function branch($title, $id = null)
     {
         $id = $id ?: $this->sanitizeId($title);
-        return $this->runOperation('branch', 'post', [
+        return $this->runLongOperation('branch', 'post', [
           'name' => $id,
           'title' => $title,
         ]);
@@ -45,21 +45,21 @@ class Environment extends Resource
      *
      * @throws \Exception
      *
-     * @return array
+     * @return Activity
      */
     public function deactivate()
     {
         if (isset($this->data['status']) && $this->data['status'] === 'inactive') {
             throw new \Exception('Inactive environments cannot be deactivated');
         }
-        return $this->runOperation('deactivate');
+        return $this->runLongOperation('deactivate');
     }
 
     /**
      * @param int $limit
      * @param string $type
      *
-     * @return EnvironmentActivity[]
+     * @return Activity[]
      */
     public function getActivities($limit = 0, $type = null)
     {
@@ -70,7 +70,7 @@ class Environment extends Resource
         if ($type) {
             $options['query']['type'] = $type;
         }
-        return EnvironmentActivity::getCollection($this->getUri() . '/activities', $options, $this->client);
+        return Activity::getCollection($this->getUri() . '/activities', $options, $this->client);
     }
 
     /**

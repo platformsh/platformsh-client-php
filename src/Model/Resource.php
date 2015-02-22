@@ -107,13 +107,11 @@ class Resource implements ResourceInterface
     /**
      * Execute an operation on the resource.
      *
-     * This updates the internal 'data' property with the API response.
-     *
      * @param string $op
      * @param string $method
      * @param array $body
      *
-     * @return array
+     * @return \GuzzleHttp\Message\ResponseInterface
      */
     protected function runOperation($op, $method = 'post', array $body = [])
     {
@@ -126,9 +124,36 @@ class Resource implements ResourceInterface
         }
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
-        $response = $this->client->send($request);
+        return $this->client->send($request);
+    }
 
-        return (array) $response->json();
+    /**
+     * Run a long-running operation.
+     *
+     * @param string $op
+     * @param string $method
+     * @param array $body
+     *
+     * @throws \Exception
+     *
+     * @return Activity
+     */
+    protected function runLongOperation($op, $method = 'post', array $body = [])
+    {
+        $response = $this->runOperation($op, $method, $body);
+        $data = $response->json();
+        if (!isset($data['_embedded']['activities'][0])) {
+            throw new \Exception('Expected activity not found');
+        }
+        return Activity::wrap($data['_embedded']['activities'][0], $this->client);
+    }
+
+    public function getProperty($property)
+    {
+        if ($property[0] === '_' || !array_key_exists($property, $this->data)) {
+            throw new \InvalidArgumentException("Property not found: $property");
+        }
+        return $this->data[$property];
     }
 
     /**
