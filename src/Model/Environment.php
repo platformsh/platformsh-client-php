@@ -19,6 +19,9 @@ class Environment extends Resource
     public function branch($title, $id = null)
     {
         $id = $id ?: $this->sanitizeId($title);
+        if (!$this->validateId($id)) {
+            throw new \InvalidArgumentException("Invalid branch ID: $id");
+        }
         return $this->runLongOperation('branch', 'post', [
           'name' => $id,
           'title' => $title,
@@ -67,7 +70,7 @@ class Environment extends Resource
         if ($limit) {
             $options['query']['count'] = $limit;
         }
-        if ($type) {
+        if ($type !== null) {
             $options['query']['type'] = $type;
         }
         return Activity::getCollection($this->getUri() . '/activities', $options, $this->client);
@@ -82,5 +85,15 @@ class Environment extends Resource
     {
         $slugify = new Slugify();
         return substr($slugify->slugify($proposed), 0, 32);
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return bool
+     */
+    public static function validateId($id)
+    {
+        return strlen($id) <= 32 && preg_match('/^[a-z0-9\-]+$/i', $id);
     }
 }

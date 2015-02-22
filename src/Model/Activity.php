@@ -7,10 +7,10 @@ use GuzzleHttp\Ring\Exception\ConnectException;
 class Activity extends Resource
 {
 
-    const STATUS_SUCCESS = 2;
-    const STATUS_PROGRESS = 1;
-    const STATUS_PENDING = 0;
-    const STATUS_FAILURE = -1;
+    const STATUS_SUCCESS = 'success';
+    const STATUS_IN_PROGRESS = 'in_progress';
+    const STATUS_PENDING = 'pending';
+    const STATUS_FAILURE = 'failure';
 
     /**
      * Wait for the activity to complete.
@@ -19,7 +19,7 @@ class Activity extends Resource
      */
     public function wait($pollInterval = 1)
     {
-        while (!$this->isComplete() && $this->getStatus() !== self::STATUS_FAILURE) {
+        while (!$this->isComplete() && $this->getState() !== self::STATUS_FAILURE) {
             usleep($pollInterval * 1000000);
             try {
                 $this->refresh(['timeout' => $pollInterval]);
@@ -35,12 +35,19 @@ class Activity extends Resource
         }
     }
 
+    /**
+     * Determine whether the activity is complete.
+     *
+     * @return bool
+     */
     public function isComplete()
     {
         return $this->getCompletionPercent() >= 100;
     }
 
     /**
+     * Get the completion progress of the activity, in percent.
+     *
      * @return int
      */
     public function getCompletionPercent()
@@ -49,26 +56,15 @@ class Activity extends Resource
     }
 
     /**
-     * @throws \Exception
+     * Get the state of the activity.
      *
-     * @return int
+     * This could be one of Activity::STATUS_SUCCESS,
+     * Activity::STATUS_IN_PROGRESS, Activity::PENDING, or Activity::FAILURE.
+     *
+     * @return string
      */
-    public function getStatus()
+    public function getState()
     {
-        switch ($this->getProperty('state')) {
-            case 'success':
-                return self::STATUS_SUCCESS;
-
-            case 'in_progress':
-                return self::STATUS_PROGRESS;
-
-            case 'pending':
-                return self::STATUS_PENDING;
-
-            case 'failed':
-                return self::STATUS_FAILURE;
-        }
-        throw new \Exception('Status not known');
+        return $this->getProperty('state');
     }
-
 }

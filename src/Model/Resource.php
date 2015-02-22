@@ -31,6 +31,9 @@ class Resource implements ResourceInterface
         $this->client = $client ?: new Client();
     }
 
+    /**
+     * Ensure that this is a full representation of the resource (not a stub).
+     */
     public function ensureFull()
     {
         if (empty($this->data['_full'])) {
@@ -39,6 +42,8 @@ class Resource implements ResourceInterface
     }
 
     /**
+     * Get a resource by its ID.
+     *
      * @param string          $id
      * @param string          $collectionUrl
      * @param ClientInterface $client
@@ -64,6 +69,8 @@ class Resource implements ResourceInterface
     }
 
     /**
+     * Get a collection of resources.
+     *
      * @param string          $url
      * @param array           $options
      * @param ClientInterface $client
@@ -77,7 +84,7 @@ class Resource implements ResourceInterface
     }
 
     /**
-     * @todo automatically wrap Guzzle responses
+     * Create a resource instance from JSON data.
      *
      * @param array $data
      * @param ClientInterface $client
@@ -90,7 +97,7 @@ class Resource implements ResourceInterface
     }
 
     /**
-     * @todo automatically wrap Guzzle responses
+     * Create an array of resource instances from a collection's JSON data.
      *
      * @param array $data
      * @param ClientInterface $client
@@ -119,7 +126,7 @@ class Resource implements ResourceInterface
             throw new \RuntimeException("Operation not available: $op");
         }
         $options = [];
-        if ($body) {
+        if (!empty($body)) {
             $options['body'] = json_encode($body);
         }
         $request = $this->client
@@ -148,6 +155,15 @@ class Resource implements ResourceInterface
         return Activity::wrap($data['_embedded']['activities'][0], $this->client);
     }
 
+    /**
+     * Get a property of the resource.
+     *
+     * @param string $property
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return mixed
+     */
     public function getProperty($property)
     {
         if ($property[0] === '_' || !array_key_exists($property, $this->data)) {
@@ -167,6 +183,8 @@ class Resource implements ResourceInterface
     }
 
     /**
+     * Get the resource's URI (relative or absolute).
+     *
      * @throws \Exception
      *
      * @return string
@@ -179,30 +197,51 @@ class Resource implements ResourceInterface
         return $this->data['_links']['self']['href'];
     }
 
+    /**
+     * Get all of the resource's data (as returned by the API in JSON).
+     *
+     * @return array
+     */
     public function getData()
     {
         return $this->data;
     }
 
+    /**
+     * Refresh the current resource.
+     *
+     * @param array $options
+     */
     public function refresh(array $options = [])
     {
         $response = $this->client->get($this->getLink('self'), $options);
-        $this->data = $response->json();
+        $this->data = (array) $response->json();
         $this->data['_full'] = true;
     }
 
+    /**
+     * Check whether an operation is available on the resource.
+     *
+     * @param string $op
+     *
+     * @return bool
+     */
     protected function operationAvailable($op)
     {
-        return (bool) $this->getLink("#$op", false);
+        return isset($this->data['_links']["#$op"]['href']);
     }
 
-    public function getLink($rel, $required = true)
+    /**
+     * Get a link for a given resource relation.
+     *
+     * @param string $rel
+     *
+     * @return string
+     */
+    public function getLink($rel)
     {
         if (!isset($this->data['_links'][$rel]['href'])) {
-            if ($required) {
-                throw new \InvalidArgumentException("Link not found: $rel");
-            }
-            return false;
+            throw new \InvalidArgumentException("Link not found: $rel");
         }
 
         return $this->data['_links'][$rel]['href'];

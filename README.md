@@ -22,10 +22,16 @@ $connector->authenticate($username, $password);
 $projects = $client->getProjects();
 
 foreach ($projects as $project) {
-  $environments = $project->getEnvironments();
-  print_r($environments[0]);
+  // Get the master environment.
+  $master = $project->getEnvironment('master');
+  // Branch the master environment.
+  $activity = $master->branch('Sprint 1', 'sprint-1');
+  // Wait for the activity to complete.
+  $activity->wait();
+  // Get the new branch.
+  $sprint1 = $project->getEnvironment('sprint-1');
+  // etc.
   break;
 }
 
-// etc.
 ```

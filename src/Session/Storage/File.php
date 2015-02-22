@@ -46,7 +46,7 @@ class File implements SessionStorageInterface
     {
         $data = $session->getData();
         $filename = $this->getFilename($session);
-        if (!$data && file_exists($filename)) {
+        if (empty($data) && file_exists($filename)) {
             return unlink($filename);
         }
         $result = file_put_contents($filename, json_encode($data));
