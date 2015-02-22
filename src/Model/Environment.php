@@ -2,21 +2,27 @@
 
 namespace Platformsh\Client\Model;
 
+use Cocur\Slugify\Slugify;
+
 class Environment extends Resource
 {
 
     /**
      * Branch (create a new environment).
      *
-     * @param string $id
-     * @param string $title
+     * @param string $title The title of the new environment.
+     * @param string $id The ID of the new environment. Leave blank to generate
+     *                   automatically from the title.
      *
      * @return array
      */
-    public function branch($id, $title = null)
+    public function branch($title, $id = null)
     {
-        $body = array_filter(['name' => $id, 'title' => $title]);
-        return $this->runOperation('branch', 'post', $body);
+        $id = $id ?: $this->sanitizeId($title);
+        return $this->runOperation('branch', 'post', [
+          'name' => $id,
+          'title' => $title,
+        ]);
     }
 
     /**
@@ -65,5 +71,16 @@ class Environment extends Resource
             $options['query']['type'] = $type;
         }
         return EnvironmentActivity::getCollection($this->getUri() . '/activities', $options, $this->client);
+    }
+
+    /**
+     * @param string $proposed
+     *
+     * @return string
+     */
+    public static function sanitizeId($proposed)
+    {
+        $slugify = new Slugify();
+        return substr($slugify->slugify($proposed), 0, 32);
     }
 }

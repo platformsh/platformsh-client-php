@@ -71,10 +71,16 @@ class PlatformClient
     public function getProject($id, $endpoint = null)
     {
         if ($endpoint !== null) {
-            return $this->getProjectDirect($id, $endpoint);
+            $project = $this->getProjectDirect($id, $endpoint);
         }
-        $projects = $this->getProjects();
-        return isset($projects[$id]) ? $projects[$id] : false;
+        else {
+            $projects = $this->getProjects();
+            if (!isset($projects[$id])) {
+                return false;
+            }
+            $project = $projects[$id];
+        }
+        return $project;
     }
 
     /**

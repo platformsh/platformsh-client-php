@@ -1,6 +1,7 @@
 {
     "name": "platformsh/client",
     "require": {
+        "cocur/slugify": "~1.0",
         "guzzlehttp/guzzle": "~5.2",
         "commerceguys/guzzle-5-oauth2-plugin": "dev-guzzle5-support",
         "guzzlehttp/cache-subscriber": "0.1.*@dev"

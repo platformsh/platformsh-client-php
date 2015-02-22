@@ -25,8 +25,8 @@ class Project extends Resource
 
     public function getUri()
     {
-        if (!empty($this->data['_url'])) {
-            return $this->data['_url'];
+        if (!empty($this->data['_full'])) {
+            return parent::getUri();
         }
         return $this->data['endpoint'];
     }
