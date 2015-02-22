@@ -55,8 +55,37 @@ class PlatformClient
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh cluster.
             $client = $connector->getClient($project['endpoint']);
-            $projects[] = new Project($project, $client);
+            $projects[$project['id']] = new Project($project, $client);
         }
         return $projects;
+    }
+
+    /**
+     * @param string $id
+     * @param string $endpoint
+     *
+     * @throws \Exception
+     *
+     * @return Project|false
+     */
+    public function getProject($id, $endpoint = null)
+    {
+        if ($endpoint !== null) {
+            return $this->getProjectDirect($id, $endpoint);
+        }
+        $projects = $this->getProjects();
+        return isset($projects[$id]) ? $projects[$id] : false;
+    }
+
+    /**
+     * @param string $id
+     * @param string $endpoint
+     *
+     * @return Project|false
+     */
+    protected function getProjectDirect($id, $endpoint)
+    {
+        $client = $this->getConnector()->getClient($endpoint);
+        return Project::get($id, $endpoint, $client);
     }
 }

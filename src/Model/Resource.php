@@ -4,6 +4,7 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 
 class Resource implements ResourceInterface
 {
@@ -16,6 +17,9 @@ class Resource implements ResourceInterface
     /** @var array */
     protected $data;
 
+    /** @var int */
+    protected $fetched;
+
     /**
      * @param array           $data
      * @param ClientInterface $client
@@ -23,7 +27,15 @@ class Resource implements ResourceInterface
     public function __construct(array $data = [], ClientInterface $client = null)
     {
         $this->data = $data;
+        $this->fetched = time();
         $this->client = $client ?: new Client();
+    }
+
+    public function ensureFull()
+    {
+        if (empty($this->data['_full'])) {
+            $this->refresh();
+        }
     }
 
     /**
@@ -31,12 +43,24 @@ class Resource implements ResourceInterface
      * @param string          $collectionUrl
      * @param ClientInterface $client
      *
-     * @return static
+     * @return static|false
      */
     public static function get($id, $collectionUrl, ClientInterface $client)
     {
-        $data = $client->get($collectionUrl . '/' . $id)->json();
-        return static::wrap($data, $client);
+        $url = rtrim($collectionUrl, '/') . '/' . $id;
+        try {
+            $data = $client->get($url)->json();
+            $data['_full'] = true;
+            $data['_url'] = $url;
+            return static::wrap($data, $client);
+        }
+        catch (BadResponseException $e) {
+            $response = $e->getResponse();
+            if ($response && $response->getStatusCode() === 404) {
+                return false;
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -44,7 +68,7 @@ class Resource implements ResourceInterface
      * @param array           $options
      * @param ClientInterface $client
      *
-     * @return static
+     * @return static[]
      */
     public static function getCollection($url, array $options = [], ClientInterface $client)
     {
@@ -103,7 +127,18 @@ class Resource implements ResourceInterface
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
         $response = $this->client->send($request);
+
         return (array) $response->json();
+    }
+
+    /**
+     * Delete the resource.
+     *
+     * @return array
+     */
+    public function delete()
+    {
+        return $this->client->delete($this->getUri())->json();
     }
 
     /**
@@ -128,6 +163,7 @@ class Resource implements ResourceInterface
     {
         $response = $this->client->get($this->getLink('self'), $options);
         $this->data = $response->json();
+        $this->data['_full'] = true;
     }
 
     protected function operationAvailable($op)

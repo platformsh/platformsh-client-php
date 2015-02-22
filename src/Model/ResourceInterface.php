@@ -28,4 +28,6 @@ interface ResourceInterface
      * @return string
      */
     public function getUri();
+
+    public function ensureFull();
 }

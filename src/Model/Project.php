@@ -8,7 +8,7 @@ class Project extends Resource
     /**
      * @param string $id
      *
-     * @return Environment
+     * @return Environment|false
      */
     public function getEnvironment($id)
     {
@@ -25,6 +25,9 @@ class Project extends Resource
 
     public function getUri()
     {
+        if (!empty($this->data['_url'])) {
+            return $this->data['_url'];
+        }
         return $this->data['endpoint'];
     }
 }
