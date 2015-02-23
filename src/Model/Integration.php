@@ -6,7 +6,10 @@ class Integration extends Resource
 {
 
     /** @var array */
-    public static $types = ['hipchat', 'github', 'webhook'];
+    protected static $required = ['type'];
+
+    /** @var array */
+    protected static $types = ['hipchat', 'github', 'webhook'];
 
     /**
      * @inheritdoc
@@ -14,8 +17,8 @@ class Integration extends Resource
     public static function check(array $data)
     {
         $errors = parent::check($data);
-        if (!in_array($data['type'], self::$types)) {
-            $errors[] = "Invalid integration type: '{$data['type']}'";
+        if (isset($data['type']) && !in_array($data['type'], self::$types)) {
+            $errors[] = "Invalid type: '{$data['type']}'";
         }
         // @todo check other properties
         return $errors;

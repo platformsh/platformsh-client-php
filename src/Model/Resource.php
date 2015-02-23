@@ -9,6 +9,9 @@ use GuzzleHttp\Exception\BadResponseException;
 class Resource implements \ArrayAccess
 {
 
+    /** @var array */
+    protected static $required = [];
+
     /** @var ClientInterface */
     protected $client;
 
@@ -118,6 +121,16 @@ class Resource implements \ArrayAccess
     }
 
     /**
+     * Get the required properties for creating a new resource.
+     *
+     * @return array
+     */
+    public static function getRequired()
+    {
+        return static::$required;
+    }
+
+    /**
      * Validate a new resource.
      *
      * @param array $data
@@ -126,7 +139,11 @@ class Resource implements \ArrayAccess
      */
     public static function check(array $data)
     {
-        return [];
+        $errors = [];
+        if ($missing = array_diff(static::getRequired(), array_keys($data))) {
+            $errors[] = 'Missing: ' . implode(', ', $missing);
+        }
+        return $errors;
     }
 
     /**

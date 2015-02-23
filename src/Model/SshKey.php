@@ -5,13 +5,16 @@ namespace Platformsh\Client\Model;
 class SshKey extends Resource
 {
 
+    /** @var array */
+    protected static $required = ['value'];
+
     /**
      * @inheritdoc
      */
     public static function check(array $data)
     {
         $errors = parent::check($data);
-        if (!self::validatePublicKey($data['value'])) {
+        if (isset($data['value']) && !self::validatePublicKey($data['value'])) {
             $errors[] = "The SSH key is invalid";
         }
 
