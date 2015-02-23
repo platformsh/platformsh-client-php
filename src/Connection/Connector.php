@@ -18,14 +18,29 @@ class Connector implements ConnectorInterface
     /** @var Collection */
     protected $config;
 
+    /** @var ClientInterface */
     protected $clientPrototype;
-    protected $clients;
+
+    /** @var ClientInterface[] */
+    protected $clients = [];
+
+    /** @var Oauth2Subscriber|null */
     protected $oauth2Plugin;
+
+    /** @var SessionInterface */
     protected $session;
+
+    /** @var bool */
     protected $loggedOut = false;
 
     /**
      * @param array            $config
+     *     Possible configuration keys are:
+     *     - accounts (string): The endpoint URL for the accounts API.
+     *     - client_id (string): The OAuth2 client ID for this client.
+     *     - debug (bool): Whether or not Guzzle debugging should be enabled (default: false).
+     *     - verify (bool): Whether or not SSL verification should be enabled (default: true).
+     *     - user_agent (string): The HTTP User-Agent for API requests.
      * @param SessionInterface $session
      * @param ClientInterface  $clientPrototype
      */
@@ -35,11 +50,11 @@ class Connector implements ConnectorInterface
         $url = 'https://github.com/platformsh/platformsh-client-php';
 
         $defaults = [
-            'accounts' => 'https://marketplace.commerceguys.com/api/platform/',
-            'client_id' => 'platformsh-client-php',
-            'debug' => false,
-            'verify' => true,
-            'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
+          'accounts' => 'https://marketplace.commerceguys.com/api/platform/',
+          'client_id' => 'platformsh-client-php',
+          'debug' => false,
+          'verify' => true,
+          'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -47,16 +62,25 @@ class Connector implements ConnectorInterface
         $this->session = $session ?: new Session();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setDebug($debug)
     {
         $this->config['debug'] = $debug;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setVerifySsl($verifySsl)
     {
         $this->config['verify'] = $verifySsl;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function logOut()
     {
         $this->session->clear();
@@ -70,21 +94,26 @@ class Connector implements ConnectorInterface
         } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()->getAccessToken();
-            $this->session->add([
-              'accessToken' => $token->getToken(),
-              'expires' => $token->getExpires()->getTimestamp(),
-            ]);
+            $this->session->add(
+              [
+                'accessToken' => $token->getToken(),
+                'expires' => $token->getExpires()->getTimestamp(),
+              ]
+            );
         }
     }
 
     /**
-     * @return Session
+     * @inheritdoc
      */
     public function getSession()
     {
         return $this->session;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function logIn($username, $password, $force = false)
     {
         $this->loggedOut = false;
@@ -130,6 +159,8 @@ class Connector implements ConnectorInterface
     }
 
     /**
+     * Get an OAuth2 subscriber to add to Guzzle clients.
+     *
      * @throws \Exception
      *
      * @return Oauth2Subscriber
@@ -166,6 +197,9 @@ class Connector implements ConnectorInterface
         return $this->oauth2Plugin;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getClient($endpoint = null)
     {
         $endpoint = $endpoint ?: $this->config['accounts'];

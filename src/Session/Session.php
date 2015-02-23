@@ -13,8 +13,8 @@ class Session implements SessionInterface
     protected $storage;
 
     /**
-     * @param string                  $id
-     * @param array                   $data
+     * @param string                  $id   A unique session ID.
+     * @param array                   $data Initial session data.
      * @param SessionStorageInterface $storage
      */
     public function __construct($id = 'default', array $data = [], SessionStorageInterface $storage = null)
@@ -25,6 +25,9 @@ class Session implements SessionInterface
         $this->load();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function load($reload = false)
     {
         if (!$this->loaded || $reload) {
@@ -36,7 +39,7 @@ class Session implements SessionInterface
     }
 
     /**
-     * @param SessionStorageInterface $storage
+     * @inheritdoc
      */
     public function setStorage(SessionStorageInterface $storage)
     {
@@ -44,11 +47,17 @@ class Session implements SessionInterface
         $this->load();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function add(array $data)
     {
         $this->data = array_merge($this->data, $data);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function set($key, $value)
     {
         if (is_object($value)) {
@@ -57,41 +66,65 @@ class Session implements SessionInterface
         $this->data[$key] = $value;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function get($key)
     {
         return isset($this->data[$key]) ? $this->data[$key] : false;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getData()
     {
         return $this->data;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setData(array $data)
     {
         $this->data = $data;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function clear()
     {
         $this->data = [];
     }
 
+    /**
+     * Destructor: ensure that session data is saved.
+     */
     public function __destruct()
     {
         $this->save();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function save()
     {
         if (!isset($this->storage)) {

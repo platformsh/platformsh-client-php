@@ -9,6 +9,8 @@ interface ConnectorInterface
 {
 
     /**
+     * Get the session instance for this connection.
+     *
      * @return SessionInterface
      */
     public function getSession();
@@ -30,6 +32,8 @@ interface ConnectorInterface
     public function logOut();
 
     /**
+     * Get an authenticated Guzzle client.
+     *
      * @param string $endpoint
      *
      * @return ClientInterface
@@ -37,11 +41,15 @@ interface ConnectorInterface
     public function getClient($endpoint = null);
 
     /**
+     * Enable or disable Guzzle debugging.
+     *
      * @param bool $debug
      */
     public function setDebug($debug);
 
     /**
+     * Enable or disable verifying SSL.
+     *
      * @param bool $verifySsl
      */
     public function setVerifySsl($verifySsl);

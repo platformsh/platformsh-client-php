@@ -15,6 +15,9 @@ class PlatformClient
     /** @var array */
     protected $accountInfo;
 
+    /**
+     * @param ConnectorInterface $connector
+     */
     public function __construct(ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
@@ -29,6 +32,8 @@ class PlatformClient
     }
 
     /**
+     * Get account information for the logged in user.
+     *
      * @param bool $reset
      *
      * @return array
@@ -44,6 +49,8 @@ class PlatformClient
     }
 
     /**
+     * Get the logged in user's projects.
+     *
      * @param bool $reset
      *
      * @return Project[]
@@ -63,10 +70,10 @@ class PlatformClient
     }
 
     /**
+     * Get a single project by its ID.
+     *
      * @param string $id
      * @param string $endpoint
-     *
-     * @throws \Exception
      *
      * @return Project|false
      */
@@ -86,6 +93,8 @@ class PlatformClient
     }
 
     /**
+     * Get a single project with a known endpoint.
+     *
      * @param string $id
      * @param string $endpoint
      *
