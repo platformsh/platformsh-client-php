@@ -328,6 +328,18 @@ class Resource implements \ArrayAccess
     }
 
     /**
+     * Check whether the resource has a link.
+     *
+     * @param $rel
+     *
+     * @return bool
+     */
+    public function hasLink($rel)
+    {
+        return isset($this->data['_links'][$rel]['href']);
+    }
+
+    /**
      * Get a link for a given resource relation.
      *
      * @param string $rel
@@ -336,7 +348,7 @@ class Resource implements \ArrayAccess
      */
     public function getLink($rel)
     {
-        if (!isset($this->data['_links'][$rel]['href'])) {
+        if (!$this->hasLink($rel)) {
             throw new \InvalidArgumentException("Link not found: $rel");
         }
 
