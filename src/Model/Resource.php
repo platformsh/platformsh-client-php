@@ -84,13 +84,17 @@ class Resource
      * Get a collection of resources.
      *
      * @param string          $url
+     * @param int             $limit
      * @param array           $options
      * @param ClientInterface $client
      *
      * @return static[]
      */
-    public static function getCollection($url, array $options = [], ClientInterface $client)
+    public static function getCollection($url, $limit = 0, array $options = [], ClientInterface $client)
     {
+        if ($limit) {
+            $options['query']['count'] = $limit;
+        }
         $data = $client->get($url, $options)->json();
 
         return static::wrapCollection($data, $client);

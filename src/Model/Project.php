@@ -41,12 +41,7 @@ class Project extends Resource
      */
     public function getEnvironments($limit = 0)
     {
-        $options = [];
-        if ($limit) {
-            $options['query']['count'] = $limit;
-        }
-
-        return Environment::getCollection($this->getUri() . '/environments', $options, $this->client);
+        return Environment::getCollection($this->getUri() . '/environments', $limit, [], $this->client);
     }
 
     /**
@@ -58,12 +53,7 @@ class Project extends Resource
      */
     public function getDomains($limit = 0)
     {
-        $options = [];
-        if ($limit) {
-            $options['query']['count'] = $limit;
-        }
-
-        return Domain::getCollection($this->getUri() . '/domains', $options, $this->client);
+        return Domain::getCollection($this->getUri() . '/domains', $limit, [], $this->client);
     }
 
     /**

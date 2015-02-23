@@ -172,24 +172,23 @@ class Environment extends Resource
     public function getActivities($limit = 0, $type = null)
     {
         $options = [];
-        if ($limit) {
-            $options['query']['count'] = $limit;
-        }
         if ($type !== null) {
             $options['query']['type'] = $type;
         }
 
-        return Activity::getCollection($this->getUri() . '/activities', $options, $this->client);
+        return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
     }
 
     /**
      * Get a list of variables.
      *
+     * @param int $limit
+     *
      * @return Variable[]
      */
-    public function getVariables()
+    public function getVariables($limit = 0)
     {
-        return Variable::getCollection($this->getLink('#manage-variables'), [], $this->client);
+        return Variable::getCollection($this->getLink('#manage-variables'), $limit, [], $this->client);
     }
 
     /**
