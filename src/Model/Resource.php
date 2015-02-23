@@ -74,7 +74,8 @@ class Resource
     public static function create(array $body, $collectionUrl, ClientInterface $client)
     {
         if ($errors = static::check($body)) {
-            throw new \InvalidArgumentException("Validation errors: " . implode('; ', $errors));
+            $message = "Cannot create resource due to validation error(s): " . implode('; ', $errors);
+            throw new \InvalidArgumentException($message);
         }
 
         $response = $client->post($collectionUrl, ['body' => $body]);
@@ -230,11 +231,15 @@ class Resource
     /**
      * Update the resource.
      *
+     * This updates the resource's internal data with the API response.
+     *
      * @param array $values
      */
-    public function update(array $values = [])
+    public function update(array $values)
     {
-        $this->runOperation('edit', 'patch', $values);
+        $options = ['body' => $values];
+        $response = $this->client->patch($this->getUri(), $options);
+        $this->data = (array) $response->json();
     }
 
     /**
@@ -264,7 +269,7 @@ class Resource
      */
     public function refresh(array $options = [])
     {
-        $response = $this->client->get($this->getLink('self'), $options);
+        $response = $this->client->get($this->getUri(), $options);
         $this->data = (array) $response->json();
         $this->data['_url'] = $response->getEffectiveUrl();
         $this->data['_full'] = true;

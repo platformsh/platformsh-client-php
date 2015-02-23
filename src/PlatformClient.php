@@ -5,6 +5,7 @@ namespace Platformsh\Client;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Model\Project;
+use Platformsh\Client\Model\SshKey;
 
 class PlatformClient
 {
@@ -32,7 +33,7 @@ class PlatformClient
     }
 
     /**
-     * Get account information for the logged in user.
+     * Get account information for the logged-in user.
      *
      * @param bool $reset
      *
@@ -41,7 +42,7 @@ class PlatformClient
     public function getAccountInfo($reset = false)
     {
         if (!isset($this->accountInfo) || $reset) {
-            $client = $this->getConnector()->getClient();
+            $client = $this->connector->getClient();
             $this->accountInfo = (array) $client->get('me')->json();
         }
 
@@ -49,7 +50,7 @@ class PlatformClient
     }
 
     /**
-     * Get the logged in user's projects.
+     * Get the logged-in user's projects.
      *
      * @param bool $reset
      *
@@ -57,12 +58,11 @@ class PlatformClient
      */
     public function getProjects($reset = false)
     {
-        $connector = $this->getConnector();
         $data = $this->getAccountInfo($reset);
         $projects = [];
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh cluster.
-            $client = $connector->getClient($project['endpoint']);
+            $client = $this->connector->getClient($project['endpoint']);
             $projects[$project['id']] = new Project($project, $client);
         }
 
@@ -102,8 +102,38 @@ class PlatformClient
      */
     protected function getProjectDirect($id, $endpoint)
     {
-        $client = $this->getConnector()->getClient($endpoint);
+        return Project::get($id, $endpoint, $this->connector->getClient($endpoint));
+    }
 
-        return Project::get($id, $endpoint, $client);
+    /**
+     * Get the logged-in user's SSH keys.
+     *
+     * @param bool $reset
+     *
+     * @return SshKey[]
+     */
+    public function getSshKeys($reset = false)
+    {
+        $data = $this->getAccountInfo($reset);
+
+        return SshKey::wrapCollection($data['ssh_keys'], $this->connector->getClient());
+    }
+
+    /**
+     * Add an SSH public key to the logged-in user's account.
+     *
+     * @param string $value The SSH key value.
+     * @param string $title A title for the key (optional).
+     *
+     * @return SshKey
+     */
+    public function addSshKey($value, $title = null)
+    {
+        $values = ['value' => $value];
+        if ($title) {
+            $values['title'] = $title;
+        }
+
+        return SshKey::create($values, 'ssh_keys', $this->connector->getClient());
     }
 }
