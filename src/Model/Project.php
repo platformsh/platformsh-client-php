@@ -23,7 +23,7 @@ class Project extends Resource
      * The accounts API does not (yet) return HAL links. Stub projects contain
      * an 'endpoint' property.
      */
-    public function getUri()
+    protected function getUri()
     {
         if (!empty($this->data['_full'])) {
             return parent::getUri();
@@ -45,6 +45,51 @@ class Project extends Resource
         if ($limit) {
             $options['query']['count'] = $limit;
         }
+
         return Environment::getCollection($this->getUri() . '/environments', $options, $this->client);
+    }
+
+    /**
+     * Get a list of domains for the project.
+     *
+     * @param int $limit
+     *
+     * @return Domain[]
+     */
+    public function getDomains($limit = 0)
+    {
+        $options = [];
+        if ($limit) {
+            $options['query']['count'] = $limit;
+        }
+
+        return Domain::getCollection($this->getUri() . '/domains', $options, $this->client);
+    }
+
+    /**
+     * Get a single domain of the project.
+     *
+     * @param string $name
+     *
+     * @return Domain|false
+     */
+    public function getDomain($name)
+    {
+        return Domain::get($name, $this->getUri() . '/domains', $this->client);
+    }
+
+    /**
+     * Add a domain to the project.
+     *
+     * @param string $name
+     * @param bool   $wildcard
+     *
+     * @return Domain
+     */
+    public function addDomain($name, $wildcard = false)
+    {
+        $body = ['name' => $name, 'wildcard' => $wildcard];
+
+        return Domain::create($this->getUri() . '/domains', $body, $this->client);
     }
 }

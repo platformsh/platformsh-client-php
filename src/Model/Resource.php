@@ -63,6 +63,24 @@ class Resource
     }
 
     /**
+     * Create a resource.
+     *
+     * @param array           $body
+     * @param string          $collectionUrl
+     * @param ClientInterface $client
+     *
+     * @return static
+     */
+    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    {
+        $response = $client->post($collectionUrl, ['body' => $body]);
+        $data = (array) $response->json();
+        $data['_full'] = true;
+
+        return static::wrap($data, $client);
+    }
+
+    /**
      * Get a collection of resources.
      *
      * @param string          $url
@@ -116,7 +134,7 @@ class Resource
      * @param string $method
      * @param array  $body
      *
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return array
      */
     protected function runOperation($op, $method = 'post', array $body = [])
     {
@@ -129,8 +147,9 @@ class Resource
         }
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
+        $response = $this->client->send($request);
 
-        return $this->client->send($request);
+        return (array) $response->json();
     }
 
     /**
@@ -146,8 +165,7 @@ class Resource
      */
     protected function runLongOperation($op, $method = 'post', array $body = [])
     {
-        $response = $this->runOperation($op, $method, $body);
-        $data = $response->json();
+        $data = $this->runOperation($op, $method, $body);
         if (!isset($data['_embedded']['activities'][0])) {
             throw new \Exception('Expected activity not found');
         }
@@ -184,11 +202,21 @@ class Resource
     }
 
     /**
+     * Update the resource.
+     *
+     * @param array $values
+     */
+    public function update(array $values = [])
+    {
+        $this->runOperation('edit', 'patch', $values);
+    }
+
+    /**
      * Get the resource's URI.
      *
      * @return string
      */
-    public function getUri()
+    protected function getUri()
     {
         return $this->getLink('self');
     }
