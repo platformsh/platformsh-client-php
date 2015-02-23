@@ -280,6 +280,8 @@ class Resource implements \ArrayAccess
         $options = ['body' => $values];
         $response = $this->client->patch($this->getUri(), $options);
         $this->data = (array) $response->json();
+        $this->data['_url'] = $response->getEffectiveUrl();
+        $this->data['_full'] = true;
     }
 
     /**
@@ -290,16 +292,6 @@ class Resource implements \ArrayAccess
     protected function getUri()
     {
         return $this->getLink('self');
-    }
-
-    /**
-     * Get all of the resource's data (as returned by the API in JSON).
-     *
-     * @return array
-     */
-    public function getData()
-    {
-        return $this->data;
     }
 
     /**
@@ -353,5 +345,29 @@ class Resource implements \ArrayAccess
         }
 
         return $this->data['_links'][$rel]['href'];
+    }
+
+    /**
+     * Get a list of this resource's property names.
+     *
+     * @return string[]
+     */
+    public function getPropertyNames()
+    {
+        $keys = array_filter(array_keys($this->data), function($key) {
+            return strpos($key, '_') !== 0;
+        });
+        return $keys;
+    }
+
+    /**
+     * Get an array of this resource's properties and their values.
+     *
+     * @return array
+     */
+    public function getProperties()
+    {
+        $keys = $this->getPropertyNames();
+        return array_intersect_key($this->data, array_flip($keys));
     }
 }

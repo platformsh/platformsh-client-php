@@ -8,6 +8,27 @@ class Environment extends Resource
 {
 
     /**
+     * Get the SSH URL for the environment.
+     *
+     * @throws \Exception
+     *
+     * @return string
+     */
+    public function getSshUrl()
+    {
+        if (!$this->hasLink('ssh')) {
+            $id = $this->data['id'];
+            throw new \Exception("The environment $id does not have an SSH URL.");
+        }
+
+        $sshUrl = parse_url($this->getLink('ssh'));
+        $host = $sshUrl['host'];
+        $user = $sshUrl['user'];
+
+        return $user . '@' . $host;
+    }
+
+    /**
      * Branch (create a new environment).
      *
      * @param string $title The title of the new environment.
@@ -166,11 +187,24 @@ class Environment extends Resource
      *
      * @param string $id
      *
-     * @return Activity
+     * @return Activity|false
      */
     public function getActivity($id)
     {
         return Activity::get($id, $this->getUri() . '/activities', $this->client);
+    }
+
+    /**
+     * Get the activity from the previous operation.
+     *
+     * @return Activity|false
+     */
+    public function getLastActivity()
+    {
+        if (!isset($this->data['_embedded']['activities'][0])) {
+            return false;
+        }
+        return Activity::wrap($this->data['_embedded']['activities'][0], $this->client);
     }
 
     /**
