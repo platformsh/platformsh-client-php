@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 
-class Resource
+class Resource implements \ArrayAccess
 {
 
     /** @var ClientInterface */
@@ -23,6 +23,34 @@ class Resource
     {
         $this->data = $data;
         $this->client = $client ?: new Client();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetExists($offset) {
+        return $this->propertyExists($offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetGet($offset) {
+        return $this->getProperty($offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetSet($offset, $value) {
+        throw new \RuntimeException('Properties are read-only');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetUnset($offset) {
+        throw new \RuntimeException('Properties are read-only');
     }
 
     /**
@@ -201,6 +229,18 @@ class Resource
     }
 
     /**
+     * Check whether a property exists in the resource.
+     *
+     * @param string $property
+     *
+     * @return bool
+     */
+    public function propertyExists($property)
+    {
+        return $property[0] !== '_' && array_key_exists($property, $this->data);
+    }
+
+    /**
      * Get a property of the resource.
      *
      * @param string $property
@@ -211,7 +251,7 @@ class Resource
      */
     public function getProperty($property)
     {
-        if ($property[0] === '_' || !array_key_exists($property, $this->data)) {
+        if (!$this->offsetExists($property)) {
             throw new \InvalidArgumentException("Property not found: $property");
         }
 
