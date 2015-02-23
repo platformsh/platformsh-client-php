@@ -322,7 +322,7 @@ class Resource implements \ArrayAccess
      *
      * @return bool
      */
-    protected function operationAvailable($op)
+    public function operationAvailable($op)
     {
         return isset($this->data['_links']["#$op"]['href']);
     }
