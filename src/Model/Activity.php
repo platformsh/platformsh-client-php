@@ -78,4 +78,101 @@ class Activity extends Resource
     {
         return $this->getProperty('state');
     }
+
+    /**
+     * Get a human-readable description of the activity.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        $type = $this->getProperty('type');
+        $payload = $this->getProperty('payload');
+        switch ($type) {
+            case 'environment.activate':
+                return sprintf(
+                  "%s activated environment %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.backup':
+                return sprintf(
+                  "%s created backup of %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.branch':
+                return sprintf(
+                  "%s branched %s from %s",
+                  $payload['user']['display_name'],
+                  $payload['outcome']['title'],
+                  $payload['parent']['title']
+                );
+
+            case 'environment.delete':
+                return sprintf(
+                  "%s deleted environment %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.deactivate':
+                return sprintf(
+                  "%s deactivated environment %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.initialize':
+                return sprintf(
+                  "%s initialized environment %s with profile %s",
+                  $payload['user']['display_name'],
+                  $payload['outcome']['title'],
+                  $payload['profile']
+                );
+
+            case 'environment.merge':
+                return sprintf(
+                  "%s merged %s into %s",
+                  $payload['user']['display_name'],
+                  $payload['outcome']['title'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.push':
+                return sprintf(
+                  "%s pushed to %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.restore':
+                return sprintf(
+                  "%s restored %s to %s",
+                  $payload['user']['display_name'],
+                  $payload['environment'],
+                  substr($payload['commit'], 0, 7)
+                );
+
+            case 'environment.synchronize':
+                $syncedCode = !empty($payload['synchronize_code']);
+                if ($syncedCode && !empty($payload['synchronize_data'])) {
+                    $syncType = 'code and data';
+                } elseif ($syncedCode) {
+                    $syncType = 'code';
+                } else {
+                    $syncType = 'data';
+                }
+                return sprintf(
+                  "%s synced %s's %s with %s",
+                  $payload['user']['display_name'],
+                  $payload['outcome']['title'],
+                  $syncType,
+                  $payload['environment']['title']
+                );
+        }
+        return $type;
+    }
 }
