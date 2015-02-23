@@ -52,14 +52,22 @@ class Environment extends Resource
     /**
      * Delete the environment.
      *
+     * @param bool $deactivate Whether to deactivate the environment before
+     *                         deleting it.
+     *
      * @throws \Exception
      *
      * @return array
      */
-    public function delete()
+    public function delete($deactivate = false)
     {
         if ($this->isActive()) {
-            throw new \Exception('Active environments cannot be deleted');
+            if (!$deactivate) {
+                throw new \Exception('Active environments cannot be deleted');
+            }
+            // Deactivate the environment before deleting. Platform.sh will
+            // queue the operations, so there should be no need to wait.
+            $this->deactivate();
         }
 
         return parent::delete();

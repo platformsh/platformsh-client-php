@@ -12,26 +12,22 @@ $connector = $client->getConnector();
 $session = $connector->getSession();
 $session->setStorage(new \Platformsh\Client\Session\Storage\File());
 
-// Enable Guzzle debugging.
-$connector->setDebug(true);
-
 // Log in (bypassed if there is a token available).
 $connector->authenticate($username, $password);
 
-// Get all the user's projects.
-$projects = $client->getProjects();
+// Get the user's first project.
+$project = $client->getProjects()[0];
 
-foreach ($projects as $project) {
-  // Get the master environment.
-  $master = $project->getEnvironment('master');
-  // Branch the master environment.
-  $activity = $master->branch('Sprint 1', 'sprint-1');
-  // Wait for the activity to complete.
-  $activity->wait();
-  // Get the new branch.
-  $sprint1 = $project->getEnvironment('sprint-1');
-  // etc.
-  break;
-}
+// Get the master environment.
+$master = $project->getEnvironment('master');
+
+// Branch the master environment.
+$activity = $master->branch('Sprint 1', 'sprint-1');
+
+// Wait for the activity to complete.
+$activity->wait();
+
+// Get the new branch.
+$sprint1 = $project->getEnvironment('sprint-1');
 
 ```
