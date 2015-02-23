@@ -162,6 +162,18 @@ class Environment extends Resource
     }
 
     /**
+     * Get a single environment activity.
+     *
+     * @param string $id
+     *
+     * @return Activity
+     */
+    public function getActivity($id)
+    {
+        return Activity::get($id, $this->getUri() . '/activities', $this->client);
+    }
+
+    /**
      * Get a list of environment activities.
      *
      * @param int    $limit
