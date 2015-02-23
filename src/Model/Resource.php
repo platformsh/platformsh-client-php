@@ -93,9 +93,15 @@ class Resource
     public static function getCollection($url, $limit = 0, array $options = [], ClientInterface $client)
     {
         if ($limit) {
-            $options['query']['count'] = $limit;
+            // @todo uncomment this when the API implements a 'count' parameter
+            // $options['query']['count'] = $limit;
         }
         $data = $client->get($url, $options)->json();
+
+        // @todo remove this when the API implements a 'count' parameter
+        if ($limit) {
+            $data = array_slice($data, 0, $limit);
+        }
 
         return static::wrapCollection($data, $client);
     }
