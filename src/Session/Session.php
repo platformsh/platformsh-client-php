@@ -25,15 +25,6 @@ class Session implements SessionInterface
         $this->load();
     }
 
-    /**
-     * @param SessionStorageInterface $storage
-     */
-    public function setStorage(SessionStorageInterface $storage)
-    {
-        $this->storage = $storage;
-        $this->load();
-    }
-
     public function load($reload = false)
     {
         if (!$this->loaded || $reload) {
@@ -42,6 +33,15 @@ class Session implements SessionInterface
                 $this->loaded = true;
             }
         }
+    }
+
+    /**
+     * @param SessionStorageInterface $storage
+     */
+    public function setStorage(SessionStorageInterface $storage)
+    {
+        $this->storage = $storage;
+        $this->load();
     }
 
     public function add(array $data)
@@ -87,6 +87,11 @@ class Session implements SessionInterface
         $this->data = [];
     }
 
+    public function __destruct()
+    {
+        $this->save();
+    }
+
     public function save()
     {
         if (!isset($this->storage)) {
@@ -94,10 +99,5 @@ class Session implements SessionInterface
         }
 
         $this->storage->save($this);
-    }
-
-    public function __destruct()
-    {
-        $this->save();
     }
 }

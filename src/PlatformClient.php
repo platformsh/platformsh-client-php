@@ -39,6 +39,7 @@ class PlatformClient
             $client = $this->getConnector()->getClient();
             $this->accountInfo = (array) $client->get('me')->json();
         }
+
         return $this->accountInfo;
     }
 
@@ -57,6 +58,7 @@ class PlatformClient
             $client = $connector->getClient($project['endpoint']);
             $projects[$project['id']] = new Project($project, $client);
         }
+
         return $projects;
     }
 
@@ -72,14 +74,14 @@ class PlatformClient
     {
         if ($endpoint !== null) {
             $project = $this->getProjectDirect($id, $endpoint);
-        }
-        else {
+        } else {
             $projects = $this->getProjects();
             if (!isset($projects[$id])) {
                 return false;
             }
             $project = $projects[$id];
         }
+
         return $project;
     }
 
@@ -92,6 +94,7 @@ class PlatformClient
     protected function getProjectDirect($id, $endpoint)
     {
         $client = $this->getConnector()->getClient($endpoint);
+
         return Project::get($id, $endpoint, $client);
     }
 }

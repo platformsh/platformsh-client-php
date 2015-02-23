@@ -58,17 +58,13 @@ class Connector implements ConnectorInterface
     {
         if ($this->loggedOut) {
             $this->session->clear();
-        }
-        elseif ($this->oauth2Plugin) {
+        } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
-            $token = $this->getOauth2Plugin()
-                          ->getAccessToken();
-            $this->session->set('accessToken', $token->getToken());
-            $this->session->set(
-              'expires',
-              $token->getExpires()
-                    ->getTimestamp()
-            );
+            $token = $this->getOauth2Plugin()->getAccessToken();
+            $this->session->add([
+              'accessToken' => $token->getToken(),
+              'expires' => $token->getExpires()->getTimestamp(),
+            ]);
         }
     }
 
@@ -100,13 +96,15 @@ class Connector implements ConnectorInterface
             return;
         }
         $client = clone $this->clientPrototype;
-        $client->__construct([
-          'base_url' => $this->accountsEndpoint,
-          'defaults' => [
-            'debug' => $this->debug,
-            'verify' => $this->verifySsl,
-          ],
-        ]);
+        $client->__construct(
+          [
+            'base_url' => $this->accountsEndpoint,
+            'defaults' => [
+              'debug' => $this->debug,
+              'verify' => $this->verifySsl,
+            ],
+          ]
+        );
         $grantType = new PasswordCredentials(
           $client, [
             'client_id' => self::CLIENT_ID,
@@ -116,21 +114,22 @@ class Connector implements ConnectorInterface
         );
         try {
             $token = $grantType->getToken();
-        }
-        catch (BadResponseException $e) {
+        } catch (BadResponseException $e) {
             $response = $e->getResponse();
             if ($response && $response->getStatusCode() === 401) {
                 throw new \Exception("Invalid credentials. Please check your username/password combination");
             }
             throw $e;
         }
-        $this->session->add([
-          'username' =>  $username,
-          'accessToken' => $token->getToken(),
-          'tokenType' => $token->getType(),
-          'expires' => $token->getExpires()->getTimestamp(),
-          'refreshToken' => $token->getRefreshToken()->getToken(),
-        ]);
+        $this->session->add(
+          [
+            'username' => $username,
+            'accessToken' => $token->getToken(),
+            'tokenType' => $token->getType(),
+            'expires' => $token->getExpires()->getTimestamp(),
+            'refreshToken' => $token->getRefreshToken()->getToken(),
+          ]
+        );
         $this->session->save();
     }
 
@@ -154,10 +153,12 @@ class Connector implements ConnectorInterface
               ],
             ];
             $oauth2Client = new Client($options);
-            $refreshTokenGrantType = new RefreshToken($oauth2Client, [
-              'client_id' => self::CLIENT_ID,
-              'refresh_token' => $this->session->get('refreshToken'),
-            ]);
+            $refreshTokenGrantType = new RefreshToken(
+              $oauth2Client, [
+                'client_id' => self::CLIENT_ID,
+                'refresh_token' => $this->session->get('refreshToken'),
+              ]
+            );
             $this->oauth2Plugin = new Oauth2Subscriber(null, $refreshTokenGrantType);
             if ($this->session->get('accessToken')) {
                 $expiresIn = $this->session->get('expires');

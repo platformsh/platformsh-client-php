@@ -15,8 +15,8 @@ class Activity extends Resource
     /**
      * Wait for the activity to complete.
      *
-     * @param callable $logger A function that will print new activity log
-     *                         messages as they are received.
+     * @param callable  $logger       A function that will print new activity log
+     *                                messages as they are received.
      * @param int|float $pollInterval The polling interval, in seconds.
      */
     public function wait(callable $logger = null, $pollInterval = 1)
@@ -35,8 +35,7 @@ class Activity extends Resource
                     $logger(trim($new) . "\n");
                     $length += strlen($new);
                 }
-            }
-            catch (ConnectException $e) {
+            } catch (ConnectException $e) {
                 // Retry on timeout.
                 if (strpos($e->getMessage(), 'cURL error 28') !== false && $retries <= 5) {
                     $retries++;

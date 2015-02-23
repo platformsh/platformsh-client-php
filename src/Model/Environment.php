@@ -11,8 +11,8 @@ class Environment extends Resource
      * Branch (create a new environment).
      *
      * @param string $title The title of the new environment.
-     * @param string $id The ID of the new environment. Leave blank to generate
-     *                   automatically from the title.
+     * @param string $id    The ID of the new environment. Leave blank to generate
+     *                      automatically from the title.
      *
      * @return Activity
      */
@@ -20,12 +20,33 @@ class Environment extends Resource
     {
         $id = $id ?: $this->sanitizeId($title);
         if (!$this->validateId($id)) {
-            throw new \InvalidArgumentException("Invalid branch ID: $id");
+            throw new \InvalidArgumentException("Invalid environment ID: $id");
         }
-        return $this->runLongOperation('branch', 'post', [
-          'name' => $id,
-          'title' => $title,
-        ]);
+        $body = ['name' => $id, 'title' => $title];
+
+        return $this->runLongOperation('branch', 'post', $body);
+    }
+
+    /**
+     * @param string $proposed
+     *
+     * @return string
+     */
+    public static function sanitizeId($proposed)
+    {
+        $slugify = new Slugify();
+
+        return substr($slugify->slugify($proposed), 0, 32);
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return bool
+     */
+    public static function validateId($id)
+    {
+        return strlen($id) <= 32 && preg_match('/^[a-z0-9\-]+$/i', $id);
     }
 
     /**
@@ -37,10 +58,35 @@ class Environment extends Resource
      */
     public function delete()
     {
-        if (isset($this->data['status']) && $this->data['status'] === 'active') {
+        if ($this->isActive()) {
             throw new \Exception('Active environments cannot be deleted');
         }
+
         return parent::delete();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->data['status'] === 'active';
+    }
+
+    /**
+     * Activate the environment.
+     *
+     * @throws \Exception
+     *
+     * @return Activity
+     */
+    public function activate()
+    {
+        if ($this->isActive()) {
+            throw new \Exception('Active environments cannot be activated');
+        }
+
+        return $this->runLongOperation('activate');
     }
 
     /**
@@ -52,14 +98,15 @@ class Environment extends Resource
      */
     public function deactivate()
     {
-        if (isset($this->data['status']) && $this->data['status'] === 'inactive') {
+        if (!$this->isActive()) {
             throw new \Exception('Inactive environments cannot be deactivated');
         }
+
         return $this->runLongOperation('deactivate');
     }
 
     /**
-     * @param int $limit
+     * @param int    $limit
      * @param string $type
      *
      * @return Activity[]
@@ -73,27 +120,7 @@ class Environment extends Resource
         if ($type !== null) {
             $options['query']['type'] = $type;
         }
+
         return Activity::getCollection($this->getUri() . '/activities', $options, $this->client);
-    }
-
-    /**
-     * @param string $proposed
-     *
-     * @return string
-     */
-    public static function sanitizeId($proposed)
-    {
-        $slugify = new Slugify();
-        return substr($slugify->slugify($proposed), 0, 32);
-    }
-
-    /**
-     * @param string $id
-     *
-     * @return bool
-     */
-    public static function validateId($id)
-    {
-        return strlen($id) <= 32 && preg_match('/^[a-z0-9\-]+$/i', $id);
     }
 }

@@ -6,19 +6,14 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 
-class Resource implements ResourceInterface
+class Resource
 {
 
-    /**
-     * @var ClientInterface
-     */
+    /** @var ClientInterface */
     protected $client;
 
     /** @var array */
     protected $data;
-
-    /** @var int */
-    protected $fetched;
 
     /**
      * @param array           $data
@@ -27,7 +22,6 @@ class Resource implements ResourceInterface
     public function __construct(array $data = [], ClientInterface $client = null)
     {
         $this->data = $data;
-        $this->fetched = time();
         $this->client = $client ?: new Client();
     }
 
@@ -52,14 +46,14 @@ class Resource implements ResourceInterface
      */
     public static function get($id, $collectionUrl, ClientInterface $client)
     {
-        $url = rtrim($collectionUrl, '/') . '/' . $id;
         try {
-            $data = $client->get($url)->json();
+            $response = $client->get(rtrim($collectionUrl, '/') . '/' . $id);
+            $data = $response->json();
             $data['_full'] = true;
-            $data['_url'] = $url;
+            $data['_url'] = $response->getEffectiveUrl();
+
             return static::wrap($data, $client);
-        }
-        catch (BadResponseException $e) {
+        } catch (BadResponseException $e) {
             $response = $e->getResponse();
             if ($response && $response->getStatusCode() === 404) {
                 return false;
@@ -80,13 +74,14 @@ class Resource implements ResourceInterface
     public static function getCollection($url, array $options = [], ClientInterface $client)
     {
         $data = $client->get($url, $options)->json();
+
         return static::wrapCollection($data, $client);
     }
 
     /**
      * Create a resource instance from JSON data.
      *
-     * @param array $data
+     * @param array           $data
      * @param ClientInterface $client
      *
      * @return static
@@ -99,16 +94,19 @@ class Resource implements ResourceInterface
     /**
      * Create an array of resource instances from a collection's JSON data.
      *
-     * @param array $data
+     * @param array           $data
      * @param ClientInterface $client
      *
      * @return static[]
      */
     public static function wrapCollection(array $data, ClientInterface $client)
     {
-        return array_map(function ($item) use ($client) {
-            return new static($item, $client);
-        }, $data);
+        return array_map(
+          function ($item) use ($client) {
+              return new static($item, $client);
+          },
+          $data
+        );
     }
 
     /**
@@ -116,7 +114,7 @@ class Resource implements ResourceInterface
      *
      * @param string $op
      * @param string $method
-     * @param array $body
+     * @param array  $body
      *
      * @return \GuzzleHttp\Message\ResponseInterface
      */
@@ -131,6 +129,7 @@ class Resource implements ResourceInterface
         }
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
+
         return $this->client->send($request);
     }
 
@@ -139,7 +138,7 @@ class Resource implements ResourceInterface
      *
      * @param string $op
      * @param string $method
-     * @param array $body
+     * @param array  $body
      *
      * @throws \Exception
      *
@@ -152,6 +151,7 @@ class Resource implements ResourceInterface
         if (!isset($data['_embedded']['activities'][0])) {
             throw new \Exception('Expected activity not found');
         }
+
         return Activity::wrap($data['_embedded']['activities'][0], $this->client);
     }
 
@@ -169,6 +169,7 @@ class Resource implements ResourceInterface
         if ($property[0] === '_' || !array_key_exists($property, $this->data)) {
             throw new \InvalidArgumentException("Property not found: $property");
         }
+
         return $this->data[$property];
     }
 
@@ -183,18 +184,13 @@ class Resource implements ResourceInterface
     }
 
     /**
-     * Get the resource's URI (relative or absolute).
-     *
-     * @throws \Exception
+     * Get the resource's URI.
      *
      * @return string
      */
     public function getUri()
     {
-        if (!isset($this->data['_links']['self']['href'])) {
-            throw new \Exception('URI not found');
-        }
-        return $this->data['_links']['self']['href'];
+        return $this->getLink('self');
     }
 
     /**
@@ -208,7 +204,7 @@ class Resource implements ResourceInterface
     }
 
     /**
-     * Refresh the current resource.
+     * Refresh the resource.
      *
      * @param array $options
      */
@@ -216,6 +212,7 @@ class Resource implements ResourceInterface
     {
         $response = $this->client->get($this->getLink('self'), $options);
         $this->data = (array) $response->json();
+        $this->data['_url'] = $response->getEffectiveUrl();
         $this->data['_full'] = true;
     }
 
