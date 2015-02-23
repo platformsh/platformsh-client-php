@@ -156,14 +156,14 @@ class Environment extends Resource
      * @param bool $code
      * @param bool $data
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      *
      * @return Activity
      */
     public function synchronize($data = false, $code = false)
     {
         if (!$data && !$code) {
-            throw new \Exception('Nothing to synchronize: you must specify $data or $code');
+            throw new \InvalidArgumentException('Nothing to synchronize: you must specify $data or $code');
         }
         $body = ['synchronize_data' => $data, 'synchronize_code' => $code];
 
@@ -172,8 +172,6 @@ class Environment extends Resource
 
     /**
      * Create a backup of the environment.
-     *
-     * @throws \Exception
      *
      * @return Activity
      */

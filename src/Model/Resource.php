@@ -41,16 +41,20 @@ class Resource implements \ArrayAccess
 
     /**
      * @inheritdoc
+     *
+     * @throws \BadMethodCallException
      */
     public function offsetSet($offset, $value) {
-        throw new \RuntimeException('Properties are read-only');
+        throw new \BadMethodCallException('Properties are read-only');
     }
 
     /**
      * @inheritdoc
+     *
+     * @throws \BadMethodCallException
      */
     public function offsetUnset($offset) {
-        throw new \RuntimeException('Properties are read-only');
+        throw new \BadMethodCallException('Properties are read-only');
     }
 
     /**

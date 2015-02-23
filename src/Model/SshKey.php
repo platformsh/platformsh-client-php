@@ -41,10 +41,12 @@ class SshKey extends Resource
 
     /**
      * @inheritdoc
+     *
+     * @throws \BadMethodCallException
      */
     public function update(array $values)
     {
-        throw new \RuntimeException('Update is not implemented for SSH keys');
+        throw new \BadMethodCallException('Update is not implemented for SSH keys');
     }
 
     /**
