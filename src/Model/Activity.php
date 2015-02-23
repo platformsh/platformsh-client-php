@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\Model;
 
-use GuzzleHttp\Ring\Exception\ConnectException;
+use GuzzleHttp\Exception\ConnectException;
 
 class Activity extends Resource
 {
@@ -15,19 +15,31 @@ class Activity extends Resource
     /**
      * Wait for the activity to complete.
      *
+     * @param callable $logger A function that will print new activity log
+     *                         messages as they are received.
      * @param int|float $pollInterval The polling interval, in seconds.
      */
-    public function wait($pollInterval = 1)
+    public function wait(callable $logger = null, $pollInterval = 1)
     {
+        $log = $this->getProperty('log');
+        if (strlen(trim($log))) {
+            $logger(trim($log) . "\n");
+        }
+        $length = strlen($log);
+        $retries = 0;
         while (!$this->isComplete() && $this->getState() !== self::STATUS_FAILURE) {
             usleep($pollInterval * 1000000);
             try {
                 $this->refresh(['timeout' => $pollInterval]);
+                if ($new = substr($this->getProperty('log'), $length)) {
+                    $logger(trim($new) . "\n");
+                    $length += strlen($new);
+                }
             }
             catch (ConnectException $e) {
                 // Retry on timeout.
-                // @todo is this cURL status code more accessible?
-                if (strpos($e->getMessage(), 'cURL error 28') !== false) {
+                if (strpos($e->getMessage(), 'cURL error 28') !== false && $retries <= 5) {
+                    $retries++;
                     continue;
                 }
                 throw $e;
