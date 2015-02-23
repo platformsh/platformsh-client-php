@@ -73,11 +73,27 @@ class Resource
      */
     public static function create(array $body, $collectionUrl, ClientInterface $client)
     {
+        if ($errors = static::check($body)) {
+            throw new \InvalidArgumentException("Validation errors: " . implode('; ', $errors));
+        }
+
         $response = $client->post($collectionUrl, ['body' => $body]);
         $data = (array) $response->json();
         $data['_full'] = true;
 
         return static::wrap($data, $client);
+    }
+
+    /**
+     * Validate a new resource.
+     *
+     * @param array $data
+     *
+     * @return string[] An array of validation errors.
+     */
+    public static function check(array $data)
+    {
+        return [];
     }
 
     /**

@@ -6,6 +6,31 @@ class Project extends Resource
 {
 
     /**
+     * Get the users associated with a project.
+     *
+     * @return User[]
+     */
+    public function getUsers()
+    {
+        return User::getCollection($this->getUri() . '/access', 0, [], $this->client);
+    }
+
+    /**
+     * Add a new user to a project.
+     *
+     * @param string $email An email address.
+     * @param string $role  One of User::ROLE_ADMIN or User::ROLE_VIEWER.
+     *
+     * @return User
+     */
+    public function addUser($email, $role)
+    {
+        $body = ['email' => $email, 'role' => $role];
+
+        return User::create($body, $this->getUri() . '/access', $this->client);
+    }
+
+    /**
      * Get a single environment of the project.
      *
      * @param string $id

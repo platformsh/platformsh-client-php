@@ -5,11 +5,31 @@ namespace Platformsh\Client\Model;
 class User extends Resource
 {
 
+    const ROLE_ADMIN = 'admin';
+    const ROLE_VIEWER = 'viewer';
+
     /**
-     * @return SshKey[]
+     * @inheritdoc
      */
-    public function getSshKeys()
+    public static function check(array $data)
     {
-        return $this->client->get($this->getLink('ssh-keys'));
+        $errors = parent::check($data);
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email address: '{$data['email']}'";
+        }
+        if (!in_array($data['role'], [self::ROLE_ADMIN, self::ROLE_VIEWER])) {
+            $errors[] = "Invalid role: '{$data['role']}";
+        }
+        return $errors;
+    }
+
+    /**
+     * Check whether the user is editable.
+     *
+     * @return bool
+     */
+    public function isEditable()
+    {
+        return $this->operationAvailable('edit');
     }
 }
