@@ -3,14 +3,8 @@
     "require": {
         "cocur/slugify": "~1.0",
         "guzzlehttp/guzzle": "~5.2",
-        "commerceguys/guzzle-5-oauth2-plugin": "dev-guzzle5-support"
+        "commerceguys/guzzle-oauth2-plugin": "dev-master"
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url":  "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Platformsh\\Client\\": "src"

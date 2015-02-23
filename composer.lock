@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e6bbe07205043739858f7acfcdf1fc70",
+    "hash": "6a7db6897badee6a3226f3f5e22d8b6a",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -67,12 +67,18 @@
             "time": "2014-11-26 22:45:14"
         },
         {
-            "name": "commerceguys/guzzle-5-oauth2-plugin",
-            "version": "dev-guzzle5-support",
+            "name": "commerceguys/guzzle-oauth2-plugin",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
-                "reference": "e08fc92f5f291fca166c4b0c65127c849682a9c6"
+                "url": "https://github.com/commerceguys/guzzle-oauth2-plugin.git",
+                "reference": "3e85e84f89f36191a21aac15f0bcfc002b566313"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/commerceguys/guzzle-oauth2-plugin/zipball/3e85e84f89f36191a21aac15f0bcfc002b566313",
+                "reference": "3e85e84f89f36191a21aac15f0bcfc002b566313",
+                "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "~5.0"
@@ -83,6 +89,7 @@
                     "CommerceGuys\\Guzzle\\Oauth2\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -98,7 +105,7 @@
                 }
             ],
             "description": "An OAuth2 plugin for Guzzle 5.x",
-            "time": "2015-02-21 15:14:44"
+            "time": "2015-02-23 16:36:21"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -307,7 +314,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "commerceguys/guzzle-5-oauth2-plugin": 20
+        "commerceguys/guzzle-oauth2-plugin": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
