@@ -63,7 +63,9 @@ class PlatformClient
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh cluster.
             $client = $this->connector->getClient($project['endpoint']);
-            $projects[$project['id']] = new Project($project, $client);
+            // @todo get the actual ID added to the API
+            $projectId = basename($project['endpoint']);
+            $projects[$projectId] = new Project($project, $client);
         }
 
         return $projects;
