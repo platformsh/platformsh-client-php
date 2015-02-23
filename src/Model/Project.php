@@ -82,4 +82,43 @@ class Project extends Resource
 
         return Domain::create($this->getUri() . '/domains', $body, $this->client);
     }
+
+    /**
+     * Get a list of integrations for the project.
+     *
+     * @param int $limit
+     *
+     * @return Integration[]
+     */
+    public function getIntegrations($limit = 0)
+    {
+        return Integration::getCollection($this->getUri() . '/integrations', $limit, [], $this->client);
+    }
+
+    /**
+     * Get a single integration of the project.
+     *
+     * @param string $id
+     *
+     * @return Integration|false
+     */
+    public function getIntegration($id)
+    {
+        return Integration::get($id, $this->getUri() . '/integrations', $this->client);
+    }
+
+    /**
+     * Add an integration to the project.
+     *
+     * @param string $type
+     * @param array $data
+     *
+     * @return Integration
+     */
+    public function addIntegration($type, array $data = [])
+    {
+        $body = ['type' => $type] + $data;
+
+        return Integration::create($this->getUri() . '/integrations', $body, $this->client);
+    }
 }
