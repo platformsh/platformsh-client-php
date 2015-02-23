@@ -1,9 +1,21 @@
 # Platform.sh API client
 
-This will be a PHP library for accessing the Platform.sh API.
+This is a PHP library for accessing the Platform.sh API.
 
-Current usage:
+## Install
+
+```
+composer require platformsh/client:dev-master
+```
+
+## Usage
+
+Example:
 ```php
+// Include the Composer autoload file.
+require 'vendor/autoload.php';
+
+// Initialize the client.
 $client = new \Platformsh\Client\PlatformClient();
 
 $connector = $client->getConnector();
