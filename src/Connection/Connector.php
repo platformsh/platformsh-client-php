@@ -7,6 +7,7 @@ use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
 use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Collection;
 use GuzzleHttp\Exception\BadResponseException;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
@@ -14,38 +15,46 @@ use Platformsh\Client\Session\SessionInterface;
 class Connector implements ConnectorInterface
 {
 
-    const CLIENT_ID = 'platform-cli';
+    /** @var Collection */
+    protected $config;
 
-    protected $accountsEndpoint;
     protected $clientPrototype;
     protected $clients;
-    protected $debug = false;
-    protected $verifySsl = true;
     protected $oauth2Plugin;
     protected $session;
     protected $loggedOut = false;
 
     /**
-     * @param string           $accountsEndpoint
+     * @param array            $config
      * @param SessionInterface $session
      * @param ClientInterface  $clientPrototype
      */
-    public function __construct($accountsEndpoint = '', SessionInterface $session = null, ClientInterface $clientPrototype = null)
+    public function __construct(array $config = [], SessionInterface $session = null, ClientInterface $clientPrototype = null)
     {
-        $this->clientPrototype = $clientPrototype ?: new Client();
-        $this->accountsEndpoint = $accountsEndpoint ?: 'https://marketplace.commerceguys.com/api/platform/';
+        $version = '0.x-dev';
+        $url = 'https://github.com/platformsh/platformsh-client-php';
 
+        $defaults = [
+            'accounts' => 'https://marketplace.commerceguys.com/api/platform/',
+            'client_id' => 'platformsh-client-php',
+            'debug' => false,
+            'verify' => true,
+            'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
+        ];
+        $this->config = Collection::fromConfig($config, $defaults);
+
+        $this->clientPrototype = $clientPrototype ?: new Client();
         $this->session = $session ?: new Session();
     }
 
     public function setDebug($debug)
     {
-        $this->debug = $debug;
+        $this->config['debug'] = $debug;
     }
 
     public function setVerifySsl($verifySsl)
     {
-        $this->verifySsl = $verifySsl;
+        $this->config['verify'] = $verifySsl;
     }
 
     public function logOut()
@@ -76,19 +85,6 @@ class Connector implements ConnectorInterface
         return $this->session;
     }
 
-    /**
-     * Get an HTTP User Agent string representing this application.
-     *
-     * @return string
-     */
-    protected function getUserAgent()
-    {
-        $version = '0.x-dev';
-        $url = 'https://github.com/platformsh/platformsh-client-php';
-
-        return "Platform.sh-Client/$version (+$url)";
-    }
-
     public function logIn($username, $password, $force = false)
     {
         $this->loggedOut = false;
@@ -98,16 +94,16 @@ class Connector implements ConnectorInterface
         $client = clone $this->clientPrototype;
         $client->__construct(
           [
-            'base_url' => $this->accountsEndpoint,
+            'base_url' => $this->config['accounts'],
             'defaults' => [
-              'debug' => $this->debug,
-              'verify' => $this->verifySsl,
+              'debug' => $this->config['debug'],
+              'verify' => $this->config['verify'],
             ],
           ]
         );
         $grantType = new PasswordCredentials(
           $client, [
-            'client_id' => self::CLIENT_ID,
+            'client_id' => $this->config['client_id'],
             'username' => $username,
             'password' => $password,
           ]
@@ -145,17 +141,17 @@ class Connector implements ConnectorInterface
                 throw new \Exception('Not logged in (no access token available)');
             }
             $options = [
-              'base_url' => $this->accountsEndpoint,
+              'base_url' => $this->config['accounts'],
               'defaults' => [
-                'headers' => ['User-Agent' => $this->getUserAgent()],
-                'debug' => $this->debug,
-                'verify' => $this->verifySsl,
+                'headers' => ['User-Agent' => $this->config['user_agent']],
+                'debug' => $this->config['debug'],
+                'verify' => $this->config['verify'],
               ],
             ];
             $oauth2Client = new Client($options);
             $refreshTokenGrantType = new RefreshToken(
               $oauth2Client, [
-                'client_id' => self::CLIENT_ID,
+                'client_id' => $this->config['client_id'],
                 'refresh_token' => $this->session->get('refreshToken'),
               ]
             );
@@ -172,14 +168,14 @@ class Connector implements ConnectorInterface
 
     public function getClient($endpoint = null)
     {
-        $endpoint = $endpoint ?: $this->accountsEndpoint;
+        $endpoint = $endpoint ?: $this->config['accounts'];
         if (!isset($this->clients[$endpoint])) {
             $options = [
               'base_url' => $endpoint,
               'defaults' => [
-                'headers' => ['User-Agent' => $this->getUserAgent()],
-                'debug' => $this->debug,
-                'verify' => $this->verifySsl,
+                'headers' => ['User-Agent' => $this->config['user_agent']],
+                'debug' => $this->config['debug'],
+                'verify' => $this->config['verify'],
                 'subscribers' => [$this->getOauth2Plugin()],
                 'auth' => 'oauth2',
               ],
