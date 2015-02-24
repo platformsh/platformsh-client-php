@@ -355,16 +355,22 @@ class Resource implements \ArrayAccess
      * Get a link for a given resource relation.
      *
      * @param string $rel
+     * @param bool   $absolute
      *
      * @return string
      */
-    public function getLink($rel)
+    public function getLink($rel, $absolute = false)
     {
         if (!$this->hasLink($rel)) {
             throw new \InvalidArgumentException("Link not found: $rel");
         }
-
-        return $this->data['_links'][$rel]['href'];
+        $url = $this->data['_links'][$rel]['href'];
+        if ($absolute && strpos($url, '//') === false) {
+            // @todo there may be a more standard Guzzle way to combine URLs
+            $base = parse_url($this->client->getBaseUrl());
+            $url = $base['scheme'] . '://' . $base['host'] . $url;
+        }
+        return $url;
     }
 
     /**
