@@ -121,6 +121,24 @@ class PlatformClient
     }
 
     /**
+     * Get a single SSH key by its ID.
+     *
+     * @param string|int $id
+     * @param bool       $reset
+     *
+     * @return SshKey_Accounts|false
+     */
+    public function getSshKey($id, $reset = false)
+    {
+        $data = $this->getAccountInfo($reset);
+        if (!isset($data['ssh_keys'][$id])) {
+            return false;
+        }
+
+        return SshKey_Accounts::wrap($data['ssh_keys'][$id], $this->connector->getClient());
+    }
+
+    /**
      * Add an SSH public key to the logged-in user's account.
      *
      * @param string $value The SSH key value.
