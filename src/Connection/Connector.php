@@ -117,7 +117,7 @@ class Connector implements ConnectorInterface
     public function logIn($username, $password, $force = false)
     {
         $this->loggedOut = false;
-        if (!$force && $this->session->get('username') === $username) {
+        if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
         }
         $client = clone $this->clientPrototype;
@@ -142,7 +142,7 @@ class Connector implements ConnectorInterface
         } catch (BadResponseException $e) {
             $response = $e->getResponse();
             if ($response && $response->getStatusCode() === 401) {
-                throw new \Exception("Invalid credentials. Please check your username/password combination");
+                throw new \InvalidArgumentException("Invalid credentials. Please check your username/password combination");
             }
             throw $e;
         }

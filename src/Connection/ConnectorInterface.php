@@ -23,6 +23,8 @@ interface ConnectorInterface
      * @param bool   $force
      *   Whether to re-authenticate even if the session appears to be logged
      *   in already.
+     *
+     * @throws \InvalidArgumentException If the credentials are invalid.
      */
     public function logIn($username, $password, $force = false);
 
