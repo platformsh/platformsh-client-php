@@ -98,12 +98,13 @@ class Project extends Resource
      *
      * @param string $name
      * @param bool   $wildcard
+     * @param array  $ssl
      *
      * @return Domain
      */
-    public function addDomain($name, $wildcard = false)
+    public function addDomain($name, $wildcard = false, array $ssl = [])
     {
-        $body = ['name' => $name, 'wildcard' => $wildcard];
+        $body = ['name' => $name, 'wildcard' => $wildcard, 'ssl' => $ssl];
 
         return Domain::create($this->getUri() . '/domains', $body, $this->client);
     }
