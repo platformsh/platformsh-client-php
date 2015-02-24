@@ -83,8 +83,9 @@ class Connector implements ConnectorInterface
      */
     public function logOut()
     {
-        $this->session->clear();
         $this->loggedOut = true;
+        $this->session->clear();
+        $this->session->save();
     }
 
     public function __destruct()
@@ -100,8 +101,8 @@ class Connector implements ConnectorInterface
                 'expires' => $token->getExpires()->getTimestamp(),
               ]
             );
-            $this->session->save();
         }
+        $this->session->save();
     }
 
     /**
