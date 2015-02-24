@@ -50,8 +50,8 @@ class Project extends Resource
      */
     protected function getUri()
     {
-        if (!empty($this->data['_full'])) {
-            return parent::getUri();
+        if ($this->hasLink('self')) {
+            return $this->getLink('self');
         }
 
         return $this->data['endpoint'];

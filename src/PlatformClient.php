@@ -75,36 +75,35 @@ class PlatformClient
      * Get a single project by its ID.
      *
      * @param string $id
-     * @param string $endpoint
      *
      * @return Project|false
      */
-    public function getProject($id, $endpoint = null)
+    public function getProject($id)
     {
-        if ($endpoint !== null) {
-            $project = $this->getProjectDirect($id, $endpoint);
-        } else {
-            $projects = $this->getProjects();
-            if (!isset($projects[$id])) {
-                return false;
-            }
-            $project = $projects[$id];
+        $projects = $this->getProjects();
+        if (!isset($projects[$id])) {
+            return false;
         }
+        $project = $projects[$id];
 
         return $project;
     }
 
     /**
-     * Get a single project with a known endpoint.
+     * Get a single project at a known location.
      *
-     * @param string $id
-     * @param string $endpoint
+     * @param string $id       The project ID.
+     * @param string $hostname The hostname of the Platform.sh cluster API,
+     *                         e.g. 'eu.platform.sh' or 'us.platform.sh'.
+     * @param bool   $https    Whether to use HTTPS (default: true).
      *
      * @return Project|false
      */
-    protected function getProjectDirect($id, $endpoint)
+    public function getProjectDirect($id, $hostname, $https = true)
     {
-        return Project::get($id, $endpoint, $this->connector->getClient($endpoint));
+        $scheme = $https ? 'https' : 'http';
+        $endpoint = "$scheme://$hostname/api/projects/";
+        return Project::get($id, '', $this->connector->getClient($endpoint));
     }
 
     /**

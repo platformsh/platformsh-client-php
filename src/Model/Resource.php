@@ -82,10 +82,10 @@ class Resource implements \ArrayAccess
     public static function get($id, $collectionUrl, ClientInterface $client)
     {
         try {
-            $response = $client->get(rtrim($collectionUrl, '/') . '/' . $id);
+            $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . $id : $id;
+            $response = $client->get($url);
             $data = $response->json();
             $data['_full'] = true;
-            $data['_url'] = $response->getEffectiveUrl();
 
             return static::wrap($data, $client);
         } catch (BadResponseException $e) {
@@ -219,7 +219,7 @@ class Resource implements \ArrayAccess
         }
         $options = [];
         if (!empty($body)) {
-            $options['body'] = json_encode($body);
+            $options['json'] = $body;
         }
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
@@ -298,11 +298,11 @@ class Resource implements \ArrayAccess
      */
     public function update(array $values)
     {
-        $options = ['body' => $values];
-        $response = $this->client->patch($this->getUri(), $options);
-        $this->data = (array) $response->json();
-        $this->data['_url'] = $response->getEffectiveUrl();
-        $this->data['_full'] = true;
+        $data = $this->runOperation('edit', 'patch', $values);
+        if (isset($data['_embedded']['entity'])) {
+            $this->data = $data['_embedded']['entity'];
+            $this->data['_full'] = true;
+        }
     }
 
     /**
@@ -324,7 +324,6 @@ class Resource implements \ArrayAccess
     {
         $response = $this->client->get($this->getUri(), $options);
         $this->data = (array) $response->json();
-        $this->data['_url'] = $response->getEffectiveUrl();
         $this->data['_full'] = true;
     }
 
