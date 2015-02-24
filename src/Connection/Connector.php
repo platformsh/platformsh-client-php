@@ -159,17 +159,25 @@ class Connector implements ConnectorInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function isLoggedIn()
+    {
+        return $this->session->get('accessToken') && $this->session->get('refreshToken');
+    }
+
+    /**
      * Get an OAuth2 subscriber to add to Guzzle clients.
      *
-     * @throws \Exception
+     * @throws \RuntimeException
      *
      * @return Oauth2Subscriber
      */
     protected function getOauth2Plugin()
     {
         if (!$this->oauth2Plugin) {
-            if (!$this->session->get('accessToken') || !$this->session->get('refreshToken')) {
-                throw new \Exception('Not logged in (no access token available)');
+            if (!$this->isLoggedIn()) {
+                throw new \RuntimeException('Not logged in');
             }
             $options = [
               'base_url' => $this->config['accounts'],

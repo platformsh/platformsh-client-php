@@ -32,7 +32,16 @@ interface ConnectorInterface
     public function logOut();
 
     /**
+     * Check whether the user is logged in.
+     *
+     * @return bool
+     */
+    public function isLoggedIn();
+
+    /**
      * Get an authenticated Guzzle client.
+     *
+     * This will fail if the user is not logged in.
      *
      * @param string $endpoint
      *
