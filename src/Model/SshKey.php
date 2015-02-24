@@ -6,7 +6,7 @@ class SshKey extends Resource
 {
 
     /** @var array */
-    protected static $required = ['value'];
+    protected static $required = ['key'];
 
     /**
      * @inheritdoc
@@ -14,7 +14,7 @@ class SshKey extends Resource
     public static function check(array $data)
     {
         $errors = parent::check($data);
-        if (isset($data['value']) && !self::validatePublicKey($data['value'])) {
+        if (isset($data['key']) && !self::validatePublicKey($data['key'])) {
             $errors[] = "The SSH key is invalid";
         }
 
@@ -28,7 +28,7 @@ class SshKey extends Resource
      *
      * @return bool
      */
-    protected static function validatePublicKey($value)
+    public static function validatePublicKey($value)
     {
         $value = preg_replace('/\s+/', ' ', $value);
         if (!strpos($value, ' ')) {
@@ -40,23 +40,5 @@ class SshKey extends Resource
         }
 
         return true;
-    }
-
-    /**
-     * @inheritdoc
-     *
-     * @throws \BadMethodCallException
-     */
-    public function update(array $values)
-    {
-        throw new \BadMethodCallException('Update is not implemented for SSH keys');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function getUri()
-    {
-        return 'ssh_keys/' . $this->data['key_id'];
     }
 }

@@ -12,6 +12,30 @@ class User extends Resource
     const ROLE_VIEWER = 'viewer';
 
     /**
+     * Get the user's SSH keys.
+     *
+     * @param int $limit
+     *
+     * @return SshKey[]
+     */
+    public function getSshKeys($limit = 0)
+    {
+        return SshKey::getCollection($this->getUri() . '/keys', $limit, [], $this->client);
+    }
+
+    /**
+     * Add an SSH key.
+     *
+     * @param string $key
+     *
+     * @return SshKey
+     */
+    public function addSshKey($key)
+    {
+        return SshKey::create(['key' => $key], $this->getUri() . '/keys', $this->client);
+    }
+
+    /**
      * @inheritdoc
      */
     public static function check(array $data)

@@ -5,7 +5,7 @@ namespace Platformsh\Client;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Model\Project;
-use Platformsh\Client\Model\SshKey;
+use Platformsh\Client\Model\SshKey_Accounts;
 
 class PlatformClient
 {
@@ -112,13 +112,13 @@ class PlatformClient
      *
      * @param bool $reset
      *
-     * @return SshKey[]
+     * @return SshKey_Accounts[]
      */
     public function getSshKeys($reset = false)
     {
         $data = $this->getAccountInfo($reset);
 
-        return SshKey::wrapCollection($data['ssh_keys'], $this->connector->getClient());
+        return SshKey_Accounts::wrapCollection($data['ssh_keys'], $this->connector->getClient());
     }
 
     /**
@@ -127,7 +127,7 @@ class PlatformClient
      * @param string $value The SSH key value.
      * @param string $title A title for the key (optional).
      *
-     * @return SshKey
+     * @return SshKey_Accounts
      */
     public function addSshKey($value, $title = null)
     {
@@ -136,6 +136,6 @@ class PlatformClient
             $values['title'] = $title;
         }
 
-        return SshKey::create($values, 'ssh_keys', $this->connector->getClient());
+        return SshKey_Accounts::create($values, 'ssh_keys', $this->connector->getClient());
     }
 }
