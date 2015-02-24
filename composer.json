@@ -1,5 +1,7 @@
 {
     "name": "platformsh/client",
+    "description": "Platform.sh API client",
+    "license": "MIT",
     "require": {
         "cocur/slugify": "~1.0",
         "guzzlehttp/guzzle": "~5.2",
@@ -9,5 +11,10 @@
         "psr-4": {
             "Platformsh\\Client\\": "src"
         }
-    }
+    },
+    "authors": [
+        {
+            "name": "Patrick Dawkins"
+        }
+    ]
 }
