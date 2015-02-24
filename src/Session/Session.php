@@ -115,14 +115,6 @@ class Session implements SessionInterface
     }
 
     /**
-     * Destructor: ensure that session data is saved.
-     */
-    public function __destruct()
-    {
-        $this->save();
-    }
-
-    /**
      * @inheritdoc
      */
     public function save()

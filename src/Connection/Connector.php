@@ -100,6 +100,7 @@ class Connector implements ConnectorInterface
                 'expires' => $token->getExpires()->getTimestamp(),
               ]
             );
+            $this->session->save();
         }
     }
 
