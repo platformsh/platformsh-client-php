@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e5d380f8c639daee328790cbe12290cc",
+    "hash": "f566a82faf4433d7c131d9d6358c1a57",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -68,7 +68,7 @@
         },
         {
             "name": "commerceguys/guzzle-oauth2-plugin",
-            "version": "dev-master",
+            "version": "v2.0.0-beta1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/commerceguys/guzzle-oauth2-plugin.git",
@@ -314,7 +314,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "commerceguys/guzzle-oauth2-plugin": 20
+        "commerceguys/guzzle-oauth2-plugin": 10
     },
     "prefer-stable": false,
     "prefer-lowest": false,

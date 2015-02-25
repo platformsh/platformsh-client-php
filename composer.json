@@ -5,7 +5,7 @@
     "require": {
         "cocur/slugify": "~1.0",
         "guzzlehttp/guzzle": "~5.2",
-        "commerceguys/guzzle-oauth2-plugin": "dev-master"
+        "commerceguys/guzzle-oauth2-plugin": ">=2.0.0-beta1"
     },
     "autoload": {
         "psr-4": {
