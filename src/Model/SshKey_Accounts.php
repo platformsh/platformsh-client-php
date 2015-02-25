@@ -37,8 +37,10 @@ class SshKey_Accounts extends Resource
     /**
      * @inheritdoc
      */
-    protected function getUri()
+    public function getUri($absolute = false)
     {
-        return 'ssh_keys/' . $this->data['key_id'];
+        $relative = 'ssh_keys/' . $this->data['key_id'];
+        $base = $this->client->getBaseUrl();
+        return $absolute ? $base . $relative : $relative;
     }
 }

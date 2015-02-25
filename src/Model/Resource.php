@@ -61,6 +61,16 @@ class Resource implements \ArrayAccess
     }
 
     /**
+     * Get all of the API data for this resource.
+     *
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
      * Ensure that this is a full representation of the resource (not a stub).
      */
     public function ensureFull()
@@ -308,11 +318,13 @@ class Resource implements \ArrayAccess
     /**
      * Get the resource's URI.
      *
+     * @param bool $absolute
+     *
      * @return string
      */
-    protected function getUri()
+    public function getUri($absolute = false)
     {
-        return $this->getLink('self');
+        return $this->getLink('self', $absolute);
     }
 
     /**
