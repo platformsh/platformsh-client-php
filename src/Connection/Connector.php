@@ -46,7 +46,7 @@ class Connector implements ConnectorInterface
      */
     public function __construct(array $config = [], SessionInterface $session = null, ClientInterface $clientPrototype = null)
     {
-        $version = '0.1.0';
+        $version = '0.1.1';
         $url = 'https://github.com/platformsh/platformsh-client-php';
 
         $defaults = [
