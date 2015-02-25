@@ -14,11 +14,11 @@ class File implements SessionStorageInterface
 
     /**
      * @param string $directory A directory where session files will be saved
-     *                          (default: ~/.platformsh)
+     *                          (default: ~/.platformsh/.session)
      */
     public function __construct($directory = null)
     {
-        $this->directory = $directory ?: $this->getHomeDirectory() . '/.platformsh';
+        $this->directory = $directory ?: $this->getHomeDirectory() . '/.platformsh/.session';
     }
 
     /**
