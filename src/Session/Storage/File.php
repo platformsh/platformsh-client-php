@@ -46,9 +46,13 @@ class File implements SessionStorageInterface
     {
         $data = $session->getData();
         $filename = $this->getFilename($session);
-        if (empty($data) && file_exists($filename)) {
-            return unlink($filename);
+        if (empty($data)) {
+            if (file_exists($filename)) {
+                unlink($filename);
+            }
+            return true;
         }
+        $this->mkDir(dirname($filename));
         $result = file_put_contents($filename, json_encode($data));
         if ($result === false) {
             throw new \Exception("Failed to save session to file: $filename");
@@ -68,26 +72,33 @@ class File implements SessionStorageInterface
         $id = preg_replace('/[^\w\-]+/', '-', $session->getId());
         $dir = $this->getDirectory();
 
-        return "$dir/sess-$id.json";
+        return "$dir/sess-$id/sess-$id.json";
     }
 
     /**
-     * @throws \Exception
-     *
      * @return string
      */
     protected function getDirectory()
     {
-        $dir = $this->directory;
+        return rtrim($this->directory, '/');
+    }
+
+    /**
+     * Create a directory.
+     *
+     * @throws \Exception
+     *
+     * @param string $dir
+     */
+    protected function mkDir($dir)
+    {
         if (!file_exists($dir)) {
             mkdir($dir, self::DIR_MODE, true);
             chmod($dir, self::DIR_MODE);
         }
         if (!is_dir($dir)) {
-            throw new \Exception("Invalid session directory: $dir");
+            throw new \Exception("Failed to create directory: $dir");
         }
-
-        return rtrim($dir, '/');
     }
 
     /**
