@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
 
@@ -38,9 +39,14 @@ class Connector implements ConnectorInterface
      *     Possible configuration keys are:
      *     - accounts (string): The endpoint URL for the accounts API.
      *     - client_id (string): The OAuth2 client ID for this client.
-     *     - debug (bool): Whether or not Guzzle debugging should be enabled (default: false).
-     *     - verify (bool): Whether or not SSL verification should be enabled (default: true).
+     *     - debug (bool): Whether or not Guzzle debugging should be enabled
+     *       (default: false).
+     *     - verify (bool): Whether or not SSL verification should be enabled
+     *       (default: true).
      *     - user_agent (string): The HTTP User-Agent for API requests.
+     *     - cache (array|bool): Caching. Set to true to enable in-memory
+     *       caching, to false (the default) to disable caching, or to an array
+     *       of options as expected by the Guzzle cache subscriber.
      * @param SessionInterface $session
      * @param ClientInterface  $clientPrototype
      */
@@ -55,6 +61,7 @@ class Connector implements ConnectorInterface
           'debug' => false,
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
+          'cache' => false,
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -208,6 +215,20 @@ class Connector implements ConnectorInterface
     }
 
     /**
+     * Set up caching on a Guzzle client.
+     *
+     * @param ClientInterface $client
+     */
+    protected function setUpCache(ClientInterface $client)
+    {
+        if ($this->config['cache'] === false) {
+            return;
+        }
+        $options = is_array($this->config['cache']) ? $this->config['cache'] : [];
+        CacheSubscriber::attach($client, $options);
+    }
+
+    /**
      * @inheritdoc
      */
     public function getClient($endpoint = null)
@@ -226,6 +247,7 @@ class Connector implements ConnectorInterface
             ];
             $client = clone $this->clientPrototype;
             $client->__construct($options);
+            $this->setUpCache($client);
             $this->clients[$endpoint] = $client;
         }
 
