@@ -22,10 +22,10 @@ class ApiResponseException extends BadResponseException
         // Modify the error message to add more detail.
         if (($response = $e->getResponse()) && ($json = $response->json())) {
             $append = '';
-            if (isset($json['message'])) {
+            if (!empty($json['message'])) {
                 $append .= ' [message] ' . implode('; ', (array) $json['message']);
             }
-            if (isset($json['detail'])) {
+            if (!empty($json['detail'])) {
                 $append .= ' [detail] ' . implode('; ', (array) $json['detail']);
             }
             if ($append) {
