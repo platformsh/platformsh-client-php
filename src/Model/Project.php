@@ -106,7 +106,7 @@ class Project extends Resource
     {
         $body = ['name' => $name, 'wildcard' => $wildcard, 'ssl' => $ssl];
 
-        return Domain::create($this->getUri() . '/domains', $body, $this->client);
+        return Domain::create($body, $this->getUri() . '/domains', $this->client);
     }
 
     /**
@@ -145,6 +145,6 @@ class Project extends Resource
     {
         $body = ['type' => $type] + $data;
 
-        return Integration::create($this->getUri() . '/integrations', $body, $this->client);
+        return Integration::create($body, $this->getUri() . '/integrations', $this->client);
     }
 }
