@@ -5,6 +5,8 @@ namespace Platformsh\Client\Model;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Message\RequestInterface;
+use Platformsh\Client\Exception\ApiResponseException;
 
 class Resource implements \ArrayAccess
 {
@@ -93,7 +95,8 @@ class Resource implements \ArrayAccess
     {
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . $id : $id;
-            $response = $client->get($url);
+            $request = $client->createRequest('get', $url);
+            $response = self::send($request, $client);
             $data = $response->json();
             $data['_full'] = true;
 
@@ -123,11 +126,31 @@ class Resource implements \ArrayAccess
             throw new \InvalidArgumentException($message);
         }
 
-        $response = $client->post($collectionUrl, ['body' => $body]);
+        $request = $client->createRequest('post', $collectionUrl, ['body' => $body]);
+        $response = self::send($request, $client);
         $data = (array) $response->json();
         $data['_full'] = true;
 
         return static::wrap($data, $client);
+    }
+
+    /**
+     * Send a Guzzle request.
+     *
+     * Using this method allows exceptions to be standardized.
+     *
+     * @param RequestInterface $request
+     * @param ClientInterface  $client
+     *
+     * @return \GuzzleHttp\Message\ResponseInterface
+     */
+    public static function send(RequestInterface $request, ClientInterface $client)
+    {
+        try {
+            return $client->send($request);
+        } catch (BadResponseException $e) {
+            throw ApiResponseException::create($e->getRequest(), $e->getResponse());
+        }
     }
 
     /**
@@ -172,7 +195,8 @@ class Resource implements \ArrayAccess
             // @todo uncomment this when the API implements a 'count' parameter
             // $options['query']['count'] = $limit;
         }
-        $data = $client->get($url, $options)->json();
+        $request = $client->createRequest('get', $url, $options);
+        $data = self::send($request, $client)->json();
 
         // @todo remove this when the API implements a 'count' parameter
         if ($limit) {
@@ -334,7 +358,8 @@ class Resource implements \ArrayAccess
      */
     public function refresh(array $options = [])
     {
-        $response = $this->client->get($this->getUri(), $options);
+        $request = $this->client->createRequest('get', $this->getUri(), $options);
+        $response = self::send($request, $this->client);
         $this->data = (array) $response->json();
         $this->data['_full'] = true;
     }
@@ -392,7 +417,7 @@ class Resource implements \ArrayAccess
      */
     public function getPropertyNames()
     {
-        $keys = array_filter(array_keys($this->data), array($this, 'isProperty'));
+        $keys = array_filter(array_keys($this->data), [$this, 'isProperty']);
         return $keys;
     }
 
