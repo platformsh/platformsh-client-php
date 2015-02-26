@@ -268,7 +268,7 @@ class Resource implements \ArrayAccess
      */
     public function propertyExists($property)
     {
-        return $property[0] !== '_' && array_key_exists($property, $this->data);
+        return $this->isProperty($property) && array_key_exists($property, $this->data);
     }
 
     /**
@@ -392,9 +392,7 @@ class Resource implements \ArrayAccess
      */
     public function getPropertyNames()
     {
-        $keys = array_filter(array_keys($this->data), function($key) {
-            return strpos($key, '_') !== 0;
-        });
+        $keys = array_filter(array_keys($this->data), array($this, 'isProperty'));
         return $keys;
     }
 
@@ -407,5 +405,15 @@ class Resource implements \ArrayAccess
     {
         $keys = $this->getPropertyNames();
         return array_intersect_key($this->data, array_flip($keys));
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    protected function isProperty($key)
+    {
+        return $key !== '_links' && $key !== '_embedded' && $key !== '_full';
     }
 }
