@@ -104,7 +104,10 @@ class Project extends Resource
      */
     public function addDomain($name, $wildcard = false, array $ssl = [])
     {
-        $body = ['name' => $name, 'wildcard' => $wildcard, 'ssl' => $ssl];
+        $body = ['name' => $name, 'wildcard' => $wildcard];
+        if (!empty($ssl)) {
+            $body['ssl'] = $ssl;
+        }
 
         return Domain::create($body, $this->getUri() . '/domains', $this->client);
     }

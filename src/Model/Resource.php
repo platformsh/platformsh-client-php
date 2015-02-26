@@ -126,7 +126,7 @@ class Resource implements \ArrayAccess
             throw new \InvalidArgumentException($message);
         }
 
-        $request = $client->createRequest('post', $collectionUrl, ['body' => $body]);
+        $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
         $response = self::send($request, $client);
         $data = (array) $response->json();
         $data['_full'] = true;
