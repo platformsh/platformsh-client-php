@@ -19,9 +19,6 @@ class Connector implements ConnectorInterface
     /** @var Collection */
     protected $config;
 
-    /** @var ClientInterface */
-    protected $clientPrototype;
-
     /** @var ClientInterface[] */
     protected $clients = [];
 
@@ -48,9 +45,8 @@ class Connector implements ConnectorInterface
      *       caching, to false (the default) to disable caching, or to an array
      *       of options as expected by the Guzzle cache subscriber.
      * @param SessionInterface $session
-     * @param ClientInterface  $clientPrototype
      */
-    public function __construct(array $config = [], SessionInterface $session = null, ClientInterface $clientPrototype = null)
+    public function __construct(array $config = [], SessionInterface $session = null)
     {
         $version = '0.1.0-beta1';
         $url = 'https://github.com/platformsh/platformsh-client-php';
@@ -65,24 +61,7 @@ class Connector implements ConnectorInterface
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
-        $this->clientPrototype = $clientPrototype ?: new Client();
         $this->session = $session ?: new Session();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setDebug($debug)
-    {
-        $this->config['debug'] = $debug;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setVerifySsl($verifySsl)
-    {
-        $this->config['verify'] = $verifySsl;
     }
 
     /**
@@ -129,16 +108,13 @@ class Connector implements ConnectorInterface
         if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
         }
-        $client = clone $this->clientPrototype;
-        $client->__construct(
-          [
-            'base_url' => $this->config['accounts'],
-            'defaults' => [
-              'debug' => $this->config['debug'],
-              'verify' => $this->config['verify'],
-            ],
-          ]
-        );
+        $client = $this->getGuzzleClient([
+          'base_url' => $this->config['accounts'],
+          'defaults' => [
+            'debug' => $this->config['debug'],
+            'verify' => $this->config['verify'],
+          ],
+        ]);
         $grantType = new PasswordCredentials(
           $client, [
             'client_id' => $this->config['client_id'],
@@ -176,6 +152,26 @@ class Connector implements ConnectorInterface
     }
 
     /**
+     * @param array $options
+     *
+     * @return ClientInterface
+     */
+    protected function getGuzzleClient(array $options)
+    {
+        return new Client($options);
+    }
+
+    /**
+     * @param array $options
+     *
+     * @return ClientInterface
+     */
+    protected function getOauth2Client(array $options)
+    {
+        return $this->getGuzzleClient($options);
+    }
+
+    /**
      * Get an OAuth2 subscriber to add to Guzzle clients.
      *
      * @throws \RuntimeException
@@ -196,7 +192,7 @@ class Connector implements ConnectorInterface
                 'verify' => $this->config['verify'],
               ],
             ];
-            $oauth2Client = new Client($options);
+            $oauth2Client = $this->getOauth2Client($options);
             $refreshTokenGrantType = new RefreshToken(
               $oauth2Client, [
                 'client_id' => $this->config['client_id'],
@@ -245,8 +241,7 @@ class Connector implements ConnectorInterface
                 'auth' => 'oauth2',
               ],
             ];
-            $client = clone $this->clientPrototype;
-            $client->__construct($options);
+            $client = $this->getGuzzleClient($options);
             $this->setUpCache($client);
             $this->clients[$endpoint] = $client;
         }

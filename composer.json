@@ -8,10 +8,18 @@
         "commerceguys/guzzle-oauth2-plugin": ">=2.0.0-beta1",
         "guzzlehttp/cache-subscriber": "0.1.*"
     },
+    "require-dev": {
+        "phpunit/phpunit": "~4.5"
+    },
     "autoload": {
         "psr-4": {
             "Platformsh\\Client\\": "src"
         }
+    },
+    "autoload-dev": {
+      "psr-4": {
+        "Platformsh\\Client\\Tests\\": "tests"
+      }
     },
     "authors": [
         {

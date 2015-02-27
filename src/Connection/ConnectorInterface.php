@@ -51,17 +51,4 @@ interface ConnectorInterface
      */
     public function getClient($endpoint = null);
 
-    /**
-     * Enable or disable Guzzle debugging.
-     *
-     * @param bool $debug
-     */
-    public function setDebug($debug);
-
-    /**
-     * Enable or disable verifying SSL.
-     *
-     * @param bool $verifySsl
-     */
-    public function setVerifySsl($verifySsl);
 }
