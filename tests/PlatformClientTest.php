@@ -24,9 +24,9 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
 
     public function testGetProjectsNone()
     {
-        $this->connector->setExpectedResult(['projects' => []]);
-        $this->assertEquals([], $this->client->getProjects());
+        $this->connector->setMockResult(['projects' => []]);
 
+        $this->assertEquals([], $this->client->getProjects());
         $this->assertFalse($this->client->getProject('test'));
     }
 
@@ -36,7 +36,7 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
           'name' => 'Test project',
           'endpoint' => 'https://example.com/api/projects/test',
         ];
-        $this->connector->setExpectedResult(['projects' => [$testProject]]);
+        $this->connector->setMockResult(['projects' => [$testProject]]);
         $projects = $this->client->getProjects();
         $this->assertEquals($testProject['name'], $projects['test']['name']);
         $this->assertEquals($testProject['endpoint'], $projects['test']['endpoint']);
