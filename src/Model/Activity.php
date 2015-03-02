@@ -80,6 +80,22 @@ class Activity extends Resource
     }
 
     /**
+     * Restore the backup associated with this activity.
+     *
+     * @return Activity
+     */
+    public function restore()
+    {
+        if ($this->getProperty('type') !== 'environment.backup') {
+            throw new \BadMethodCallException('Cannot restore activity (wrong type)');
+        }
+        if (!$this->isComplete()) {
+            throw new \BadMethodCallException('Cannot restore backup (not complete)');
+        }
+        return $this->runLongOperation('restore');
+    }
+
+    /**
      * Get a human-readable description of the activity.
      *
      * @return string
