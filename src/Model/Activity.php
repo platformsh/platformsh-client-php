@@ -15,15 +15,23 @@ class Activity extends Resource
     /**
      * Wait for the activity to complete.
      *
-     * @param callable  $logger       A function that will print new activity log
-     *                                messages as they are received.
+     * @todo use the FutureInterface
+     *
+     * @param callable  $onPoll       A function that will be called every time
+     *                                the activity is polled for updates. It
+     *                                will be passed one argument: the
+     *                                Activity object.
+     * @param callable  $onLog        A function that will print new activity log
+     *                                messages as they are received. It will be
+     *                                passed one argument: the message as a
+     *                                string.
      * @param int|float $pollInterval The polling interval, in seconds.
      */
-    public function wait(callable $logger = null, $pollInterval = 1)
+    public function wait(callable $onPoll = null, callable $onLog = null, $pollInterval = 1)
     {
         $log = $this->getProperty('log');
-        if (strlen(trim($log))) {
-            $logger(trim($log) . "\n");
+        if ($onLog !== null && strlen(trim($log))) {
+            $onLog(trim($log) . "\n");
         }
         $length = strlen($log);
         $retries = 0;
@@ -31,8 +39,11 @@ class Activity extends Resource
             usleep($pollInterval * 1000000);
             try {
                 $this->refresh(['timeout' => $pollInterval]);
-                if ($new = substr($this->getProperty('log'), $length)) {
-                    $logger(trim($new) . "\n");
+                if ($onPoll !== null) {
+                    $onPoll($this);
+                }
+                if ($onLog !== null && ($new = substr($this->getProperty('log'), $length))) {
+                    $onLog(trim($new) . "\n");
                     $length += strlen($new);
                 }
             } catch (ConnectException $e) {
