@@ -14,11 +14,18 @@ class ProjectUser extends Resource
     /**
      * Get the account information for this user.
      *
+     * @throws \Exception
+     *
      * @return Account
      */
     public function getAccount()
     {
-        return Account::get($this->getProperty('id'), '/api/users', $this->client);
+        $uuid = $this->getProperty('id');
+        $account = Account::get($uuid, '/api/users', $this->client);
+        if (!$account) {
+            throw new \Exception("Account not found for user: " . $uuid);
+        }
+        return $account;
     }
 
     /**
