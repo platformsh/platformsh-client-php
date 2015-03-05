@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Message\RequestInterface;
+use GuzzleHttp\Url;
 use Platformsh\Client\Exception\ApiResponseException;
 
 class Resource implements \ArrayAccess
@@ -403,11 +404,27 @@ class Resource implements \ArrayAccess
         }
         $url = $this->data['_links'][$rel]['href'];
         if ($absolute && strpos($url, '//') === false) {
-            // @todo there may be a more standard Guzzle way to combine URLs
-            $base = parse_url($this->client->getBaseUrl());
-            $url = $base['scheme'] . '://' . $base['host'] . $url;
+            $url = $this->makeAbsoluteUrl($url);
         }
         return $url;
+    }
+
+    /**
+     * Make a URL absolute, based on the client's base URL.
+     *
+     * @param string $relativeUrl
+     * @param string $baseUrl
+     *
+     * @return string
+     */
+    protected function makeAbsoluteUrl($relativeUrl, $baseUrl = null)
+    {
+        $baseUrl = $baseUrl ?: $this->client->getBaseUrl();
+        if (empty($baseUrl)) {
+            throw new \RuntimeException('No base URL');
+        }
+        $base = Url::fromString($baseUrl);
+        return (string) $base->combine($relativeUrl);
     }
 
     /**

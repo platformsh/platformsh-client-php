@@ -59,4 +59,16 @@ class User extends Resource
     {
         return $this->operationAvailable('edit');
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getUri($absolute = false)
+    {
+        $path = '/api/users/' . $this->getProperty('id');
+        if ($absolute) {
+            $path = $this->makeAbsoluteUrl($path);
+        }
+        return $path;
+    }
 }
