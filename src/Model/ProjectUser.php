@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\Model;
 
-class User extends Resource
+class ProjectUser extends Resource
 {
 
     /** @var array */
@@ -10,6 +10,16 @@ class User extends Resource
 
     const ROLE_ADMIN = 'admin';
     const ROLE_VIEWER = 'viewer';
+
+    /**
+     * Get the account information for this user.
+     *
+     * @return Account
+     */
+    public function getAccount()
+    {
+        return Account::get($this->getProperty('id'), '/api/users', $this->client);
+    }
 
     /**
      * Get the user's SSH keys.
@@ -58,17 +68,5 @@ class User extends Resource
     public function isEditable()
     {
         return $this->operationAvailable('edit');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getUri($absolute = false)
-    {
-        $path = '/api/users/' . $this->getProperty('id');
-        if ($absolute) {
-            $path = $this->makeAbsoluteUrl($path);
-        }
-        return $path;
     }
 }
