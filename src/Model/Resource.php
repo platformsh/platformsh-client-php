@@ -272,7 +272,7 @@ class Resource implements \ArrayAccess
         }
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
-        $response = $this->client->send($request);
+        $response = $this->send($request, $this->client);
 
         return (array) $response->json();
     }

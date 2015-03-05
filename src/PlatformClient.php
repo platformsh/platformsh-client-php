@@ -6,6 +6,7 @@ use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\SshKey;
+use Platformsh\Client\Model\Subscription;
 
 class PlatformClient
 {
@@ -154,5 +155,15 @@ class PlatformClient
         }
 
         return SshKey::create($values, 'ssh_keys', $this->connector->getClient());
+    }
+
+    /**
+     * Get a list of your Platform.sh subscriptions.
+     *
+     * @return Subscription[]
+     */
+    public function getSubscriptions()
+    {
+        return Subscription::getCollection('subscriptions', 0, [], $this->connector->getClient());
     }
 }
