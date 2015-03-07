@@ -7,10 +7,10 @@ use GuzzleHttp\Exception\ConnectException;
 class Activity extends Resource
 {
 
-    const STATUS_SUCCESS = 'success';
-    const STATUS_IN_PROGRESS = 'in_progress';
-    const STATUS_PENDING = 'pending';
-    const STATUS_FAILURE = 'failure';
+    const SUCCESS = 'success';
+    const IN_PROGRESS = 'in_progress';
+    const PENDING = 'pending';
+    const FAILURE = 'failure';
 
     /**
      * Wait for the activity to complete.
@@ -80,8 +80,8 @@ class Activity extends Resource
     /**
      * Get the state of the activity.
      *
-     * This could be one of Activity::STATUS_SUCCESS,
-     * Activity::STATUS_IN_PROGRESS, Activity::PENDING, or Activity::FAILURE.
+     * This could be one of Activity::SUCCESS, Activity::IN_PROGRESS,
+     * Activity::PENDING, or Activity::FAILURE.
      *
      * @return string
      */
