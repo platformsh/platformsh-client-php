@@ -27,7 +27,8 @@ class ProjectUser extends Resource
     public function getAccount()
     {
         $uuid = $this->getProperty('id');
-        $account = Account::get($uuid, '/api/users', $this->client);
+        $url = $this->makeAbsoluteUrl('/api/users');
+        $account = Account::get($uuid, $url, $this->client);
         if (!$account) {
             throw new \Exception("Account not found for user: " . $uuid);
         }

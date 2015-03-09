@@ -19,8 +19,8 @@ class Connector implements ConnectorInterface
     /** @var Collection */
     protected $config;
 
-    /** @var ClientInterface[] */
-    protected $clients = [];
+    /** @var ClientInterface */
+    protected $client;
 
     /** @var Oauth2Subscriber|null */
     protected $oauth2Plugin;
@@ -62,6 +62,16 @@ class Connector implements ConnectorInterface
         $this->config = Collection::fromConfig($config, $defaults);
 
         $this->session = $session ?: new Session();
+    }
+
+    /**
+     * Get the configured accounts endpoint URL.
+     *
+     * @return string
+     */
+    public function getAccountsEndpoint()
+    {
+        return $this->config['accounts'];
     }
 
     /**
@@ -227,12 +237,10 @@ class Connector implements ConnectorInterface
     /**
      * @inheritdoc
      */
-    public function getClient($endpoint = null)
+    public function getClient()
     {
-        $endpoint = $endpoint ?: $this->config['accounts'];
-        if (!isset($this->clients[$endpoint])) {
+        if (!isset($this->client)) {
             $options = [
-              'base_url' => $endpoint,
               'defaults' => [
                 'headers' => ['User-Agent' => $this->config['user_agent']],
                 'debug' => $this->config['debug'],
@@ -243,9 +251,9 @@ class Connector implements ConnectorInterface
             ];
             $client = $this->getGuzzleClient($options);
             $this->setUpCache($client);
-            $this->clients[$endpoint] = $client;
+            $this->client = $client;
         }
 
-        return $this->clients[$endpoint];
+        return $this->client;
     }
 }

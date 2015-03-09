@@ -57,7 +57,7 @@ class Project extends Resource
      * The accounts API does not (yet) return HAL links. Stub projects contain
      * an 'endpoint' property.
      */
-    public function getUri($absolute = false)
+    public function getUri($absolute = true)
     {
         if ($this->hasLink('self')) {
             return $this->getLink('self', $absolute);

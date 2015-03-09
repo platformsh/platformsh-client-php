@@ -229,7 +229,7 @@ class Environment extends Resource
         if (!isset($this->data['_embedded']['activities'][0])) {
             return false;
         }
-        return Activity::wrap($this->data['_embedded']['activities'][0], $this->client);
+        return Activity::wrap($this->data['_embedded']['activities'][0], $this->baseUrl, $this->client);
     }
 
     /**

@@ -18,17 +18,30 @@ class Resource implements \ArrayAccess
     /** @var ClientInterface */
     protected $client;
 
+    /** @var string */
+    protected $baseUrl;
+
     /** @var array */
     protected $data;
 
     /**
      * @param array           $data
+     * @param string          $baseUrl
      * @param ClientInterface $client
      */
-    public function __construct(array $data = [], ClientInterface $client = null)
+    public function __construct(array $data = [], $baseUrl = null, ClientInterface $client = null)
     {
         $this->data = $data;
         $this->client = $client ?: new Client();
+        $this->baseUrl = (string) $baseUrl;
+    }
+
+    /**
+     * @param string $baseUrl
+     */
+    public function setBaseUrl($baseUrl)
+    {
+        $this->baseUrl = $baseUrl;
     }
 
     /**
@@ -106,7 +119,7 @@ class Resource implements \ArrayAccess
      *
      * @return static|false
      */
-    public static function get($id, $collectionUrl, ClientInterface $client)
+    public static function get($id, $collectionUrl = null, ClientInterface $client)
     {
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . $id : $id;
@@ -115,7 +128,7 @@ class Resource implements \ArrayAccess
             $data = $response->json();
             $data['_full'] = true;
 
-            return static::wrap($data, $client);
+            return static::wrap($data, $url, $client);
         } catch (BadResponseException $e) {
             $response = $e->getResponse();
             if ($response && $response->getStatusCode() === 404) {
@@ -146,7 +159,7 @@ class Resource implements \ArrayAccess
         $data = (array) $response->json();
         $data['_full'] = true;
 
-        return static::wrap($data, $client);
+        return static::wrap($data, $collectionUrl, $client);
     }
 
     /**
@@ -218,35 +231,37 @@ class Resource implements \ArrayAccess
             $data = array_slice($data, 0, $limit);
         }
 
-        return static::wrapCollection($data, $client);
+        return static::wrapCollection($data, $url, $client);
     }
 
     /**
      * Create a resource instance from JSON data.
      *
      * @param array           $data
+     * @param string          $baseUrl
      * @param ClientInterface $client
      *
      * @return static
      */
-    public static function wrap(array $data, ClientInterface $client)
+    public static function wrap(array $data, $baseUrl, ClientInterface $client)
     {
-        return new static($data, $client);
+        return new static($data, $baseUrl, $client);
     }
 
     /**
      * Create an array of resource instances from a collection's JSON data.
      *
      * @param array           $data
+     * @param string          $baseUrl
      * @param ClientInterface $client
      *
      * @return static[]
      */
-    public static function wrapCollection(array $data, ClientInterface $client)
+    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
         return array_map(
-          function ($item) use ($client) {
-              return new static($item, $client);
+          function ($item) use ($baseUrl, $client) {
+              return new static($item, $baseUrl, $client);
           },
           $data
         );
@@ -295,7 +310,7 @@ class Resource implements \ArrayAccess
             throw new \Exception('Expected activity not found');
         }
 
-        return Activity::wrap($data['_embedded']['activities'][0], $this->client);
+        return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
     }
 
     /**
@@ -366,7 +381,7 @@ class Resource implements \ArrayAccess
      *
      * @return string
      */
-    public function getUri($absolute = false)
+    public function getUri($absolute = true)
     {
         return $this->getLink('self', $absolute);
     }
@@ -416,7 +431,7 @@ class Resource implements \ArrayAccess
      *
      * @return string
      */
-    public function getLink($rel, $absolute = false)
+    public function getLink($rel, $absolute = true)
     {
         if (!$this->hasLink($rel)) {
             throw new \InvalidArgumentException("Link not found: $rel");
@@ -429,7 +444,7 @@ class Resource implements \ArrayAccess
     }
 
     /**
-     * Make a URL absolute, based on the client's base URL.
+     * Make a URL absolute, based on the base URL.
      *
      * @param string $relativeUrl
      * @param string $baseUrl
@@ -438,7 +453,7 @@ class Resource implements \ArrayAccess
      */
     protected function makeAbsoluteUrl($relativeUrl, $baseUrl = null)
     {
-        $baseUrl = $baseUrl ?: $this->client->getBaseUrl();
+        $baseUrl = $baseUrl ?: $this->baseUrl;
         if (empty($baseUrl)) {
             throw new \RuntimeException('No base URL');
         }

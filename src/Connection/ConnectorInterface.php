@@ -45,10 +45,14 @@ interface ConnectorInterface
      *
      * This will fail if the user is not logged in.
      *
-     * @param string $endpoint
-     *
      * @return ClientInterface
      */
-    public function getClient($endpoint = null);
+    public function getClient();
 
+    /**
+     * Get the configured accounts endpoint URL.
+     *
+     * @return string
+     */
+    public function getAccountsEndpoint();
 }

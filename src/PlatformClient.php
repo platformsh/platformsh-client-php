@@ -14,6 +14,9 @@ class PlatformClient
     /** @var ConnectorInterface */
     protected $connector;
 
+    /** @var string */
+    protected $accountsEndpoint;
+
     /** @var array */
     protected $accountInfo;
 
@@ -23,6 +26,7 @@ class PlatformClient
     public function __construct(ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
+        $this->accountsEndpoint = $connector->getAccountsEndpoint();;
     }
 
     /**
@@ -63,10 +67,10 @@ class PlatformClient
         $projects = [];
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh cluster.
-            $client = $this->connector->getClient($project['endpoint']);
+            $client = $this->connector->getClient();
             // @todo get the actual ID added to the API
             $projectId = basename($project['endpoint']);
-            $projects[$projectId] = new Project($project, $client);
+            $projects[$projectId] = Project::wrap($project, $project['endpoint'], $client);
         }
 
         return $projects;
@@ -118,7 +122,7 @@ class PlatformClient
     {
         $data = $this->getAccountInfo($reset);
 
-        return SshKey::wrapCollection($data['ssh_keys'], $this->connector->getClient());
+        return SshKey::wrapCollection($data['ssh_keys'], $this->accountsEndpoint, $this->connector->getClient());
     }
 
     /**
@@ -136,7 +140,7 @@ class PlatformClient
             return false;
         }
 
-        return SshKey::wrap($data['ssh_keys'][$id], $this->connector->getClient());
+        return SshKey::wrap($data['ssh_keys'][$id], $this->accountsEndpoint, $this->connector->getClient());
     }
 
     /**
@@ -153,8 +157,9 @@ class PlatformClient
         if ($title) {
             $values['title'] = $title;
         }
+        $url = $this->accountsEndpoint . 'ssh_keys';
 
-        return SshKey::create($values, 'ssh_keys', $this->connector->getClient());
+        return SshKey::create($values, $url, $this->connector->getClient());
     }
 
     /**
@@ -164,6 +169,7 @@ class PlatformClient
      */
     public function getSubscriptions()
     {
-        return Subscription::getCollection('subscriptions', 0, [], $this->connector->getClient());
+        $url = $this->accountsEndpoint . 'subscriptions';
+        return Subscription::getCollection($url, 0, [], $this->connector->getClient());
     }
 }
