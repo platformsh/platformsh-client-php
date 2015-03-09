@@ -62,14 +62,14 @@ class ProjectUser extends Resource
     /**
      * @inheritdoc
      */
-    public static function check(array $data)
+    protected static function checkProperty($property, $value)
     {
-        $errors = parent::check($data);
-        if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Invalid email address: '{$data['email']}'";
+        $errors = [];
+        if ($property === 'email' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email address: '$value'";
         }
-        if (isset($data['role']) && !in_array($data['role'], [self::ROLE_ADMIN, self::ROLE_VIEWER])) {
-            $errors[] = "Invalid role: '{$data['role']}";
+        elseif ($property === 'role' && !in_array($value, [self::ROLE_ADMIN, self::ROLE_VIEWER])) {
+            $errors[] = "Invalid role: '$value'";
         }
         return $errors;
     }

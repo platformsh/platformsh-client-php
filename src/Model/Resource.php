@@ -149,7 +149,7 @@ class Resource implements \ArrayAccess
      */
     public static function create(array $body, $collectionUrl, ClientInterface $client)
     {
-        if ($errors = static::check($body)) {
+        if ($errors = static::checkNew($body)) {
             $message = "Cannot create resource due to validation error(s): " . implode('; ', $errors);
             throw new \InvalidArgumentException($message);
         }
@@ -198,13 +198,29 @@ class Resource implements \ArrayAccess
      *
      * @return string[] An array of validation errors.
      */
-    public static function check(array $data)
+    protected static function checkNew(array $data)
     {
         $errors = [];
         if ($missing = array_diff(static::getRequired(), array_keys($data))) {
             $errors[] = 'Missing: ' . implode(', ', $missing);
         }
+        foreach ($data as $key => $value) {
+            $errors += static::checkProperty($key, $value);
+        }
         return $errors;
+    }
+
+    /**
+     * Validate a property of the resource, for creating or updating.
+     *
+     * @param string $property
+     * @param mixed  $value
+     *
+     * @return string[] An array of validation errors.
+     */
+    protected static function checkProperty($property, $value)
+    {
+        return [];
     }
 
     /**
@@ -367,11 +383,31 @@ class Resource implements \ArrayAccess
      */
     public function update(array $values)
     {
+        if ($errors = $this->checkUpdate($values)) {
+            $message = "Cannot update resource due to validation error(s): " . implode('; ', $errors);
+            throw new \InvalidArgumentException($message);
+        }
         $data = $this->runOperation('edit', 'patch', $values);
         if (isset($data['_embedded']['entity'])) {
             $this->data = $data['_embedded']['entity'];
             $this->data['_full'] = true;
         }
+    }
+
+    /**
+     * Validate values for update.
+     *
+     * @param array $values
+     *
+     * @return string[] An array of validation errors.
+     */
+    protected static function checkUpdate(array $values)
+    {
+        $errors = [];
+        foreach ($values as $key => $value) {
+            $errors += static::checkProperty($key, $value);
+        }
+        return $errors;
     }
 
     /**

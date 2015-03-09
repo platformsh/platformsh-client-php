@@ -7,6 +7,63 @@ use GuzzleHttp\ClientInterface;
 class Subscription extends Resource
 {
 
+    public static $availablePlans = ['Development', 'Standard', 'Medium', 'Large'];
+    public static $availableClusters = ['us_east', 'eu_west'];
+
+    const STATUS_ACTIVE = 'Active';
+    const STATUS_REQUESTED = 'Requested';
+    const STATUS_PROVISIONING = 'Provisioning';
+    const STATUS_SUSPENDED = 'Suspended';
+    const STATUS_DELETED = 'Deleted';
+
+    /**
+     * @inheritdoc
+     */
+    protected static function checkProperty($property, $value)
+    {
+        if ($property === 'plan' && !in_array($value, self::$availablePlans)) {
+            $errors[] = "Plan not found: " . $value;
+        }
+        elseif ($property === 'cluster' && !in_array($value, self::$availableClusters)) {
+            $errors[] = "Cluster not found: " . $value;
+        }
+    }
+
+    /**
+     * Check whether the subscription is pending (requested or provisioning).
+     *
+     * @return bool
+     */
+    public function isPending()
+    {
+        $status = $this->getStatus();
+        return $status === self::STATUS_PROVISIONING || $status === self::STATUS_REQUESTED;
+    }
+
+    /**
+     * Find whether the subscription is active.
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->getStatus() === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Get the subscription status.
+     *
+     * This could be one of Subscription::STATUS_ACTIVE,
+     * Subscription::STATUS_REQUESTED, Subscription::STATUS_PROVISIONING,
+     * Subscription::STATUS_SUSPENDED, or Subscription::STATUS_DELETED.
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->getProperty('status');
+    }
+
     /**
      * Get the account for the project's owner.
      *
@@ -26,7 +83,7 @@ class Subscription extends Resource
      */
     public function getProject()
     {
-        $url = $this->getProperty('endpoint');
+        $url = $this->getProperty('project_endpoint');
         return Project::get($url, null, $this->client);
     }
 

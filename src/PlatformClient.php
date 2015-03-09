@@ -11,6 +11,9 @@ use Platformsh\Client\Model\Subscription;
 class PlatformClient
 {
 
+    /** @var string[] */
+    protected $availableClusters = ['eu_west', 'us_east'];
+
     /** @var ConnectorInterface */
     protected $connector;
 
@@ -48,7 +51,8 @@ class PlatformClient
     {
         if (!isset($this->accountInfo) || $reset) {
             $client = $this->connector->getClient();
-            $this->accountInfo = (array) $client->get('me')->json();
+            $url = $this->accountsEndpoint . 'me';
+            $this->accountInfo = (array) $client->get($url)->json();
         }
 
         return $this->accountInfo;
@@ -160,6 +164,25 @@ class PlatformClient
         $url = $this->accountsEndpoint . 'ssh_keys';
 
         return SshKey::create($values, $url, $this->connector->getClient());
+    }
+
+    /**
+     * Create a new Platform.sh subscription.
+     *
+     * @param string $cluster
+     * @param string $plan
+     * @param string $title
+     *
+     * @return Subscription
+     */
+    public function createSubscription($cluster = null, $plan = 'Development', $title = 'Untitled Project')
+    {
+        if ($cluster === null) {
+            $cluster = reset($this->availableClusters);
+        }
+        $url = $this->accountsEndpoint . 'subscriptions';
+        $values = ['cluster' => $cluster, 'plan' => $plan, 'title' => $title];
+        return Subscription::create($values, $url, $this->connector->getClient());
     }
 
     /**

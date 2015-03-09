@@ -11,8 +11,18 @@ namespace Platformsh\Client\Model;
 class SshKey extends Resource
 {
 
-    /** @var array */
     protected static $required = ['value'];
+
+    /**
+     * @inheritdoc
+     */
+    protected static function checkProperty($property, $value)
+    {
+        if ($property === 'value' && !self::validatePublicKey($value)) {
+            return ["The SSH key is invalid"];
+        }
+        return [];
+    }
 
     /**
      * Validate an SSH public key.
@@ -33,19 +43,6 @@ class SshKey extends Resource
         }
 
         return true;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function check(array $data)
-    {
-        $errors = parent::check($data);
-        if (isset($data['value']) && !self::validatePublicKey($data['value'])) {
-            $errors[] = "The SSH key is invalid";
-        }
-
-        return $errors;
     }
 
     /**

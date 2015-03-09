@@ -16,13 +16,11 @@ class SshKey_Platform extends Resource
     /**
      * @inheritdoc
      */
-    public static function check(array $data)
+    protected static function checkProperty($property, $value)
     {
-        $errors = parent::check($data);
-        if (isset($data['key']) && !SshKey::validatePublicKey($data['key'])) {
-            $errors[] = "The SSH key is invalid";
+        if ($property === 'key' && !SshKey::validatePublicKey($value)) {
+            return ["The SSH key is invalid"];
         }
-
-        return $errors;
+        return [];
     }
 }

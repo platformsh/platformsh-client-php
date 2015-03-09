@@ -23,8 +23,8 @@ class MockConnector extends Connector
         $this->mockValues = $values;
         $this->mockStatus = $status;
 
-        // Empty the cache of client objects.
-        $this->clients = [];
+        // Remove the cached client object.
+        $this->client = null;
     }
 
     /**

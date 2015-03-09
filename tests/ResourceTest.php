@@ -15,23 +15,23 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->properties = array(
+        $this->properties = [
           'id' => 'test-id',
           'name' => 'test name',
-          'array' => array(),
+          'array' => [],
           'integer' => 123,
-        );
-        $data = $this->properties + array(
-            '_embedded' => array(),
-            '_links' => array(
-              'self' => array(
+        ];
+        $data = $this->properties + [
+            '_embedded' => [],
+            '_links' => [
+              'self' => [
                 'href' => 'https://example.com/',
-              ),
-              '#operate' => array(
+              ],
+              '#operate' => [
                 'href' => 'https://example.com/operate',
-              ),
-            ),
-          );
+              ],
+            ],
+          ];
         $this->resource = new Resource($data);
     }
 
@@ -73,5 +73,25 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($this->resource->getLink('#operate'));
         $this->setExpectedException('\InvalidArgumentException');
         $this->resource->getLink('nonexistent');
+    }
+
+    /**
+     * Test new resource validation.
+     */
+    public function testRequiredPropertiesBlockCreation()
+    {
+        $mockClient = new MockClient();
+        $this->setExpectedException('\InvalidArgumentException');
+        MockResource::create([], '', $mockClient);
+    }
+
+    /**
+     * Test updating resource validation.
+     */
+    public function testInvalidPropertiesBlockUpdate()
+    {
+        $resource = new MockResource();
+        $this->setExpectedException('\InvalidArgumentException');
+        $resource->update(['testProperty' => 2]);
     }
 }

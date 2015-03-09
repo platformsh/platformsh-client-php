@@ -20,13 +20,12 @@ class Integration extends Resource
     /**
      * @inheritdoc
      */
-    public static function check(array $data)
+    protected static function checkProperty($property, $value)
     {
-        $errors = parent::check($data);
-        if (isset($data['type']) && !in_array($data['type'], self::$types)) {
-            $errors[] = "Invalid type: '{$data['type']}'";
+        $errors = [];
+        if ($property === 'type' && !in_array($value, self::$types)) {
+            $errors[] = "Invalid type: '$value'";
         }
-        // @todo check other properties
         return $errors;
     }
 }
