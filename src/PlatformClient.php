@@ -195,4 +195,17 @@ class PlatformClient
         $url = $this->accountsEndpoint . 'subscriptions';
         return Subscription::getCollection($url, 0, [], $this->connector->getClient());
     }
+
+    /**
+     * Get a subscription by its ID.
+     *
+     * @param string|int $id
+     *
+     * @return Subscription|false
+     */
+    public function getSubscription($id)
+    {
+        $url = $this->accountsEndpoint . 'subscriptions';
+        return Subscription::get($id, $url, $this->connector->getClient());
+    }
 }

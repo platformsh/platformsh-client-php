@@ -16,19 +16,13 @@ Example:
 ```php
 
 use Platformsh\Client\PlatformClient;
-use Platformsh\Client\Session\Storage\File;
 
 // Initialize the client.
 $client = new PlatformClient();
 
+// Set the API token to use.
 $connector = $client->getConnector();
-
-// Store session data in a file (allows token reuse).
-$session = $connector->getSession();
-$session->setStorage(new File());
-
-// Log in (bypassed if already logged in).
-$connector->authenticate($username, $password);
+$connector->setApiToken($myToken);
 
 // Get the user's first project.
 $projects = $client->getProjects();

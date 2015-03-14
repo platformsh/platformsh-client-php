@@ -16,6 +16,13 @@ interface ConnectorInterface
     public function getSession();
 
     /**
+     * Set the API token to use for Platform.sh requests.
+     *
+     * @param string $token
+     */
+    public function setApiToken($token);
+
+    /**
      * Log in to Platform.sh.
      *
      * @param string $username

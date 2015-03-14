@@ -32,6 +32,7 @@ class MockConnector extends Connector
      */
     public function isLoggedIn()
     {
+        $this->session->set('refreshToken', 'test');
         // @todo test the login method
         return true;
     }

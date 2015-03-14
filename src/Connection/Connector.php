@@ -54,6 +54,7 @@ class Connector implements ConnectorInterface
         $defaults = [
           'accounts' => 'https://marketplace.commerceguys.com/api/platform/',
           'client_id' => 'platformsh-client-php',
+          'client_secret' => null,
           'debug' => false,
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
@@ -62,6 +63,11 @@ class Connector implements ConnectorInterface
         $this->config = Collection::fromConfig($config, $defaults);
 
         $this->session = $session ?: new Session();
+
+        if (isset($this->config['api_token'])) {
+            $this->setApiToken($this->config['api_token']);
+            unset($this->config['api_token']);
+        }
     }
 
     /**
@@ -112,6 +118,16 @@ class Connector implements ConnectorInterface
     /**
      * @inheritdoc
      */
+    public function setApiToken($token)
+    {
+        $this->session->set('accessToken', $token);
+        $this->session->set('expires', 2147483647);
+        $this->session->set('tokenType', 'bearer');
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function logIn($username, $password, $force = false)
     {
         $this->loggedOut = false;
@@ -128,6 +144,7 @@ class Connector implements ConnectorInterface
         $grantType = new PasswordCredentials(
           $client, [
             'client_id' => $this->config['client_id'],
+            'client_secret' => $this->config['client_secret'],
             'username' => $username,
             'password' => $password,
           ]
@@ -147,9 +164,11 @@ class Connector implements ConnectorInterface
             'accessToken' => $token->getToken(),
             'tokenType' => $token->getType(),
             'expires' => $token->getExpires()->getTimestamp(),
-            'refreshToken' => $token->getRefreshToken()->getToken(),
           ]
         );
+        if ($token->getRefreshToken()) {
+            $this->session->set('refreshToken', $token->getRefreshToken()->getToken());
+        }
         $this->session->save();
     }
 
@@ -158,7 +177,7 @@ class Connector implements ConnectorInterface
      */
     public function isLoggedIn()
     {
-        return $this->session->get('accessToken') && $this->session->get('refreshToken');
+        return $this->session->get('accessToken') || $this->session->get('refreshToken');
     }
 
     /**
@@ -203,17 +222,21 @@ class Connector implements ConnectorInterface
               ],
             ];
             $oauth2Client = $this->getOauth2Client($options);
-            $refreshTokenGrantType = new RefreshToken(
-              $oauth2Client, [
-                'client_id' => $this->config['client_id'],
-                'refresh_token' => $this->session->get('refreshToken'),
-              ]
-            );
+            $refreshTokenGrantType = null;
+            if ($this->session->get('refreshToken')) {
+                $refreshTokenGrantType = new RefreshToken(
+                  $oauth2Client, [
+                    'client_id' => $this->config['client_id'],
+                    'client_secret' => $this->config['client_secret'],
+                    'refresh_token' => $this->session->get('refreshToken'),
+                  ]
+                );
+            }
             $this->oauth2Plugin = new Oauth2Subscriber(null, $refreshTokenGrantType);
             if ($this->session->get('accessToken')) {
-                $expiresIn = $this->session->get('expires');
                 $type = $this->session->get('tokenType');
-                $this->oauth2Plugin->setAccessToken($this->session->get('accessToken'), $type, $expiresIn);
+                $expires = $this->session->get('expires');
+                $this->oauth2Plugin->setAccessToken($this->session->get('accessToken'), $type, $expires);
             }
         }
 
