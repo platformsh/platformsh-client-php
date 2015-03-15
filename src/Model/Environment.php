@@ -10,11 +10,13 @@ class Environment extends Resource
     /**
      * Get the SSH URL for the environment.
      *
+     * @param string $app An application name.
+     *
      * @throws \Exception
      *
      * @return string
      */
-    public function getSshUrl()
+    public function getSshUrl($app = '')
     {
         if (!$this->hasLink('ssh')) {
             $id = $this->data['id'];
@@ -24,6 +26,10 @@ class Environment extends Resource
         $sshUrl = parse_url($this->getLink('ssh'));
         $host = $sshUrl['host'];
         $user = $sshUrl['user'];
+
+        if ($app) {
+            $user .= '--' . $app;
+        }
 
         return $user . '@' . $host;
     }
