@@ -29,7 +29,7 @@ class PlatformClient
     public function __construct(ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
-        $this->accountsEndpoint = $connector->getAccountsEndpoint();;
+        $this->accountsEndpoint = $this->connector->getAccountsEndpoint();;
     }
 
     /**
@@ -111,8 +111,8 @@ class PlatformClient
     public function getProjectDirect($id, $hostname, $https = true)
     {
         $scheme = $https ? 'https' : 'http';
-        $endpoint = "$scheme://$hostname/api/projects/";
-        return Project::get($id, '', $this->connector->getClient($endpoint));
+        $collection = "$scheme://$hostname/api/projects";
+        return Project::get($id, $collection, $this->connector->getClient());
     }
 
     /**
@@ -158,7 +158,7 @@ class PlatformClient
     public function addSshKey($value, $title = null)
     {
         $values = ['value' => $value];
-        if ($title) {
+        if ($title !== null) {
             $values['title'] = $title;
         }
         $url = $this->accountsEndpoint . 'ssh_keys';

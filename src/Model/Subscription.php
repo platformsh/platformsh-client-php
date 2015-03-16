@@ -35,12 +35,14 @@ class Subscription extends Resource
      */
     protected static function checkProperty($property, $value)
     {
+        $errors = [];
         if ($property === 'plan' && !in_array($value, self::$availablePlans)) {
             $errors[] = "Plan not found: " . $value;
         }
         elseif ($property === 'cluster' && !in_array($value, self::$availableClusters)) {
             $errors[] = "Cluster not found: " . $value;
         }
+        return $errors;
     }
 
     /**
@@ -81,7 +83,7 @@ class Subscription extends Resource
     /**
      * Get the account for the project's owner.
      *
-     * @return Account
+     * @return Account|false
      */
     public function getOwner()
     {
