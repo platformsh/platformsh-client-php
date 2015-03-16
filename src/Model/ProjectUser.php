@@ -2,6 +2,12 @@
 
 namespace Platformsh\Client\Model;
 
+/**
+ * A user with access to a Platform.sh project.
+ *
+ * @property-read string $id
+ * @property-read string $role
+ */
 class ProjectUser extends Resource
 {
 
@@ -33,11 +39,11 @@ class ProjectUser extends Resource
      *
      * @param int $limit
      *
-     * @return SshKey[]
+     * @return SshKey_Platform[]
      */
     public function getSshKeys($limit = 0)
     {
-        return SshKey::getCollection($this->getUri() . '/keys', $limit, [], $this->client);
+        return SshKey_Platform::getCollection($this->getUri() . '/keys', $limit, [], $this->client);
     }
 
     /**
@@ -45,11 +51,11 @@ class ProjectUser extends Resource
      *
      * @param string $key
      *
-     * @return SshKey
+     * @return SshKey_Platform
      */
     public function addSshKey($key)
     {
-        return SshKey::create(['key' => $key], $this->getUri() . '/keys', $this->client);
+        return SshKey_Platform::create(['key' => $key], $this->getUri() . '/keys', $this->client);
     }
 
     /**

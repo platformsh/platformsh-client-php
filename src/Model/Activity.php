@@ -4,13 +4,35 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Exception\ConnectException;
 
+/**
+ * An activity on a Platform.sh environment.
+ *
+ * Activities are triggered by environment operations (such as 'branch' or
+ * 'merge').
+ *
+ * @property-read string   $id
+ * @property-read int      $completion_percent
+ * @property-read string   $log
+ * @property-read string   $created_at
+ * @property-read string   $updated_at
+ * @property-read string[] $environments
+ * @property-read string   $completed_at
+ * @property-read array    $parameters
+ * @property-read string   $state
+ * @property-read string   $result
+ * @property-read string   $started_at
+ * @property-read string   $type
+ * @property-read array    $payload
+ */
 class Activity extends Resource
 {
 
-    const SUCCESS = 'success';
-    const IN_PROGRESS = 'in_progress';
-    const PENDING = 'pending';
-    const FAILURE = 'failure';
+    const RESULT_SUCCESS = 'success';
+    const RESULT_FAILURE = 'failure';
+
+    const STATE_COMPLETE = 'complete';
+    const STATE_IN_PROGRESS = 'in_progress';
+    const STATE_PENDING = 'pending';
 
     /**
      * Wait for the activity to complete.
@@ -35,7 +57,7 @@ class Activity extends Resource
         }
         $length = strlen($log);
         $retries = 0;
-        while (!$this->isComplete() && $this->getState() !== self::STATUS_FAILURE) {
+        while (!$this->isComplete()) {
             usleep($pollInterval * 1000000);
             try {
                 $this->refresh(['timeout' => $pollInterval]);
@@ -75,19 +97,6 @@ class Activity extends Resource
     public function getCompletionPercent()
     {
         return (int) $this->getProperty('completion_percent');
-    }
-
-    /**
-     * Get the state of the activity.
-     *
-     * This could be one of Activity::SUCCESS, Activity::IN_PROGRESS,
-     * Activity::PENDING, or Activity::FAILURE.
-     *
-     * @return string
-     */
-    public function getState()
-    {
-        return $this->getProperty('state');
     }
 
     /**

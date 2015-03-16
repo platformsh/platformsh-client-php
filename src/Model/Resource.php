@@ -34,15 +34,27 @@ class Resource implements \ArrayAccess
     /**
      * @inheritdoc
      */
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return $this->propertyExists($offset);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->getProperty($name, false);
     }
 
     /**
      * @inheritdoc
      */
-    public function offsetGet($offset) {
-        return $this->getProperty($offset);
+    public function offsetGet($offset)
+    {
+        return $this->getProperty($offset, false);
     }
 
     /**
@@ -50,7 +62,8 @@ class Resource implements \ArrayAccess
      *
      * @throws \BadMethodCallException
      */
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         throw new \BadMethodCallException('Properties are read-only');
     }
 
@@ -59,7 +72,8 @@ class Resource implements \ArrayAccess
      *
      * @throws \BadMethodCallException
      */
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         throw new \BadMethodCallException('Properties are read-only');
     }
 
@@ -300,15 +314,20 @@ class Resource implements \ArrayAccess
      * Get a property of the resource.
      *
      * @param string $property
+     * @param bool   $required
      *
-     * @throws \InvalidArgumentException
+     * @throws \InvalidArgumentException If $required is true and the property
+     *                                   is not found.
      *
      * @return mixed
      */
-    public function getProperty($property)
+    public function getProperty($property, $required = true)
     {
-        if (!$this->offsetExists($property)) {
-            throw new \InvalidArgumentException("Property not found: $property");
+        if (!$this->propertyExists($property)) {
+            if ($required) {
+                throw new \InvalidArgumentException("Property not found: $property");
+            }
+            return null;
         }
 
         return $this->data[$property];

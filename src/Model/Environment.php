@@ -4,6 +4,27 @@ namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
 
+/**
+ * A Platform.sh environment.
+ *
+ * Environments correspond to project Git branches.
+ *
+ * @property-read string $id
+ * @property-read string $status
+ * @property-read string $head_commit
+ * @property-read string $name
+ * @property-read string $parent
+ * @property-read string $title
+ * @property-read string $created_at
+ * @property-read string $updated_at
+ * @property-read string $project
+ * @property-read bool   $is_dirty
+ * @property-read bool   $enable_smtp
+ * @property-read bool   $has_code
+ * @property-read string $deployment_target
+ * @property-read array  $http_access
+ * @property-read bool   $is_main
+ */
 class Environment extends Resource
 {
 

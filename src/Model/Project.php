@@ -2,6 +2,15 @@
 
 namespace Platformsh\Client\Model;
 
+/**
+ * A Platform.sh project.
+ *
+ * @property-read string $id
+ * @property-read string $title
+ * @property-read string $created_at
+ * @property-read string $updated_at
+ * @property-read string $owner
+ */
 class Project extends Resource
 {
 
@@ -149,5 +158,15 @@ class Project extends Resource
         $body = ['type' => $type] + $data;
 
         return Integration::create($body, $this->getUri() . '/integrations', $this->client);
+    }
+
+    /**
+     * Get project routes.
+     *
+     * @return Route[]
+     */
+    public function getRoutes()
+    {
+        return ProjectUser::getCollection($this->getUri() . '/routes', 0, [], $this->client);
     }
 }

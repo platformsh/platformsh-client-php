@@ -2,6 +2,12 @@
 
 namespace Platformsh\Client\Model;
 
+/**
+ * A project integration.
+ *
+ * @property-read string $id
+ * @property-read string $type
+ */
 class Integration extends Resource
 {
 
