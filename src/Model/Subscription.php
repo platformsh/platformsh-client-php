@@ -4,6 +4,20 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 
+/**
+ * Represents a Platform.sh subscription.
+ *
+ * @property-read string $status
+ * @property-read string $owner
+ * @property-read string $plan
+ * @property-read int    $environments  Available environments.
+ * @property-read int    $storage       Available storage (in MiB).
+ * @property-read int    $user_licenses Number of users.
+ * @property-read string $project_id
+ * @property-read string $project_title
+ * @property-read string $project_cluster
+ * @property-read string $project_cluster_label
+ */
 class Subscription extends Resource
 {
 

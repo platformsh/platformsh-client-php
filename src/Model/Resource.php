@@ -124,8 +124,7 @@ class Resource implements \ArrayAccess
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . $id : $id;
             $request = $client->createRequest('get', $url);
-            $response = self::send($request, $client);
-            $data = $response->json();
+            $data = self::send($request, $client);
             $data['_full'] = true;
 
             return static::wrap($data, $url, $client);
@@ -155,8 +154,7 @@ class Resource implements \ArrayAccess
         }
 
         $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
-        $response = self::send($request, $client);
-        $data = (array) $response->json();
+        $data = self::send($request, $client);
         $data['_full'] = true;
 
         return static::wrap($data, $collectionUrl, $client);
@@ -170,12 +168,14 @@ class Resource implements \ArrayAccess
      * @param RequestInterface $request
      * @param ClientInterface  $client
      *
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return array
      */
     public static function send(RequestInterface $request, ClientInterface $client)
     {
         try {
-            return $client->send($request);
+            $response = $client->send($request);
+            $data = $response->json();
+            return (array) $data;
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
         }
@@ -240,7 +240,7 @@ class Resource implements \ArrayAccess
             // $options['query']['count'] = $limit;
         }
         $request = $client->createRequest('get', $url, $options);
-        $data = self::send($request, $client)->json();
+        $data = self::send($request, $client);
 
         // @todo remove this when the API implements a 'count' parameter
         if ($limit) {
@@ -303,9 +303,8 @@ class Resource implements \ArrayAccess
         }
         $request = $this->client
           ->createRequest($method, $this->getLink("#$op"), $options);
-        $response = $this->send($request, $this->client);
 
-        return (array) $response->json();
+        return $this->send($request, $this->client);
     }
 
     /**
@@ -430,8 +429,7 @@ class Resource implements \ArrayAccess
     public function refresh(array $options = [])
     {
         $request = $this->client->createRequest('get', $this->getUri(), $options);
-        $response = self::send($request, $this->client);
-        $this->data = (array) $response->json();
+        $this->data = self::send($request, $this->client);
         $this->data['_full'] = true;
     }
 
