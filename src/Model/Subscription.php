@@ -106,7 +106,7 @@ class Subscription extends Resource
      */
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
-        $data = isset($data['hal:subscriptions']) ? $data['hal:subscriptions'] : [];
+        $data = isset($data['subscriptions']) ? $data['subscriptions'] : [];
         return parent::wrapCollection($data, $baseUrl, $client);
     }
 
