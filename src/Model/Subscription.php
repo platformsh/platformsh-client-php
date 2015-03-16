@@ -86,7 +86,7 @@ class Subscription extends Resource
     public function getOwner()
     {
         $uuid = $this->getProperty('owner');
-        $url = $this->makeAbsoluteUrl('/api/users', $this->getProperty('endpoint'));
+        $url = $this->makeAbsoluteUrl('/api/users', $this->getLink('project'));
         return Account::get($uuid, $url, $this->client);
     }
 
@@ -97,7 +97,7 @@ class Subscription extends Resource
      */
     public function getProject()
     {
-        $url = $this->getProperty('project_endpoint');
+        $url = $this->getLink('project');
         return Project::get($url, null, $this->client);
     }
 
