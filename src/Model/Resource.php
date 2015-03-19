@@ -5,6 +5,7 @@ namespace Platformsh\Client\Model;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ParseException;
 use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Url;
 use Platformsh\Client\Exception\ApiResponseException;
@@ -172,10 +173,19 @@ class Resource implements \ArrayAccess
      */
     public static function send(RequestInterface $request, ClientInterface $client)
     {
+        $response = null;
         try {
             $response = $client->send($request);
             $data = $response->json();
             return (array) $data;
+        } catch (ParseException $e) {
+            $content = $response ? $response->getBody()->getContents() : '';
+            if ($content === '') {
+                throw new ApiResponseException('Received empty response', $request, $response);
+            }
+            else {
+                throw new ApiResponseException('Received non-JSON response', $request, $response);
+            }
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
         }

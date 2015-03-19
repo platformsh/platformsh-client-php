@@ -121,8 +121,6 @@ class Connector implements ConnectorInterface
     public function setApiToken($token)
     {
         $this->session->set('accessToken', $token);
-        $this->session->set('expires', 2147483647);
-        $this->session->set('tokenType', 'bearer');
     }
 
     /**
@@ -235,7 +233,8 @@ class Connector implements ConnectorInterface
             $this->oauth2Plugin = new Oauth2Subscriber(null, $refreshTokenGrantType);
             if ($this->session->get('accessToken')) {
                 $type = $this->session->get('tokenType');
-                $expires = $this->session->get('expires');
+                // If the token does not expire, the 'expires' time must be null.
+                $expires = $this->session->get('expires') ?: null;
                 $this->oauth2Plugin->setAccessToken($this->session->get('accessToken'), $type, $expires);
             }
         }

@@ -5,7 +5,7 @@
     "require": {
         "cocur/slugify": "~1.0",
         "guzzlehttp/guzzle": "~5.2",
-        "commerceguys/guzzle-oauth2-plugin": ">=2.0.0-beta1",
+        "commerceguys/guzzle-oauth2-plugin": ">=2.0.0-beta2",
         "guzzlehttp/cache-subscriber": "0.1.*"
     },
     "require-dev": {
