@@ -97,12 +97,10 @@ class Connector implements ConnectorInterface
         } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()->getAccessToken();
-            $this->session->add(
-              [
-                'accessToken' => $token->getToken(),
-                'expires' => $token->getExpires()->getTimestamp(),
-              ]
-            );
+            $this->session->set('accessToken', $token->getToken());
+            if ($token->getExpires()) {
+                $this->session->set('expires', $token->getExpires()->getTimestamp());
+            }
         }
         $this->session->save();
     }
