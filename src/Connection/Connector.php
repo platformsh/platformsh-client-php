@@ -227,6 +227,7 @@ class Connector implements ConnectorInterface
                     'client_id' => $this->config['client_id'],
                     'client_secret' => $this->config['client_secret'],
                     'refresh_token' => $this->session->get('refreshToken'),
+                    'token_url' => '/oauth2/token',
                   ]
                 );
             }
