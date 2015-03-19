@@ -4,10 +4,11 @@ This is a PHP library for accessing the Platform.sh API.
 
 ## Install
 
-Add these requirements to your `composer.json` file:
+Add this requirement to your `composer.json` file:
 ```
-        "commerceguys/guzzle-oauth2-plugin": "@beta",
+    "require": {
         "platformsh/client": "@beta"
+    }
 ```
 
 ## Usage
