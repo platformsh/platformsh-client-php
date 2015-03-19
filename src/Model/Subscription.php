@@ -21,14 +21,22 @@ use GuzzleHttp\ClientInterface;
 class Subscription extends Resource
 {
 
-    public static $availablePlans = ['Development', 'Standard', 'Medium', 'Large'];
-    public static $availableClusters = ['us_east', 'eu_west'];
+    public static $availablePlans = ['development', 'standard', 'medium', 'large'];
+    public static $availableClusters = ['eu_west', 'us_east'];
 
     const STATUS_ACTIVE = 'Active';
     const STATUS_REQUESTED = 'Requested';
     const STATUS_PROVISIONING = 'Provisioning';
     const STATUS_SUSPENDED = 'Suspended';
     const STATUS_DELETED = 'Deleted';
+
+    /**
+     * @inheritdoc
+     */
+    public static function getRequired()
+    {
+        return ['project_cluster', 'plan', 'project_title', 'storage', 'environments'];
+    }
 
     /**
      * @inheritdoc
@@ -41,6 +49,9 @@ class Subscription extends Resource
         }
         elseif ($property === 'cluster' && !in_array($value, self::$availableClusters)) {
             $errors[] = "Cluster not found: " . $value;
+        }
+        elseif ($property === 'storage' && $value < 1024) {
+            $errors[] = "Storage must be at least 1024 MiB";
         }
         return $errors;
     }
@@ -101,6 +112,15 @@ class Subscription extends Resource
     {
         $url = $this->getLink('project');
         return Project::get($url, null, $this->client);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function wrap(array $data, $baseUrl, ClientInterface $client)
+    {
+        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : [];
+        return parent::wrap($data, $baseUrl, $client);
     }
 
     /**

@@ -11,9 +11,6 @@ use Platformsh\Client\Model\Subscription;
 class PlatformClient
 {
 
-    /** @var string[] */
-    protected $availableClusters = ['eu_west', 'us_east'];
-
     /** @var ConnectorInterface */
     protected $connector;
 
@@ -172,16 +169,27 @@ class PlatformClient
      * @param string $cluster
      * @param string $plan
      * @param string $title
+     * @param int    $storage
+     * @param int    $environments
      *
      * @return Subscription
      */
-    public function createSubscription($cluster = null, $plan = 'Development', $title = 'Untitled Project')
+    public function createSubscription($cluster = null, $plan = null, $title = 'Untitled Project', $storage = 5120, $environments = 3)
     {
         if ($cluster === null) {
-            $cluster = reset($this->availableClusters);
+            $cluster = reset(Subscription::$availableClusters);
+        }
+        if ($plan === null) {
+            $plan = reset(Subscription::$availablePlans);
         }
         $url = $this->accountsEndpoint . 'subscriptions';
-        $values = ['cluster' => $cluster, 'plan' => $plan, 'title' => $title];
+        $values = [
+          'project_cluster' => $cluster,
+          'plan' => $plan,
+          'project_title' => $title,
+          'storage' => $storage,
+          'environments' => $environments,
+        ];
         return Subscription::create($values, $url, $this->connector->getClient());
     }
 
