@@ -192,6 +192,22 @@ class Resource implements \ArrayAccess
     }
 
     /**
+     * A simple helper function to send an HTTP request.
+     *
+     * @param string $url
+     * @param string $method
+     *
+     * @return array
+     */
+    protected function sendRequest($url, $method = 'get')
+    {
+        return $this->send(
+          $this->client->createRequest($method, $url),
+          $this->client
+        );
+    }
+
+    /**
      * Get the required properties for creating a new resource.
      *
      * @return array

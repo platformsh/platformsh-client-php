@@ -36,6 +36,28 @@ class ProjectUser extends Resource
     }
 
     /**
+     * Get the user's roles on environments.
+     *
+     * @param Environment[] $environments
+     *
+     * @return array
+     *   An array of environment IDs mapped to roles ('admin', 'contributor',
+     *   or 'viewer').
+     */
+    public function getEnvironmentRoles(array $environments)
+    {
+        $access = [];
+        foreach ($environments as $environment) {
+            $result = $this->sendRequest($environment->getUri() . '/access');
+            if ($result['id'] === $this->id) {
+                $access[$environment->id] = $result['role'];
+            }
+        }
+
+        return $access;
+    }
+
+    /**
      * Get the user's SSH keys.
      *
      * @param int $limit
