@@ -117,10 +117,10 @@ class Subscription extends Resource
     /**
      * @inheritdoc
      */
-    public static function wrap(array $data, $baseUrl, ClientInterface $client)
+    protected function setData(array $data)
     {
-        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : [];
-        return parent::wrap($data, $baseUrl, $client);
+        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : $data;
+        $this->data = $data;
     }
 
     /**

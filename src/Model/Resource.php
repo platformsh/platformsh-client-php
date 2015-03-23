@@ -32,7 +32,7 @@ class Resource implements \ArrayAccess
      */
     public function __construct(array $data = [], $baseUrl = null, ClientInterface $client = null)
     {
-        $this->data = $data;
+        $this->setData($data);
         $this->client = $client ?: new Client();
         $this->baseUrl = (string) $baseUrl;
     }
@@ -405,6 +405,8 @@ class Resource implements \ArrayAccess
      * This updates the resource's internal data with the API response.
      *
      * @param array $values
+     *
+     * @return array
      */
     public function update(array $values)
     {
@@ -414,9 +416,10 @@ class Resource implements \ArrayAccess
         }
         $data = $this->runOperation('edit', 'patch', $values);
         if (isset($data['_embedded']['entity'])) {
-            $this->data = $data['_embedded']['entity'];
-            $this->data['_full'] = true;
+            $data = $data['_embedded']['entity'];
+            $this->setData($data + ['_full' => true]);
         }
+        return $data;
     }
 
     /**
@@ -455,8 +458,15 @@ class Resource implements \ArrayAccess
     public function refresh(array $options = [])
     {
         $request = $this->client->createRequest('get', $this->getUri(), $options);
-        $this->data = self::send($request, $this->client);
-        $this->data['_full'] = true;
+        $this->setData(self::send($request, $this->client) + ['_full' => true]);
+    }
+
+    /**
+     * @param array $data
+     */
+    protected function setData(array $data)
+    {
+        $this->data = $data;
     }
 
     /**
