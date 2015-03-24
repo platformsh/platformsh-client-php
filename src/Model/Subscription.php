@@ -27,8 +27,28 @@ class Subscription extends Resource
     const STATUS_ACTIVE = 'Active';
     const STATUS_REQUESTED = 'Requested';
     const STATUS_PROVISIONING = 'Provisioning';
+    const STATUS_FAILED = 'Provisioning Failure';
     const STATUS_SUSPENDED = 'Suspended';
     const STATUS_DELETED = 'Deleted';
+
+    /**
+     * Wait for the subscription's project to be provisioned.
+     *
+     * @param callable  $onPoll   A function that will be called every time the
+     *                            subscription is refreshed. It will be passed
+     *                            one argument: the Subscription object.
+     * @param int       $interval The polling interval, in seconds.
+     */
+    public function wait(callable $onPoll = null, $interval = 2)
+    {
+        while (in_array($this->getStatus(), array(self::STATUS_PROVISIONING, self::STATUS_REQUESTED))) {
+            sleep($interval > 1 ? $interval : 1);
+            $this->refresh();
+            if ($onPoll !== null) {
+                $onPoll($this);
+            }
+        }
+    }
 
     /**
      * @inheritdoc
