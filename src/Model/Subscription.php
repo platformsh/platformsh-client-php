@@ -7,6 +7,7 @@ use GuzzleHttp\ClientInterface;
 /**
  * Represents a Platform.sh subscription.
  *
+ * @property-read int    $id
  * @property-read string $status
  * @property-read string $owner
  * @property-read string $plan
@@ -41,7 +42,7 @@ class Subscription extends Resource
      */
     public function wait(callable $onPoll = null, $interval = 2)
     {
-        while (in_array($this->getStatus(), array(self::STATUS_PROVISIONING, self::STATUS_REQUESTED))) {
+        while ($this->isPending()) {
             sleep($interval > 1 ? $interval : 1);
             $this->refresh();
             if ($onPoll !== null) {
