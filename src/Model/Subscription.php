@@ -35,7 +35,7 @@ class Subscription extends Resource
      */
     public static function getRequired()
     {
-        return ['project_cluster', 'plan', 'project_title', 'storage', 'environments'];
+        return ['project_cluster'];
     }
 
     /**

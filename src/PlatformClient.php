@@ -38,21 +38,21 @@ class PlatformClient
     }
 
     /**
-     * Get account information for the logged-in user.
+     * Get a single project by its ID.
      *
-     * @param bool $reset
+     * @param string $id
      *
-     * @return array
+     * @return Project|false
      */
-    public function getAccountInfo($reset = false)
+    public function getProject($id)
     {
-        if (!isset($this->accountInfo) || $reset) {
-            $client = $this->connector->getClient();
-            $url = $this->accountsEndpoint . 'me';
-            $this->accountInfo = (array) $client->get($url)->json();
+        $projects = $this->getProjects();
+        if (!isset($projects[$id])) {
+            return false;
         }
+        $project = $projects[$id];
 
-        return $this->accountInfo;
+        return $project;
     }
 
     /**
@@ -78,21 +78,21 @@ class PlatformClient
     }
 
     /**
-     * Get a single project by its ID.
+     * Get account information for the logged-in user.
      *
-     * @param string $id
+     * @param bool $reset
      *
-     * @return Project|false
+     * @return array
      */
-    public function getProject($id)
+    public function getAccountInfo($reset = false)
     {
-        $projects = $this->getProjects();
-        if (!isset($projects[$id])) {
-            return false;
+        if (!isset($this->accountInfo) || $reset) {
+            $client = $this->connector->getClient();
+            $url = $this->accountsEndpoint . 'me';
+            $this->accountInfo = (array) $client->get($url)->json();
         }
-        $project = $projects[$id];
 
-        return $project;
+        return $this->accountInfo;
     }
 
     /**
@@ -154,42 +154,48 @@ class PlatformClient
      */
     public function addSshKey($value, $title = null)
     {
-        $values = ['value' => $value];
-        if ($title !== null) {
-            $values['title'] = $title;
-        }
+        $values = $this->cleanRequest(['value' => $value, 'title' => $title]);
         $url = $this->accountsEndpoint . 'ssh_keys';
 
         return SshKey::create($values, $url, $this->connector->getClient());
     }
 
     /**
+     * Filter a request array to remove null values.
+     *
+     * @param array $request
+     *
+     * @return array
+     */
+    protected function cleanRequest(array $request)
+    {
+        return array_filter($request, function ($element) {
+            return $element !== null;
+        });
+    }
+
+    /**
      * Create a new Platform.sh subscription.
      *
-     * @param string $cluster
-     * @param string $plan
-     * @param string $title
-     * @param int    $storage
-     * @param int    $environments
+     * @param string $cluster The cluster. See Subscription::$availableClusters.
+     * @param string $plan    The plan. See Subscription::$availablePlans.
+     * @param string $title   The project title.
+     * @param int    $storage The storage of each environment, in MiB.
+     * @param int    $environments The number of available environments.
      *
      * @return Subscription
      */
-    public function createSubscription($cluster = null, $plan = null, $title = 'Untitled Project', $storage = 5120, $environments = 3)
+    public function createSubscription($cluster, $plan = 'development', $title = null, $storage = null, $environments = null)
     {
-        if ($cluster === null) {
-            $cluster = reset(Subscription::$availableClusters);
-        }
-        if ($plan === null) {
-            $plan = reset(Subscription::$availablePlans);
-        }
         $url = $this->accountsEndpoint . 'subscriptions';
-        $values = [
+        $values = $this->cleanRequest([
           'project_cluster' => $cluster,
           'plan' => $plan,
           'project_title' => $title,
           'storage' => $storage,
           'environments' => $environments,
-        ];
+        ]);
+
         return Subscription::create($values, $url, $this->connector->getClient());
     }
 
