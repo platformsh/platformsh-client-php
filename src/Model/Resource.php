@@ -178,16 +178,10 @@ class Resource implements \ArrayAccess
             $response = $client->send($request);
             $data = $response->json();
             return (array) $data;
-        } catch (ParseException $e) {
-            $content = $response ? $response->getBody()->getContents() : '';
-            if ($content === '') {
-                throw new ApiResponseException('Received empty response', $request, $response);
-            }
-            else {
-                throw new ApiResponseException('Received non-JSON response', $request, $response);
-            }
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
+        } catch (ParseException $e) {
+            throw ApiResponseException::create($request, $response);
         }
     }
 
