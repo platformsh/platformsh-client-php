@@ -21,7 +21,7 @@ class Project extends Resource
      */
     public function getUsers()
     {
-        return ProjectUser::getCollection($this->getUri() . '/access', 0, [], $this->client);
+        return ProjectUser::getCollection($this->getLink('access'), 0, [], $this->client);
     }
 
     /**
@@ -36,7 +36,7 @@ class Project extends Resource
     {
         $body = ['email' => $email, 'role' => $role];
 
-        return ProjectUser::create($body, $this->getUri() . '/access', $this->client);
+        return ProjectUser::create($body, $this->getLink('access'), $this->client);
     }
 
     /**
@@ -48,22 +48,26 @@ class Project extends Resource
      */
     public function getEnvironment($id)
     {
-        return Environment::get($id, $this->getUri() . '/environments', $this->client);
+        return Environment::get($id, $this->getLink('environments'), $this->client);
     }
 
     /**
      * @inheritdoc
      *
-     * The accounts API does not (yet) return HAL links. Stub projects contain
-     * an 'endpoint' property.
+     * The accounts API does not (yet) return HAL links. This is a collection
+     * of workarounds for that issue.
      */
-    public function getUri($absolute = true)
+    public function getLink($rel, $absolute = true)
     {
-        if ($this->hasLink('self')) {
-            return $this->getLink('self', $absolute);
+        if ($this->hasLink($rel)) {
+            return $this->getLink($rel, $absolute);
         }
 
-        return $this->data['endpoint'];
+        if ($rel === 'self') {
+            return $this->data['endpoint'];
+        }
+
+        return $this->data['endpoint'] . '/' . ltrim($rel, '#');
     }
 
     /**
@@ -75,7 +79,7 @@ class Project extends Resource
      */
     public function getEnvironments($limit = 0)
     {
-        return Environment::getCollection($this->getUri() . '/environments', $limit, [], $this->client);
+        return Environment::getCollection($this->getLink('environments'), $limit, [], $this->client);
     }
 
     /**
@@ -87,7 +91,7 @@ class Project extends Resource
      */
     public function getDomains($limit = 0)
     {
-        return Domain::getCollection($this->getUri() . '/domains', $limit, [], $this->client);
+        return Domain::getCollection($this->getLink('domains'), $limit, [], $this->client);
     }
 
     /**
@@ -99,7 +103,7 @@ class Project extends Resource
      */
     public function getDomain($name)
     {
-        return Domain::get($name, $this->getUri() . '/domains', $this->client);
+        return Domain::get($name, $this->getLink('domains'), $this->client);
     }
 
     /**
@@ -118,7 +122,7 @@ class Project extends Resource
             $body['ssl'] = $ssl;
         }
 
-        return Domain::create($body, $this->getUri() . '/domains', $this->client);
+        return Domain::create($body, $this->getLink('domains'), $this->client);
     }
 
     /**
@@ -130,7 +134,7 @@ class Project extends Resource
      */
     public function getIntegrations($limit = 0)
     {
-        return Integration::getCollection($this->getUri() . '/integrations', $limit, [], $this->client);
+        return Integration::getCollection($this->getLink('integrations'), $limit, [], $this->client);
     }
 
     /**
@@ -142,7 +146,7 @@ class Project extends Resource
      */
     public function getIntegration($id)
     {
-        return Integration::get($id, $this->getUri() . '/integrations', $this->client);
+        return Integration::get($id, $this->getLink('integrations'), $this->client);
     }
 
     /**
@@ -157,7 +161,7 @@ class Project extends Resource
     {
         $body = ['type' => $type] + $data;
 
-        return Integration::create($body, $this->getUri() . '/integrations', $this->client);
+        return Integration::create($body, $this->getLink('integrations'), $this->client);
     }
 
     /**
@@ -167,6 +171,6 @@ class Project extends Resource
      */
     public function getRoutes()
     {
-        return ProjectUser::getCollection($this->getUri() . '/routes', 0, [], $this->client);
+        return ProjectUser::getCollection($this->getLink('routes'), 0, [], $this->client);
     }
 }
