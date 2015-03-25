@@ -7,7 +7,7 @@ This is a PHP library for accessing the Platform.sh API.
 Add this requirement to your `composer.json` file:
 ```
     "require": {
-        "platformsh/client": "@beta"
+        "platformsh/client": "@stable"
     }
 ```
 
@@ -22,13 +22,13 @@ use Platformsh\Client\PlatformClient;
 $client = new PlatformClient();
 
 // Set the API token to use.
-$connector = $client->getConnector();
-$connector->setApiToken($myToken);
+// N.B. you must keep your API token(s) safe!
+$client->getConnector()->setApiToken($myToken);
 
 // Get the user's first project.
 $projects = $client->getProjects();
 if ($projects) {
-    $firstProject = $projects[0];
+    $firstProject = reset($projects);
 
     // Get the master environment.
     $master = $firstProject->getEnvironment('master');
