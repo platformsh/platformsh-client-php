@@ -67,7 +67,7 @@ class Project extends Resource
             return $this->data['endpoint'];
         }
 
-        return $this->data['endpoint'] . '/' . ltrim($rel, '#');
+        return $this->getUri() . '/' . ltrim($rel, '#');
     }
 
     /**
