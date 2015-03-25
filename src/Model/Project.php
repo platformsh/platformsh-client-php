@@ -60,7 +60,7 @@ class Project extends Resource
     public function getLink($rel, $absolute = true)
     {
         if ($this->hasLink($rel)) {
-            return $this->getLink($rel, $absolute);
+            return parent::getLink($rel, $absolute);
         }
 
         if ($rel === 'self') {
