@@ -300,4 +300,14 @@ class Environment extends Resource
     {
         return Variable::get($id, $this->getLink('#manage-variables'), $this->client);
     }
+
+    /**
+     * Get environment routes.
+     *
+     * @return Route[]
+     */
+    public function getRoutes()
+    {
+        return Route::getCollection($this->getLink('#manage-routes'), 0, [], $this->client);
+    }
 }
