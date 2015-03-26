@@ -59,6 +59,7 @@ class Connector implements ConnectorInterface
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
           'cache' => false,
+          'token_url' => '/oauth2/token',
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -143,6 +144,7 @@ class Connector implements ConnectorInterface
             'client_secret' => $this->config['client_secret'],
             'username' => $username,
             'password' => $password,
+            'token_url' => $this->config['token_url'],
           ]
         );
         try {
@@ -225,7 +227,7 @@ class Connector implements ConnectorInterface
                     'client_id' => $this->config['client_id'],
                     'client_secret' => $this->config['client_secret'],
                     'refresh_token' => $this->session->get('refreshToken'),
-                    'token_url' => '/oauth2/token',
+                    'token_url' => $this->config['token_url'],
                   ]
                 );
             }
