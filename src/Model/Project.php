@@ -163,14 +163,4 @@ class Project extends Resource
 
         return Integration::create($body, $this->getLink('integrations'), $this->client);
     }
-
-    /**
-     * Get project routes.
-     *
-     * @return Route[]
-     */
-    public function getRoutes()
-    {
-        return ProjectUser::getCollection($this->getLink('routes'), 0, [], $this->client);
-    }
 }
