@@ -15,7 +15,7 @@ class Integration extends Resource
     protected static $required = ['type'];
 
     /** @var array */
-    protected static $types = ['hipchat', 'github', 'webhook'];
+    protected static $types = ['bitbucket', 'hipchat', 'github', 'webhook'];
 
     /**
      * @inheritdoc
