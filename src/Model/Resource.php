@@ -156,7 +156,15 @@ class Resource implements \ArrayAccess
 
         $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
         $data = self::send($request, $client);
-        $data['_full'] = true;
+
+        // A create action can simply return 201 Created with a location.
+        if (isset($data['status']) && $data['status'] === 'created' && isset($data['location'])) {
+            $resource = static::get($data['location'], null, $client);
+            if ($resource === false) {
+                throw new \RuntimeException('Failed to retrieve created resource');
+            }
+            return $resource;
+        }
 
         return static::wrap($data, $collectionUrl, $client);
     }
