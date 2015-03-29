@@ -64,6 +64,15 @@ class Resource implements \ArrayAccess
     }
 
     /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function __isset($name) {
+        return $this->propertyExists($name);
+    }
+
+    /**
      * @inheritdoc
      */
     public function offsetGet($offset)
