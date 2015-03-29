@@ -15,6 +15,21 @@ class Project extends Resource
 {
 
     /**
+     * Get the Git URL for the project.
+     *
+     * @return string
+     */
+    public function getGitUrl()
+    {
+        if (!$this->propertyExists('repository')) {
+            $this->ensureFull();
+        }
+        $repository = $this->getProperty('repository');
+
+        return $repository['url'];
+    }
+
+    /**
      * Get the users associated with a project.
      *
      * @return ProjectUser[]
