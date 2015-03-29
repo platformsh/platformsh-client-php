@@ -18,6 +18,7 @@ use GuzzleHttp\ClientInterface;
  * @property-read string $project_title
  * @property-read string $project_cluster
  * @property-read string $project_cluster_label
+ * @property-read string $project_ui
  */
 class Subscription extends Resource
 {
