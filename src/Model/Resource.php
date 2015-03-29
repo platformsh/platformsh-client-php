@@ -207,13 +207,14 @@ class Resource implements \ArrayAccess
      *
      * @param string $url
      * @param string $method
+     * @param array  $options
      *
      * @return array
      */
-    protected function sendRequest($url, $method = 'get')
+    protected function sendRequest($url, $method = 'get', array $options = [])
     {
         return $this->send(
-          $this->client->createRequest($method, $url),
+          $this->client->createRequest($method, $url, $options),
           $this->client
         );
     }
