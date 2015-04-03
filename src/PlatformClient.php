@@ -182,10 +182,11 @@ class PlatformClient
      * @param string $title   The project title.
      * @param int    $storage The storage of each environment, in MiB.
      * @param int    $environments The number of available environments.
+     * @param array  $activationCallback An activation callback for the subscription.
      *
      * @return Subscription
      */
-    public function createSubscription($cluster, $plan = 'development', $title = null, $storage = null, $environments = null)
+    public function createSubscription($cluster, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
     {
         $url = $this->accountsEndpoint . 'subscriptions';
         $values = $this->cleanRequest([
@@ -194,6 +195,7 @@ class PlatformClient
           'project_title' => $title,
           'storage' => $storage,
           'environments' => $environments,
+          'activation_callback' => $activationCallback,
         ]);
 
         return Subscription::create($values, $url, $this->connector->getClient());

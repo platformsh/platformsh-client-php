@@ -75,6 +75,14 @@ class Subscription extends Resource
         elseif ($property === 'storage' && $value < 1024) {
             $errors[] = "Storage must be at least 1024 MiB";
         }
+        elseif ($property === 'activation_callback') {
+            if (!isset($value['uri'])) {
+                $errors[] = "A 'uri' key is required in the activation callback";
+            }
+            elseif (!filter_var($value['uri'], FILTER_VALIDATE_URL)) {
+                $errors[] = 'Invalid URI in activation callback';
+            }
+        }
         return $errors;
     }
 
