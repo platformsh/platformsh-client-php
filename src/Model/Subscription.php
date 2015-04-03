@@ -132,6 +132,9 @@ class Subscription extends Resource
      */
     public function getProject()
     {
+        if (!$this->hasLink('project') && !$this->isActive()) {
+            throw new \BadMethodCallException('Inactive subscriptions do not have projects.');
+        }
         $url = $this->getLink('project');
         return Project::get($url, null, $this->client);
     }
