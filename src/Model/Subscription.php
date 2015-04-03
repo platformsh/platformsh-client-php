@@ -26,12 +26,12 @@ class Subscription extends Resource
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
     public static $availableClusters = ['eu_west', 'us_east'];
 
-    const STATUS_ACTIVE = 'Active';
-    const STATUS_REQUESTED = 'Requested';
-    const STATUS_PROVISIONING = 'Provisioning';
-    const STATUS_FAILED = 'Provisioning Failure';
-    const STATUS_SUSPENDED = 'Suspended';
-    const STATUS_DELETED = 'Deleted';
+    const STATUS_ACTIVE = 'active';
+    const STATUS_REQUESTED = 'requested';
+    const STATUS_PROVISIONING = 'provisioning';
+    const STATUS_FAILED = 'provisioning Failure';
+    const STATUS_SUSPENDED = 'suspended';
+    const STATUS_DELETED = 'deleted';
 
     /**
      * Wait for the subscription's project to be provisioned.
