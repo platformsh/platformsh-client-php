@@ -178,27 +178,4 @@ class Project extends Resource
 
         return Integration::create($body, $this->getLink('integrations'), $this->client);
     }
-
-    /**
-     * Initialize the project from an external repository.
-     *
-     * This can only work when the project's repository is empty.
-     *
-     * @param string $profile
-     *   The name of the profile. This is shown in the resulting activity log.
-     * @param string $repository
-     *   A repository URL, optionally followed by an '@' sign and a branch name,
-     *   e.g. 'git://github.com/platformsh/platformsh-examples.git@drupal/7.x'.
-     *   The default branch is 'master'.
-     *
-     * @return Activity
-     */
-    public function initialize($profile, $repository) {
-        $values = [
-            'profile' => $profile,
-            'repository' => $repository,
-        ];
-
-        return $this->runLongOperation('initialize', 'post', $values);
-    }
 }

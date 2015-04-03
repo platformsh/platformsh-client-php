@@ -310,4 +310,27 @@ class Environment extends Resource
     {
         return Route::getCollection($this->getLink('#manage-routes'), 0, [], $this->client);
     }
+
+    /**
+     * Initialize the environment from an external repository.
+     *
+     * This can only work when the repository is empty.
+     *
+     * @param string $profile
+     *   The name of the profile. This is shown in the resulting activity log.
+     * @param string $repository
+     *   A repository URL, optionally followed by an '@' sign and a branch name,
+     *   e.g. 'git://github.com/platformsh/platformsh-examples.git@drupal/7.x'.
+     *   The default branch is 'master'.
+     *
+     * @return Activity
+     */
+    public function initialize($profile, $repository) {
+        $values = [
+          'profile' => $profile,
+          'repository' => $repository,
+        ];
+
+        return $this->runLongOperation('initialize', 'post', $values);
+    }
 }
