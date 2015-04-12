@@ -21,7 +21,7 @@ class Project extends Resource
      */
     public function getGitUrl()
     {
-        if (!$this->propertyExists('repository')) {
+        if (!$this->hasProperty('repository')) {
             $this->ensureFull();
         }
         $repository = $this->getProperty('repository');

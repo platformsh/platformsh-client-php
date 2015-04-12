@@ -50,7 +50,7 @@ class Resource implements \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return $this->propertyExists($offset);
+        return $this->hasProperty($offset);
     }
 
     /**
@@ -69,7 +69,7 @@ class Resource implements \ArrayAccess
      * @return bool
      */
     public function __isset($name) {
-        return $this->propertyExists($name);
+        return $this->hasProperty($name);
     }
 
     /**
@@ -373,7 +373,7 @@ class Resource implements \ArrayAccess
      *
      * @return bool
      */
-    public function propertyExists($property)
+    public function hasProperty($property)
     {
         return $this->isProperty($property) && array_key_exists($property, $this->data);
     }
@@ -391,7 +391,7 @@ class Resource implements \ArrayAccess
      */
     public function getProperty($property, $required = true)
     {
-        if (!$this->propertyExists($property)) {
+        if (!$this->hasProperty($property)) {
             if ($required) {
                 throw new \InvalidArgumentException("Property not found: $property");
             }
