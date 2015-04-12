@@ -36,25 +36,25 @@ class ProjectUser extends Resource
     }
 
     /**
-     * Get the user's roles on environments.
+     * Get the user's role on an environment.
      *
-     * @param Environment[] $environments
+     * @param Environment $environment
      *
-     * @return array
-     *   An array of environment IDs mapped to roles ('admin', 'contributor',
-     *   or 'viewer').
+     * @throws \Exception
+     *
+     * @return string
+     *   The user's environment-level role ('admin', 'contributor', or
+     *   'viewer').
      */
-    public function getEnvironmentRoles(array $environments)
+    public function getEnvironmentRole(Environment $environment)
     {
-        $access = [];
-        foreach ($environments as $environment) {
-            $result = $this->sendRequest($environment->getUri() . '/access');
+        $results = $this->sendRequest($environment->getUri() . '/access');
+        foreach ($results as $result) {
             if ($result['id'] === $this->id) {
-                $access[$environment->id] = $result['role'];
+                return $result['role'];
             }
         }
-
-        return $access;
+        throw new \Exception("User role not found for environment {$environment->id}");
     }
 
     /**
