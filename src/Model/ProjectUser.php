@@ -54,7 +54,26 @@ class ProjectUser extends Resource
                 return $result['role'];
             }
         }
-        throw new \Exception("User role not found for environment {$environment->id}");
+
+        return $this->getProperty('role');
+    }
+
+    /**
+     * Change the user's environment-level role.
+     *
+     * @param Environment $environment
+     * @param string      $newRole The new role ('admin', 'contributor',
+     *                             or 'viewer').
+     */
+    public function changeEnvironmentRole(Environment $environment, $newRole)
+    {
+        if (!in_array($newRole, ['admin', 'contributor', 'viewer'])) {
+            throw new \InvalidArgumentException("Invalid role: $newRole");
+        }
+
+        $this->sendRequest($environment->getUri() . '/access/' . $this->id, 'patch', [
+          'json' => ['role' => $newRole],
+        ]);
     }
 
     /**
