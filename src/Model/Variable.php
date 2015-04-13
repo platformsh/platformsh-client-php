@@ -8,6 +8,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $id
  * @property-read string $environment
  * @property-read string $name
+ * @property-read bool   $is_enabled
  * @property-read bool   $is_json
  * @property-read string $created_at
  * @property-read string $updated_at
