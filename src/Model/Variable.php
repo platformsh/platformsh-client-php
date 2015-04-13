@@ -19,4 +19,18 @@ namespace Platformsh\Client\Model;
 class Variable extends Resource
 {
 
+    /**
+     * Disable the variable.
+     *
+     * This is only useful if the variable is both inherited and enabled.
+     * Non-inherited variables can be deleted.
+     */
+    public function disable()
+    {
+        if (!$this->getProperty('is_enabled')) {
+            return;
+        }
+
+        $this->update(['is_enabled' => false]);
+    }
 }
