@@ -67,7 +67,7 @@ class PlatformClient
         $data = $this->getAccountInfo($reset);
         $projects = [];
         foreach ($data['projects'] as $project) {
-            // Each project has its own endpoint on a Platform.sh cluster.
+            // Each project has its own endpoint on a Platform.sh region.
             $client = $this->connector->getClient();
             // @todo get the actual ID added to the API
             $projectId = basename($project['endpoint']);
@@ -99,7 +99,7 @@ class PlatformClient
      * Get a single project at a known location.
      *
      * @param string $id       The project ID.
-     * @param string $hostname The hostname of the Platform.sh cluster API,
+     * @param string $hostname The hostname of the Platform.sh regional API,
      *                         e.g. 'eu.platform.sh' or 'us.platform.sh'.
      * @param bool   $https    Whether to use HTTPS (default: true).
      *
@@ -177,7 +177,7 @@ class PlatformClient
     /**
      * Create a new Platform.sh subscription.
      *
-     * @param string $cluster The cluster. See Subscription::$availableClusters.
+     * @param string $region  The region. See Subscription::$availableRegions.
      * @param string $plan    The plan. See Subscription::$availablePlans.
      * @param string $title   The project title.
      * @param int    $storage The storage of each environment, in MiB.
@@ -186,11 +186,11 @@ class PlatformClient
      *
      * @return Subscription
      */
-    public function createSubscription($cluster, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
+    public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
     {
         $url = $this->accountsEndpoint . 'subscriptions';
         $values = $this->cleanRequest([
-          'project_cluster' => $cluster,
+          'project_region' => $region,
           'plan' => $plan,
           'project_title' => $title,
           'storage' => $storage,

@@ -16,15 +16,15 @@ use GuzzleHttp\ClientInterface;
  * @property-read int    $user_licenses Number of users.
  * @property-read string $project_id
  * @property-read string $project_title
- * @property-read string $project_cluster
- * @property-read string $project_cluster_label
+ * @property-read string $project_region
+ * @property-read string $project_region_label
  * @property-read string $project_ui
  */
 class Subscription extends Resource
 {
 
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
-    public static $availableClusters = ['eu_west', 'us_east'];
+    public static $availableRegions = ['eu_west', 'us_east'];
 
     const STATUS_ACTIVE = 'active';
     const STATUS_REQUESTED = 'requested';
@@ -57,7 +57,7 @@ class Subscription extends Resource
      */
     public static function getRequired()
     {
-        return ['project_cluster'];
+        return ['project_region'];
     }
 
     /**
@@ -69,8 +69,8 @@ class Subscription extends Resource
         if ($property === 'plan' && !in_array($value, self::$availablePlans)) {
             $errors[] = "Plan not found: " . $value;
         }
-        elseif ($property === 'cluster' && !in_array($value, self::$availableClusters)) {
-            $errors[] = "Cluster not found: " . $value;
+        elseif ($property === 'project_region' && !in_array($value, self::$availableRegions)) {
+            $errors[] = "Region not found: " . $value;
         }
         elseif ($property === 'storage' && $value < 1024) {
             $errors[] = "Storage must be at least 1024 MiB";
