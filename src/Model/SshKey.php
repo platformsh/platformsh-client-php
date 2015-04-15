@@ -37,7 +37,7 @@ class SshKey extends Resource
         if (!strpos($value, ' ')) {
             return false;
         }
-        list($type, $key) = explode(' ', $value, 2);
+        list($type, $key) = explode(' ', $value, 3);
         if (!in_array($type, ['ssh-rsa', 'ssh-dsa']) || base64_decode($key, true) === false) {
             return false;
         }
