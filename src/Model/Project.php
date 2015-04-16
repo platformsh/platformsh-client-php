@@ -15,6 +15,26 @@ class Project extends Resource
 {
 
     /**
+     * Get the subscription ID for the project.
+     *
+     * @todo when APIs are unified, this can be a property
+     *
+     * @return int
+     */
+    public function getSubscriptionId()
+    {
+        if ($this->hasProperty('subscription_id')) {
+            return $this->getProperty('subscription_id');
+        }
+
+        if (isset($this->data['subscription']['license_uri'])) {
+            return basename($this->data['subscription']['license_uri']);
+        }
+
+        throw new \RuntimeException('Subscription ID not found');
+    }
+
+    /**
      * Get the Git URL for the project.
      *
      * @return string
