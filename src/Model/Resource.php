@@ -168,6 +168,15 @@ class Resource implements \ArrayAccess
 
         // A create action can simply return 201 Created with a location.
         if (isset($data['status']) && $data['status'] === 'created' && isset($data['location'])) {
+            // Platform.sh can erroneously return HTTP URLs in the location.
+            if (strpos($collectionUrl, 'https://') !== false && strpos($data['location'], 'http://') !== false) {
+                $data['location'] = str_replace('http://', 'https://', $data['location']);
+            } elseif (strpos($data['location'], '//') === false) {
+                // If the location is relative, make it absolute.
+                $base = Url::fromString($collectionUrl);
+                $data['location'] = (string) $base->combine($data['location']);
+            }
+
             $resource = static::get($data['location'], null, $client);
             if ($resource === false) {
                 throw new \RuntimeException('Failed to retrieve created resource');
