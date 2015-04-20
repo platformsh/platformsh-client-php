@@ -47,6 +47,6 @@ class Integration extends Resource
         // Switch off authentication for this request (none is required).
         $options['auth'] = null;
 
-        $this->client->post($hookUrl, $options);
+        $this->sendRequest($hookUrl, 'post', $options);
     }
 }
