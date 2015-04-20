@@ -13,6 +13,15 @@ namespace Platformsh\Client\Model;
  */
 class Project extends Resource
 {
+    /**
+     * Prevent deletion.
+     *
+     * @internal
+     */
+    public function delete()
+    {
+        throw new \BadMethodCallException("Projects should not be deleted directly. Delete the subscription instead.");
+    }
 
     /**
      * Get the subscription ID for the project.
