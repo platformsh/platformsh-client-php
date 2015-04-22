@@ -56,6 +56,23 @@ class Environment extends Resource
     }
 
     /**
+     * Get the public URL for the environment.
+     *
+     * @throws \Exception
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        if (!$this->hasLink('public-url')) {
+            $id = $this->data['id'];
+            throw new \Exception("The environment $id does not have a Public URL.");
+        }
+
+        return $this->getLink('public-url');
+    }
+
+    /**
      * Branch (create a new environment).
      *
      * @param string $title The title of the new environment.
