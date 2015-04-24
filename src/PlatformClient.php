@@ -65,13 +65,11 @@ class PlatformClient
     public function getProjects($reset = false)
     {
         $data = $this->getAccountInfo($reset);
+        $client = $this->connector->getClient();
         $projects = [];
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh region.
-            $client = $this->connector->getClient();
-            // @todo get the actual ID added to the API
-            $projectId = basename($project['endpoint']);
-            $projects[$projectId] = Project::wrap($project, $project['endpoint'], $client);
+            $projects[] = Project::wrap($project, $project['endpoint'], $client);
         }
 
         return $projects;
