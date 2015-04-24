@@ -62,7 +62,7 @@ class Environment extends Resource
      *
      * @return string
      */
-    public function getUrl()
+    public function getPublicUrl()
     {
         if (!$this->hasLink('public-url')) {
             $id = $this->data['id'];
