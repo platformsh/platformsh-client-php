@@ -46,13 +46,13 @@ class PlatformClient
      */
     public function getProject($id)
     {
-        $projects = $this->getProjects();
-        if (!isset($projects[$id])) {
-            return false;
+        foreach ($this->getProjects() as $project) {
+            if ($project->id === $id) {
+                return $project;
+            }
         }
-        $project = $projects[$id];
 
-        return $project;
+        return false;
     }
 
     /**

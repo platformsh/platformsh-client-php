@@ -33,13 +33,14 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
     public function testGetProjectsSingle()
     {
         $testProject = [
+          'id' => 'test',
           'name' => 'Test project',
           'endpoint' => 'https://example.com/api/projects/test',
         ];
         $this->connector->setMockResult(['projects' => [$testProject]]);
         $projects = $this->client->getProjects();
-        $this->assertEquals($testProject['name'], $projects['test']['name']);
-        $this->assertEquals($testProject['endpoint'], $projects['test']['endpoint']);
+        $this->assertEquals($testProject['name'], $projects[0]['name']);
+        $this->assertEquals($testProject['endpoint'], $projects[0]['endpoint']);
 
         $project = $this->client->getProject('test');
         $this->assertEquals($testProject['name'], $project['name']);
