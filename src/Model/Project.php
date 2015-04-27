@@ -108,7 +108,11 @@ class Project extends Resource
         }
 
         if ($rel === 'self') {
-            return $this->data['endpoint'];
+            return $this->getProperty('endpoint');
+        }
+
+        if ($rel === '#ui') {
+            return $this->getProperty('uri');
         }
 
         return $this->getUri() . '/' . ltrim($rel, '#');
