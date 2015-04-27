@@ -50,8 +50,12 @@ class Project extends Resource
      */
     public function getGitUrl()
     {
+        // The collection doesn't provide a Git URL, but it does provide the
+        // right host, so the URL can be calculated.
         if (!$this->hasProperty('repository')) {
-            $this->ensureFull();
+            $host = parse_url($this->getProperty('uri'), PHP_URL_HOST);
+
+            return "{$this->id}@git.{$host}:{$this->id}.git";
         }
         $repository = $this->getProperty('repository');
 
