@@ -2,8 +2,10 @@
 
 namespace Platformsh\Client;
 
+use GuzzleHttp\Exception\BadResponseException;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
+use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
@@ -87,7 +89,12 @@ class PlatformClient
         if (!isset($this->accountInfo) || $reset) {
             $client = $this->connector->getClient();
             $url = $this->accountsEndpoint . 'me';
-            $this->accountInfo = (array) $client->get($url)->json();
+            try {
+                $this->accountInfo = (array) $client->get($url)->json();
+            }
+            catch (BadResponseException $e) {
+                throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
+            }
         }
 
         return $this->accountInfo;

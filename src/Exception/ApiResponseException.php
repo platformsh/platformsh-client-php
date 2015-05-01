@@ -29,14 +29,20 @@ class ApiResponseException extends BadResponseException
         $originalMessage = $e->getMessage();
         $message = $originalMessage;
 
+        $responseInfoProperties = [
+          'message',
+          'detail',
+          'error',
+          'error_description',
+        ];
+
         try {
             $response->getBody()->seek(0);
             $json = $response->json();
-            if (!empty($json['message'])) {
-                $message .= ' [message] ' . implode('; ', (array) $json['message']);
-            }
-            if (!empty($json['detail'])) {
-                $message .= ' [detail] ' . implode('; ', (array) $json['detail']);
+            foreach ($responseInfoProperties as $property) {
+                if (!empty($json[$property])) {
+                    $message .= " [$property] " . implode('; ', (array) $json[$property]);
+                }
             }
         } catch (ParseException $parseException) {
             // Occasionally the response body may not be JSON.
