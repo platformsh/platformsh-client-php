@@ -54,7 +54,7 @@ class Connector implements ConnectorInterface
         $defaults = [
           'accounts' => 'https://marketplace.commerceguys.com/api/platform/',
           'client_id' => 'platformsh-client-php',
-          'client_secret' => null,
+          'client_secret' => '',
           'debug' => false,
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
