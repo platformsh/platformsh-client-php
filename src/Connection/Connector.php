@@ -2,6 +2,7 @@
 
 namespace Platformsh\Client\Connection;
 
+use CommerceGuys\Guzzle\Oauth2\AccessToken;
 use CommerceGuys\Guzzle\Oauth2\GrantType\PasswordCredentials;
 use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
 use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
@@ -98,10 +99,7 @@ class Connector implements ConnectorInterface
         } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()->getAccessToken();
-            $this->session->set('accessToken', $token->getToken());
-            if ($token->getExpires()) {
-                $this->session->set('expires', $token->getExpires()->getTimestamp());
-            }
+            $this->addTokenToSession($token);
         }
         $this->session->save();
     }
@@ -156,18 +154,26 @@ class Connector implements ConnectorInterface
             }
             throw $e;
         }
-        $this->session->add(
-          [
-            'username' => $username,
-            'accessToken' => $token->getToken(),
-            'tokenType' => $token->getType(),
-            'expires' => $token->getExpires()->getTimestamp(),
-          ]
-        );
+        $this->session->set('username', $username);
+        $this->addTokenToSession($token);
+        $this->session->save();
+    }
+
+    /**
+     * Save an access token to the session.
+     *
+     * @param AccessToken $token
+     */
+    protected function addTokenToSession(AccessToken $token)
+    {
+        $this->session->set('accessToken', $token->getToken());
+        $this->session->set('tokenType', $token->getType());
+        if ($token->getExpires()) {
+            $this->session->set('expires', $token->getExpires()->getTimestamp());
+        }
         if ($token->getRefreshToken()) {
             $this->session->set('refreshToken', $token->getRefreshToken()->getToken());
         }
-        $this->session->save();
     }
 
     /**
