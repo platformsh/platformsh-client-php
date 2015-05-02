@@ -3,8 +3,9 @@
 namespace Platformsh\Client\Model;
 
 /**
- * An SSH key on a user account.
+ * A user's SSH public key.
  *
+ * @property-read string $title
  * @property-read int    $key_id
  * @property-read string $fingerprint
  */
