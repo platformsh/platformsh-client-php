@@ -135,18 +135,14 @@ class PlatformClient
      * Get a single SSH key by its ID.
      *
      * @param string|int $id
-     * @param bool       $reset
      *
      * @return SshKey|false
      */
-    public function getSshKey($id, $reset = false)
+    public function getSshKey($id)
     {
-        $data = $this->getAccountInfo($reset);
-        if (!isset($data['ssh_keys'][$id])) {
-            return false;
-        }
+        $url = $this->accountsEndpoint . 'ssh_keys';
 
-        return SshKey::wrap($data['ssh_keys'][$id], $this->accountsEndpoint, $this->connector->getClient());
+        return SshKey::get($id, $url, $this->connector->getClient());
     }
 
     /**
