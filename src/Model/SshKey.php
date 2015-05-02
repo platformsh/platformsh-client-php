@@ -58,10 +58,9 @@ class SshKey extends Resource
     /**
      * @inheritdoc
      */
-    public function getUri($absolute = false)
+    public function getUri($absolute = true)
     {
-        $relative = 'ssh_keys/' . $this->data['key_id'];
-        $base = $this->client->getBaseUrl();
-        return $absolute ? $base . $relative : $relative;
+        // Work around absence of HAL links in the current API.
+        return $this->baseUrl;
     }
 }
