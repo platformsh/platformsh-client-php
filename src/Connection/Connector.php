@@ -45,6 +45,9 @@ class Connector implements ConnectorInterface
      *     - cache (array|bool): Caching. Set to true to enable in-memory
      *       caching, to false (the default) to disable caching, or to an array
      *       of options as expected by the Guzzle cache subscriber.
+     *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
+     *       Use a string to specify an HTTP proxy, or an array to specify
+     *       different proxies for different protocols.
      * @param SessionInterface $session
      */
     public function __construct(array $config = [], SessionInterface $session = null)
@@ -61,6 +64,7 @@ class Connector implements ConnectorInterface
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
           'cache' => false,
           'token_url' => '/oauth2/token',
+          'proxy' => null,
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -134,6 +138,7 @@ class Connector implements ConnectorInterface
           'defaults' => [
             'debug' => $this->config['debug'],
             'verify' => $this->config['verify'],
+            'proxy' => $this->config['proxy'],
           ],
         ]);
         $grantType = new PasswordCredentials(
@@ -223,6 +228,7 @@ class Connector implements ConnectorInterface
                 'headers' => ['User-Agent' => $this->config['user_agent']],
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
+                'proxy' => $this->config['proxy'],
               ],
             ];
             $oauth2Client = $this->getOauth2Client($options);
@@ -274,6 +280,7 @@ class Connector implements ConnectorInterface
                 'headers' => ['User-Agent' => $this->config['user_agent']],
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
+                'proxy' => $this->config['proxy'],
                 'subscribers' => [$this->getOauth2Plugin()],
                 'auth' => 'oauth2',
               ],
