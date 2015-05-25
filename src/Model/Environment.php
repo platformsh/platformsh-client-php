@@ -60,6 +60,9 @@ class Environment extends Resource
      *
      * @throws \Exception
      *
+     * @deprecated You should use routes to get the correct URL(s)
+     * @see self::getRoutes()
+     *
      * @return string
      */
     public function getPublicUrl()
