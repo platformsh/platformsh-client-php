@@ -322,12 +322,12 @@ class Resource implements \ArrayAccess
      */
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
-        return array_map(
-          function ($item) use ($baseUrl, $client) {
-              return new static($item, $baseUrl, $client);
-          },
-          $data
-        );
+        $resources = [];
+        foreach ($data as $item) {
+            $resources[] = new static($item, $baseUrl, $client);
+        }
+
+        return $resources;
     }
 
     /**
