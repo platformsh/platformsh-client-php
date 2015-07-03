@@ -162,14 +162,13 @@ class Project extends Resource
      * Add a domain to the project.
      *
      * @param string $name
-     * @param bool   $wildcard
      * @param array  $ssl
      *
      * @return Domain
      */
-    public function addDomain($name, $wildcard = false, array $ssl = [])
+    public function addDomain($name, array $ssl = [])
     {
-        $body = ['name' => $name, 'wildcard' => $wildcard];
+        $body = ['name' => $name];
         if (!empty($ssl)) {
             $body['ssl'] = $ssl;
         }
