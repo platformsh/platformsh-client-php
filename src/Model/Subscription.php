@@ -24,7 +24,7 @@ class Subscription extends Resource
 {
 
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
-    public static $availableRegions = ['eu_west', 'us_east'];
+    public static $availableRegions = ['eu', 'us'];
 
     const STATUS_ACTIVE = 'active';
     const STATUS_REQUESTED = 'requested';
@@ -66,13 +66,7 @@ class Subscription extends Resource
     protected static function checkProperty($property, $value)
     {
         $errors = [];
-        if ($property === 'plan' && !in_array($value, self::$availablePlans)) {
-            $errors[] = "Plan not found: " . $value;
-        }
-        elseif ($property === 'project_region' && !in_array($value, self::$availableRegions)) {
-            $errors[] = "Region not found: " . $value;
-        }
-        elseif ($property === 'storage' && $value < 1024) {
+        if ($property === 'storage' && $value < 1024) {
             $errors[] = "Storage must be at least 1024 MiB";
         }
         elseif ($property === 'activation_callback') {
