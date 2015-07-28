@@ -24,7 +24,7 @@ class Subscription extends Resource
 {
 
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
-    public static $availableRegions = ['eu', 'us'];
+    public static $availableRegions = ['eu.platform.sh', 'us.platform.sh'];
 
     const STATUS_ACTIVE = 'active';
     const STATUS_REQUESTED = 'requested';
