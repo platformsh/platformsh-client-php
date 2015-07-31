@@ -60,7 +60,7 @@ class Activity extends Resource
         while (!$this->isComplete()) {
             usleep($pollInterval * 1000000);
             try {
-                $this->refresh(['timeout' => $pollInterval]);
+                $this->refresh(['timeout' => $pollInterval + 5]);
                 if ($onPoll !== null) {
                     $onPoll($this);
                 }
