@@ -41,7 +41,7 @@ class Environment extends Resource
     {
         if (!$this->hasLink('ssh')) {
             $id = $this->data['id'];
-            throw new \Exception("The environment $id does not have an SSH URL.");
+            throw new \Exception("The environment $id does not have an SSH URL. It may be currently inactive, or you may not have permission to SSH.");
         }
 
         $sshUrl = parse_url($this->getLink('ssh'));
