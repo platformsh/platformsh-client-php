@@ -2,6 +2,9 @@
 
 This is a PHP library for accessing the Platform.sh API.
 
+Our API is not stable yet. We recommend you use the [Platform.sh
+CLI](https://github.com/platformsh/platformsh-cli) for most purposes.
+
 ## Install
 
 Add this requirement to your `composer.json` file:
