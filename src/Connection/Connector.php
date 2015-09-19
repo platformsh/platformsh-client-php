@@ -11,6 +11,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
+use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
 
@@ -125,9 +126,12 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @param string|int $totp Time-based one-time password (two-factor
+     *                         authentication).
      */
-    public function logIn($username, $password, $force = false)
+    public function logIn($username, $password, $force = false, $totp = null)
     {
         $this->loggedOut = false;
         if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
@@ -141,7 +145,7 @@ class Connector implements ConnectorInterface
             'proxy' => $this->config['proxy'],
           ],
         ]);
-        $grantType = new PasswordCredentials(
+        $grantType = new PasswordCredentialsWithTfa(
           $client, [
             'client_id' => $this->config['client_id'],
             'client_secret' => $this->config['client_secret'],
@@ -150,6 +154,9 @@ class Connector implements ConnectorInterface
             'token_url' => $this->config['token_url'],
           ]
         );
+        if (isset($totp)) {
+            $grantType->setTotp($totp);
+        }
         try {
             $token = $grantType->getToken();
         } catch (BadResponseException $e) {
