@@ -3,7 +3,6 @@
 namespace Platformsh\Client\Connection;
 
 use CommerceGuys\Guzzle\Oauth2\AccessToken;
-use CommerceGuys\Guzzle\Oauth2\GrantType\PasswordCredentials;
 use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
 use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
