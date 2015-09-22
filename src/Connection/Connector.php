@@ -125,9 +125,6 @@ class Connector implements ConnectorInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param string|int $totp Time-based one-time password (two-factor
-     *                         authentication).
      */
     public function logIn($username, $password, $force = false, $totp = null)
     {
