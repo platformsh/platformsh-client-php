@@ -8,7 +8,6 @@ use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
