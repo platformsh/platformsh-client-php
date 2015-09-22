@@ -156,15 +156,7 @@ class Connector implements ConnectorInterface
         if (isset($totp)) {
             $grantType->setTotp($totp);
         }
-        try {
-            $token = $grantType->getToken();
-        } catch (BadResponseException $e) {
-            $response = $e->getResponse();
-            if ($response && $response->getStatusCode() === 401) {
-                throw new \InvalidArgumentException("Invalid credentials. Please check your username/password combination");
-            }
-            throw $e;
-        }
+        $token = $grantType->getToken();
         $this->session->set('username', $username);
         $this->addTokenToSession($token);
         $this->session->save();
