@@ -3,6 +3,8 @@
 namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
+use Platformsh\Client\Exception\EnvironmentStateException;
+use Platformsh\Client\Exception\OperationUnavailableException;
 
 /**
  * A Platform.sh environment.
@@ -33,7 +35,7 @@ class Environment extends Resource
      *
      * @param string $app An application name.
      *
-     * @throws \Exception
+     * @throws EnvironmentStateException
      *
      * @return string
      */
@@ -41,7 +43,7 @@ class Environment extends Resource
     {
         if (!$this->hasLink('ssh')) {
             $id = $this->data['id'];
-            throw new \Exception("The environment $id does not have an SSH URL. It may be currently inactive, or you may not have permission to SSH.");
+            throw new EnvironmentStateException("The environment '$id' does not have an SSH URL. It may be currently inactive, or you may not have permission to SSH.");
         }
 
         $sshUrl = parse_url($this->getLink('ssh'));
@@ -58,7 +60,7 @@ class Environment extends Resource
     /**
      * Get the public URL for the environment.
      *
-     * @throws \Exception
+     * @throws EnvironmentStateException
      *
      * @deprecated You should use routes to get the correct URL(s)
      * @see self::getRoutes()
@@ -69,7 +71,7 @@ class Environment extends Resource
     {
         if (!$this->hasLink('public-url')) {
             $id = $this->data['id'];
-            throw new \Exception("The environment $id does not have a Public URL.");
+            throw new EnvironmentStateException("The environment '$id' does not have a public URL. It may be inactive.");
         }
 
         return $this->getLink('public-url');
@@ -123,7 +125,7 @@ class Environment extends Resource
      * @param bool $deactivate Whether to deactivate the environment before
      *                         deleting it.
      *
-     * @throws \Exception
+     * @throws EnvironmentStateException
      *
      * @return array
      */
@@ -131,7 +133,7 @@ class Environment extends Resource
     {
         if ($this->isActive()) {
             if (!$deactivate) {
-                throw new \Exception('Active environments cannot be deleted');
+                throw new EnvironmentStateException('Active environments cannot be deleted');
             }
             // Deactivate the environment before deleting. Platform.sh will
             // queue the operations, so there should be no need to wait.
@@ -152,14 +154,14 @@ class Environment extends Resource
     /**
      * Activate the environment.
      *
-     * @throws \Exception
+     * @throws EnvironmentStateException
      *
      * @return Activity
      */
     public function activate()
     {
         if ($this->isActive()) {
-            throw new \Exception('Active environments cannot be activated');
+            throw new EnvironmentStateException('Active environments cannot be activated');
         }
 
         return $this->runLongOperation('activate');
@@ -168,14 +170,14 @@ class Environment extends Resource
     /**
      * Deactivate the environment.
      *
-     * @throws \Exception
+     * @throws EnvironmentStateException
      *
      * @return Activity
      */
     public function deactivate()
     {
         if (!$this->isActive()) {
-            throw new \Exception('Inactive environments cannot be deactivated');
+            throw new EnvironmentStateException('Inactive environments cannot be deactivated');
         }
 
         return $this->runLongOperation('deactivate');
@@ -184,14 +186,14 @@ class Environment extends Resource
     /**
      * Merge an environment into its parent.
      *
-     * @throws \Exception
+     * @throws OperationUnavailableException
      *
      * @return Activity
      */
     public function merge()
     {
         if (!$this->getProperty('parent')) {
-            throw new \Exception('The environment does not have a parent, so it cannot be merged');
+            throw new OperationUnavailableException('The environment does not have a parent, so it cannot be merged');
         }
 
         return $this->runLongOperation('merge');

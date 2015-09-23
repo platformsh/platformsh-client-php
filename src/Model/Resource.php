@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\ParseException;
 use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Url;
 use Platformsh\Client\Exception\ApiResponseException;
+use Platformsh\Client\Exception\OperationUnavailableException;
 
 class Resource implements \ArrayAccess
 {
@@ -342,7 +343,7 @@ class Resource implements \ArrayAccess
     protected function runOperation($op, $method = 'post', array $body = [])
     {
         if (!$this->operationAvailable($op)) {
-            throw new \RuntimeException("Operation not available: $op");
+            throw new OperationUnavailableException("Operation not available: $op");
         }
         $options = [];
         if (!empty($body)) {
