@@ -63,7 +63,7 @@ class Environment extends Resource
      * @throws EnvironmentStateException
      *
      * @deprecated You should use routes to get the correct URL(s)
-     * @see self::getRoutes()
+     * @see self::getRouteUrls()
      *
      * @return string
      */
@@ -324,13 +324,32 @@ class Environment extends Resource
     }
 
     /**
-     * Get environment routes.
+     * Get the environment's routes configuration.
+     *
+     * @see self::getRouteUrls()
      *
      * @return Route[]
      */
     public function getRoutes()
     {
         return Route::getCollection($this->getLink('#manage-routes'), 0, [], $this->client);
+    }
+
+    /**
+     * Get the resolved URLs for the environment's routes.
+     *
+     * @return string[]
+     */
+    public function getRouteUrls()
+    {
+        $routes = [];
+        if (isset($this->data['_links']['pf:routes'])) {
+            foreach ($this->data['_links']['pf:routes'] as $route) {
+                $routes[] = $route['href'];
+            }
+        }
+
+        return $routes;
     }
 
     /**
