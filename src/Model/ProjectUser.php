@@ -64,6 +64,8 @@ class ProjectUser extends Resource
      * @param Environment $environment
      * @param string      $newRole The new role ('admin', 'contributor',
      *                             or 'viewer').
+     *
+     * @return Activity
      */
     public function changeEnvironmentRole(Environment $environment, $newRole)
     {
@@ -71,9 +73,15 @@ class ProjectUser extends Resource
             throw new \InvalidArgumentException("Invalid role: $newRole");
         }
 
-        $this->sendRequest($environment->getUri() . '/access/' . $this->id, 'patch', [
-          'json' => ['role' => $newRole],
+        $data = $this->sendRequest($environment->getUri() . '/access', 'post', [
+          'json' => ['user' => $this->id, 'role' => $newRole],
         ]);
+
+        if (!isset($data['_embedded']['activities'][0])) {
+            throw new \RuntimeException('Expected activity not found');
+        }
+
+        return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
     }
 
     /**
