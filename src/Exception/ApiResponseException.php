@@ -64,7 +64,7 @@ class ApiResponseException extends BadResponseException
             $json = $response->json();
             foreach ($responseInfoProperties as $property) {
                 if (!empty($json[$property])) {
-                    $details .= " \n [$property] " . implode('; ', (array) $json[$property]);
+                    $details .= " [$property] " . implode('; ', (array) $json[$property]);
                 }
             }
         } catch (ParseException $parseException) {
@@ -72,11 +72,11 @@ class ApiResponseException extends BadResponseException
             $response->getBody()->seek(0);
             $body = $response->getBody()->getContents();
             if ($body) {
-                $details .= " \n [extra] Non-JSON response body";
-                $details .= " \n [body] " . $body;
+                $details .= " [extra] Non-JSON response body";
+                $details .= " [body] " . $body;
             }
             else {
-                $details .= " \n [extra] Empty response body";
+                $details .= " [extra] Empty response body";
             }
         }
 
