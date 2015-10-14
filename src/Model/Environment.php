@@ -398,7 +398,7 @@ class Environment extends Resource
      * @param string $user The user's UUID.
      * @param string $role One of EnvironmentAccess::$roles.
      *
-     * @return ProjectAccess
+     * @return Activity
      */
     public function addUser($user, $role)
     {
