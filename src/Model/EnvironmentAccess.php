@@ -2,6 +2,8 @@
 
 namespace Platformsh\Client\Model;
 
+use GuzzleHttp\ClientInterface;
+
 /**
  * A record establishing a user's access to a Platform.sh environment.
  *
@@ -37,14 +39,40 @@ class EnvironmentAccess extends Resource
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \Exception if the expected activity is not returned.
+     *
+     * @return Activity
+     */
+    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    {
+        if ($errors = static::checkNew($body)) {
+            $message = "Cannot create resource due to validation error(s): " . implode('; ', $errors);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
+        $data = self::send($request, $client);
+
+        if (!isset($data['_embedded']['activities'][0])) {
+            throw new \Exception('Expected activity not found');
+        }
+
+        return Activity::wrap($data['_embedded']['activities'][0], $collectionUrl, $client);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Activity
      */
     public function update(array $values)
     {
-        # Environment access resources don't contain an 'edit' operation link.
         if ($errors = $this->checkUpdate($values)) {
             $message = "Cannot update resource due to validation error(s): " . implode('; ', $errors);
             throw new \InvalidArgumentException($message);
         }
+
         $request = $this->client->createRequest('patch', $this->getUri(), ['json' => $values]);
         $data = $this->send($request, $this->client);
         if (isset($data['_embedded']['entity'])) {
@@ -52,6 +80,10 @@ class EnvironmentAccess extends Resource
             $this->setData($data + ['_full' => true]);
         }
 
-        return $data;
+        if (!isset($data['_embedded']['activities'][0])) {
+            throw new \Exception('Expected activity not found');
+        }
+
+        return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
     }
 }

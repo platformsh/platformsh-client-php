@@ -64,13 +64,7 @@ class ProjectAccess extends Resource
      */
     public function getEnvironmentAccess(Environment $environment)
     {
-        foreach ($environment->getUsers() as $access) {
-            if ($access->user === $this->id) {
-                return $access;
-            }
-        }
-
-        return false;
+        return EnvironmentAccess::get($this->id, $environment->getLink('#manage-access'), $this->client);
     }
 
     /**
@@ -79,26 +73,20 @@ class ProjectAccess extends Resource
      * @param Environment $environment
      * @param string $newRole The new role (see EnvironmentAccess::$roles).
      *
-     * @return Activity|true
-     *   An activity if one was returned (suggesting the environment is being
-     *   redeployed), TRUE otherwise.
+     * @return Activity
      */
     public function changeEnvironmentRole(Environment $environment, $newRole)
     {
         $access = $this->getEnvironmentAccess($environment);
         if ($access) {
-            $data = $access->update(['role' => $newRole]);
-        }
-        else {
-            $access = $environment->addUser($this->id, $newRole);
-            $data = $access->getData();
+            if ($access->role === $newRole) {
+                throw new \InvalidArgumentException("There is nothing to change");
+            }
+
+            return $access->update(['role' => $newRole]);
         }
 
-        if (!isset($data['_embedded']['activities'][0])) {
-            return true;
-        }
-
-        return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
+        return $environment->addUser($this->id, $newRole);
     }
 
     /**
