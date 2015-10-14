@@ -76,7 +76,7 @@ class Project extends Resource
      * Add a new user to a project.
      *
      * @param string $email An email address.
-     * @param string $role  One of User::ROLE_ADMIN or User::ROLE_VIEWER.
+     * @param string $role  One of ProjectUser::$roles.
      *
      * @return ProjectAccess
      */

@@ -55,7 +55,7 @@ class ProjectAccess extends Resource
     }
 
     /**
-     * Get the user's role on an environment.
+     * Get the user's access on an environment.
      *
      * @param Environment $environment
      *
@@ -64,8 +64,7 @@ class ProjectAccess extends Resource
      */
     public function getEnvironmentAccess(Environment $environment)
     {
-        $collection = EnvironmentAccess::getCollection($environment->getUri() . '/access', 0, [], $this->client);
-        foreach ($collection as $access) {
+        foreach ($environment->getUsers() as $access) {
             if ($access->user === $this->id) {
                 return $access;
             }
@@ -78,8 +77,7 @@ class ProjectAccess extends Resource
      * Change the user's environment-level role.
      *
      * @param Environment $environment
-     * @param string      $newRole The new role ('admin', 'contributor',
-     *                             or 'viewer').
+     * @param string $newRole The new role (see EnvironmentAccess::$roles).
      *
      * @return Activity|true
      *   An activity if one was returned (suggesting the environment is being
@@ -92,11 +90,7 @@ class ProjectAccess extends Resource
             $data = $access->update(['role' => $newRole]);
         }
         else {
-            $access = EnvironmentAccess::create(
-              ['user' => $this->id, 'role' => $newRole],
-              $environment->getUri() . '/access',
-              $this->client
-            );
+            $access = $environment->addUser($this->id, $newRole);
             $data = $access->getData();
         }
 

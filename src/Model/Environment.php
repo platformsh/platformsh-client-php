@@ -381,4 +381,29 @@ class Environment extends Resource
 
         return $this->runLongOperation('initialize', 'post', $values);
     }
+
+    /**
+     * Get the users with access to this environment.
+     *
+     * @return EnvironmentAccess[]
+     */
+    public function getUsers()
+    {
+        return EnvironmentAccess::getCollection($this->getLink('#manage-access'), 0, [], $this->client);
+    }
+
+    /**
+     * Add a new user to the environment.
+     *
+     * @param string $user The user's UUID.
+     * @param string $role One of EnvironmentAccess::$roles.
+     *
+     * @return ProjectAccess
+     */
+    public function addUser($user, $role)
+    {
+        $body = ['user' => $user, 'role' => $role];
+
+        return EnvironmentAccess::create($body, $this->getLink('#manage-access'), $this->client);
+    }
 }
