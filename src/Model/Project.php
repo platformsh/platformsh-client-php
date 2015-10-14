@@ -65,11 +65,11 @@ class Project extends Resource
     /**
      * Get the users associated with a project.
      *
-     * @return ProjectUser[]
+     * @return ProjectAccess[]
      */
     public function getUsers()
     {
-        return ProjectUser::getCollection($this->getLink('access'), 0, [], $this->client);
+        return ProjectAccess::getCollection($this->getLink('access'), 0, [], $this->client);
     }
 
     /**
@@ -78,13 +78,13 @@ class Project extends Resource
      * @param string $email An email address.
      * @param string $role  One of User::ROLE_ADMIN or User::ROLE_VIEWER.
      *
-     * @return ProjectUser
+     * @return ProjectAccess
      */
     public function addUser($email, $role)
     {
         $body = ['email' => $email, 'role' => $role];
 
-        return ProjectUser::create($body, $this->getLink('access'), $this->client);
+        return ProjectAccess::create($body, $this->getLink('access'), $this->client);
     }
 
     /**
