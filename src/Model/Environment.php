@@ -383,6 +383,18 @@ class Environment extends Resource
     }
 
     /**
+     * Get a user's access to this environment.
+     *
+     * @param string $uuid
+     *
+     * @return EnvironmentAccess|false
+     */
+    public function getUser($uuid)
+    {
+        return EnvironmentAccess::get($uuid, $this->getLink('#manage-access'), $this->client);
+    }
+
+    /**
      * Get the users with access to this environment.
      *
      * @return EnvironmentAccess[]

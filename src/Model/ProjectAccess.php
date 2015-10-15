@@ -42,29 +42,16 @@ class ProjectAccess extends Resource
      *
      * @param Environment $environment
      *
-     * @deprecated use getEnvironmentAccess() instead
+     * @deprecated use Environment::getUser() instead
      *
      * @return string|false
      *   The user's environment role, or false if not found.
      */
     public function getEnvironmentRole(Environment $environment)
     {
-        $access = $this->getEnvironmentAccess($environment);
+        $access = $environment->getUser($this->id);
 
         return $access ? $access->role : false;
-    }
-
-    /**
-     * Get the user's access on an environment.
-     *
-     * @param Environment $environment
-     *
-     * @return EnvironmentAccess|false
-     *   The user's environment access, or false if not found.
-     */
-    public function getEnvironmentAccess(Environment $environment)
-    {
-        return EnvironmentAccess::get($this->id, $environment->getLink('#manage-access'), $this->client);
     }
 
     /**
@@ -77,7 +64,7 @@ class ProjectAccess extends Resource
      */
     public function changeEnvironmentRole(Environment $environment, $newRole)
     {
-        $access = $this->getEnvironmentAccess($environment);
+        $access = $environment->getUser($this->id);
         if ($access) {
             if ($access->role === $newRole) {
                 throw new \InvalidArgumentException("There is nothing to change");
