@@ -24,13 +24,15 @@ class Variable extends Resource
      *
      * This is only useful if the variable is both inherited and enabled.
      * Non-inherited variables can be deleted.
+     *
+     * @return Activity|array
      */
     public function disable()
     {
         if (!$this->getProperty('is_enabled')) {
-            return;
+            return [];
         }
 
-        $this->update(['is_enabled' => false]);
+        return $this->update(['is_enabled' => false]);
     }
 }
