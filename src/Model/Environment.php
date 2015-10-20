@@ -29,7 +29,6 @@ use Platformsh\Client\Exception\OperationUnavailableException;
  */
 class Environment extends Resource
 {
-
     /**
      * Get the SSH URL for the environment.
      *
@@ -244,6 +243,8 @@ class Environment extends Resource
     /**
      * Get the activity from the previous operation.
      *
+     * @deprecated This never actually worked.
+     *
      * @return Activity|false
      */
     public function getLastActivity()
@@ -298,7 +299,7 @@ class Environment extends Resource
      * @param mixed  $value
      * @param bool   $json
      *
-     * @return Variable
+     * @return Activity|array
      */
     public function setVariable($name, $value, $json = false)
     {
@@ -309,9 +310,7 @@ class Environment extends Resource
         $values = ['value' => $value, 'is_json' => $json];
         $existing = $this->getVariable($name);
         if ($existing) {
-            $existing->update($values);
-
-            return $existing;
+            return $existing->update($values);
         }
         $values['name'] = $name;
 
