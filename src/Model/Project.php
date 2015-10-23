@@ -206,7 +206,7 @@ class Project extends Resource
      * @param string $type
      * @param array $data
      *
-     * @return Activity
+     * @return Activity|array
      */
     public function addIntegration($type, array $data = [])
     {
