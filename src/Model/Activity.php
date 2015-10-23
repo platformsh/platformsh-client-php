@@ -125,6 +125,34 @@ class Activity extends Resource
         $type = $this->getProperty('type');
         $payload = $this->getProperty('payload');
         switch ($type) {
+            case 'project.domain.create':
+                return sprintf(
+                  "%s added domain %s",
+                  $payload['user']['display_name'],
+                  $payload['domain']['name']
+                );
+
+            case 'project.domain.delete':
+                return sprintf(
+                  "%s deleted domain %s",
+                  $payload['user']['display_name'],
+                  $payload['domain']['name']
+                );
+
+            case 'project.domain.update':
+                return sprintf(
+                  "%s updated domain %s",
+                  $payload['user']['display_name'],
+                  $payload['domain']['name']
+                );
+
+            case 'project.modify.title':
+                return sprintf(
+                  "%s changed project name to %s",
+                  $payload['user']['display_name'],
+                  $payload['new_title']
+                );
+
             case 'environment.activate':
                 return sprintf(
                   "%s activated environment %s",
@@ -251,6 +279,47 @@ class Activity extends Resource
                   "%s updated HTTP Access settings on environment %s",
                   $payload['user']['display_name'],
                   $payload['environment']['title']
+                );
+
+            case 'environment.update.smtp':
+                return sprintf(
+                  "%s updated SMTP settings on environment %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.route.create':
+                return sprintf(
+                  "%s added route %s",
+                  $payload['user']['display_name'],
+                  $payload['route']['route']
+                );
+
+            case 'environment.route.delete':
+                return sprintf(
+                  "%s deleted route %s",
+                  $payload['user']['display_name'],
+                  $payload['route']['route']
+                );
+
+            case 'environment.route.update':
+                return sprintf(
+                  "%s modified route %s",
+                  $payload['user']['display_name'],
+                  $payload['route']['route']
+                );
+
+            case 'environment.subscription.update':
+                return sprintf(
+                  "%s modified subscription",
+                  $payload['user']['display_name']
+                );
+
+            case 'project.create':
+                return sprintf(
+                  "%s created a new project %s",
+                  $payload['user']['display_name'],
+                  $payload['outcome']['title']
                 );
         }
         return $type;
