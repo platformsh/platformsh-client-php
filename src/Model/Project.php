@@ -164,7 +164,7 @@ class Project extends Resource
      * @param string $name
      * @param array  $ssl
      *
-     * @return Activity
+     * @return Activity|array
      */
     public function addDomain($name, array $ssl = [])
     {
