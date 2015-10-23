@@ -93,7 +93,7 @@ class ProjectAccess extends Resource
      *
      * @param string $key
      *
-     * @return SshKey_Platform
+     * @return array
      */
     public function addSshKey($key)
     {

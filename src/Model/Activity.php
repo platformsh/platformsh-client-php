@@ -208,6 +208,50 @@ class Activity extends Resource
                   $syncType,
                   $payload['environment']['title']
                 );
+
+            case 'environment.access.add':
+                return sprintf(
+                  "%s added %s to %s",
+                  $payload['user']['display_name'],
+                  $payload['access']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.access.remove':
+                return sprintf(
+                  "%s removed %s from %s",
+                  $payload['user']['display_name'],
+                  $payload['access']['display_name'],
+                  $payload['environment']['title']
+                );
+
+            case 'environment.variable.create':
+                return sprintf(
+                  "%s added variable %s",
+                  $payload['user']['display_name'],
+                  $payload['variable']['name']
+                );
+
+            case 'environment.variable.delete':
+                return sprintf(
+                  "%s deleted variable %s",
+                  $payload['user']['display_name'],
+                  $payload['variable']['name']
+                );
+
+            case 'environment.variable.update':
+                return sprintf(
+                  "%s modified variable %s",
+                  $payload['user']['display_name'],
+                  $payload['variable']['name']
+                );
+
+            case 'environment.update.http_access':
+                return sprintf(
+                  "%s updated HTTP Access settings on environment %s",
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
         }
         return $type;
     }

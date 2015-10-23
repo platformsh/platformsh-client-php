@@ -10,7 +10,6 @@ namespace Platformsh\Client\Model;
 class SshKey_Platform extends Resource
 {
 
-    /** @var array */
     protected static $required = ['key'];
 
     /**
@@ -22,5 +21,15 @@ class SshKey_Platform extends Resource
             return ["The SSH key is invalid"];
         }
         return [];
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @throws \BadMethodCallException
+     */
+    public function update(array $values)
+    {
+        throw new \BadMethodCallException('Update is not implemented for SSH keys');
     }
 }

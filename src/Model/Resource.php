@@ -155,7 +155,7 @@ class Resource implements \ArrayAccess
      * @param string          $collectionUrl
      * @param ClientInterface $client
      *
-     * @return static
+     * @return Activity|array
      */
     public static function create(array $body, $collectionUrl, ClientInterface $client)
     {
@@ -167,25 +167,11 @@ class Resource implements \ArrayAccess
         $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
         $data = self::send($request, $client);
 
-        // A create action can simply return 201 Created with a location.
-        if (isset($data['status']) && $data['status'] === 'created' && isset($data['location'])) {
-            // Platform.sh can erroneously return HTTP URLs in the location.
-            if (strpos($collectionUrl, 'https://') !== false && strpos($data['location'], 'http://') !== false) {
-                $data['location'] = str_replace('http://', 'https://', $data['location']);
-            } elseif (strpos($data['location'], '//') === false) {
-                // If the location is relative, make it absolute.
-                $base = Url::fromString($collectionUrl);
-                $data['location'] = (string) $base->combine($data['location']);
-            }
-
-            $resource = static::get($data['location'], null, $client);
-            if ($resource === false) {
-                throw new \RuntimeException('Failed to retrieve created resource');
-            }
-            return $resource;
+        if (isset($data['_embedded']['activities'][0])) {
+            return Activity::wrap($data['_embedded']['activities'][0], $collectionUrl, $client);
         }
 
-        return static::wrap($data, $collectionUrl, $client);
+        return $data;
     }
 
     /**
@@ -414,11 +400,16 @@ class Resource implements \ArrayAccess
     /**
      * Delete the resource.
      *
-     * @return array
+     * @return Activity|array
      */
     public function delete()
     {
-        return $this->client->delete($this->getUri())->json();
+        $data = $this->client->delete($this->getUri())->json();
+        if (isset($data['_embedded']['activities'][0])) {
+            return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
+        }
+
+        return $data;
     }
 
     /**
@@ -428,7 +419,7 @@ class Resource implements \ArrayAccess
      *
      * @param array $values
      *
-     * @return array
+     * @return Activity|array
      */
     public function update(array $values)
     {
@@ -437,10 +428,16 @@ class Resource implements \ArrayAccess
             throw new \InvalidArgumentException($message);
         }
         $data = $this->runOperation('edit', 'patch', $values);
+
         if (isset($data['_embedded']['entity'])) {
-            $data = $data['_embedded']['entity'];
-            $this->setData($data + ['_full' => true]);
+            $resourceData = $data['_embedded']['entity'];
+            $this->setData($resourceData + ['_full' => true]);
         }
+
+        if (isset($data['_embedded']['activities'][0])) {
+            return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
+        }
+
         return $data;
     }
 
