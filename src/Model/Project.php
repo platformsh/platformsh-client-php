@@ -78,7 +78,7 @@ class Project extends Resource
      * @param string $email An email address.
      * @param string $role  One of ProjectUser::$roles.
      *
-     * @return Activity
+     * @return array
      */
     public function addUser($email, $role)
     {
