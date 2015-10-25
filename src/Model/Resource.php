@@ -337,7 +337,7 @@ abstract class Resource implements \ArrayAccess
         $data = $this->runOperation($op, $method, $body);
         $result = new Result($data, $this->baseUrl, $this->client, get_called_class());
         $activities = $result->getActivities();
-        if (count($activities) > 1) {
+        if (count($activities) !== 1) {
             trigger_error(sprintf("Expected one activity, found %d", count($activities)), E_USER_WARNING);
         }
 
