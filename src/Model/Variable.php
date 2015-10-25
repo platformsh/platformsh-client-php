@@ -25,7 +25,7 @@ class Variable extends Resource
      * This is only useful if the variable is both inherited and enabled.
      * Non-inherited variables can be deleted.
      *
-     * @return Activity|array
+     * @return Result
      */
     public function disable()
     {

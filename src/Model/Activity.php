@@ -112,6 +112,7 @@ class Activity extends Resource
         if (!$this->isComplete()) {
             throw new \BadMethodCallException('Cannot restore backup (not complete)');
         }
+
         return $this->runLongOperation('restore');
     }
 

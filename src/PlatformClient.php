@@ -71,7 +71,7 @@ class PlatformClient
         $projects = [];
         foreach ($data['projects'] as $project) {
             // Each project has its own endpoint on a Platform.sh region.
-            $projects[] = Project::wrap($project, $project['endpoint'], $client);
+            $projects[] = new Project($project, $project['endpoint'], $client);
         }
 
         return $projects;

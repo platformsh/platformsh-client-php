@@ -78,7 +78,7 @@ class Project extends Resource
      * @param string $email An email address.
      * @param string $role  One of ProjectUser::$roles.
      *
-     * @return array
+     * @return Result
      */
     public function addUser($email, $role)
     {
@@ -164,7 +164,7 @@ class Project extends Resource
      * @param string $name
      * @param array  $ssl
      *
-     * @return Activity|array
+     * @return Result
      */
     public function addDomain($name, array $ssl = [])
     {
@@ -206,7 +206,7 @@ class Project extends Resource
      * @param string $type
      * @param array $data
      *
-     * @return Activity|array
+     * @return Result
      */
     public function addIntegration($type, array $data = [])
     {

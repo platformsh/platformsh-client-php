@@ -60,7 +60,7 @@ class ProjectAccess extends Resource
      * @param Environment $environment
      * @param string $newRole The new role (see EnvironmentAccess::$roles).
      *
-     * @return Activity
+     * @return Result
      */
     public function changeEnvironmentRole(Environment $environment, $newRole)
     {
@@ -93,7 +93,7 @@ class ProjectAccess extends Resource
      *
      * @param string $key
      *
-     * @return array
+     * @return Result
      */
     public function addSshKey($key)
     {
