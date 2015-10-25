@@ -121,22 +121,14 @@ class Environment extends Resource
     /**
      * Delete the environment.
      *
-     * @param bool $deactivate Whether to deactivate the environment before
-     *                         deleting it.
-     *
      * @throws EnvironmentStateException
      *
-     * @return array
+     * @return Result
      */
-    public function delete($deactivate = false)
+    public function delete()
     {
         if ($this->isActive()) {
-            if (!$deactivate) {
-                throw new EnvironmentStateException('Active environments cannot be deleted');
-            }
-            // Deactivate the environment before deleting. Platform.sh will
-            // queue the operations, so there should be no need to wait.
-            $this->deactivate();
+            throw new EnvironmentStateException('Active environments cannot be deleted');
         }
 
         return parent::delete();
@@ -241,21 +233,6 @@ class Environment extends Resource
     }
 
     /**
-     * Get the activity from the previous operation.
-     *
-     * @deprecated This never actually worked.
-     *
-     * @return Activity|false
-     */
-    public function getLastActivity()
-    {
-        if (!isset($this->data['_embedded']['activities'][0])) {
-            return false;
-        }
-        return Activity::wrap($this->data['_embedded']['activities'][0], $this->baseUrl, $this->client);
-    }
-
-    /**
      * Get a list of environment activities.
      *
      * @param int $limit
@@ -299,7 +276,7 @@ class Environment extends Resource
      * @param mixed  $value
      * @param bool   $json
      *
-     * @return Activity|array
+     * @return Result
      */
     public function setVariable($name, $value, $json = false)
     {
@@ -409,7 +386,7 @@ class Environment extends Resource
      * @param string $user The user's UUID.
      * @param string $role One of EnvironmentAccess::$roles.
      *
-     * @return Activity
+     * @return Result
      */
     public function addUser($user, $role)
     {

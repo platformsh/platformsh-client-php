@@ -11,7 +11,7 @@ use GuzzleHttp\Url;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 
-class Resource implements \ArrayAccess
+abstract class Resource implements \ArrayAccess
 {
 
     /** @var array */
@@ -31,7 +31,7 @@ class Resource implements \ArrayAccess
      * @param string          $baseUrl
      * @param ClientInterface $client
      */
-    public function __construct(array $data = [], $baseUrl = null, ClientInterface $client = null)
+    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null)
     {
         $this->setData($data);
         $this->client = $client ?: new Client();
@@ -138,7 +138,7 @@ class Resource implements \ArrayAccess
             $data = self::send($request, $client);
             $data['_full'] = true;
 
-            return static::wrap($data, $url, $client);
+            return new static($data, $url, $client);
         } catch (BadResponseException $e) {
             $response = $e->getResponse();
             if ($response && $response->getStatusCode() === 404) {
@@ -155,7 +155,7 @@ class Resource implements \ArrayAccess
      * @param string          $collectionUrl
      * @param ClientInterface $client
      *
-     * @return Activity|array
+     * @return Result
      */
     public static function create(array $body, $collectionUrl, ClientInterface $client)
     {
@@ -167,11 +167,7 @@ class Resource implements \ArrayAccess
         $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
         $data = self::send($request, $client);
 
-        if (isset($data['_embedded']['activities'][0])) {
-            return Activity::wrap($data['_embedded']['activities'][0], $collectionUrl, $client);
-        }
-
-        return $data;
+        return new Result($data, $collectionUrl, $client, get_called_class());
     }
 
     /**
@@ -285,20 +281,6 @@ class Resource implements \ArrayAccess
     }
 
     /**
-     * Create a resource instance from JSON data.
-     *
-     * @param array           $data
-     * @param string          $baseUrl
-     * @param ClientInterface $client
-     *
-     * @return static
-     */
-    public static function wrap(array $data, $baseUrl, ClientInterface $client)
-    {
-        return new static($data, $baseUrl, $client);
-    }
-
-    /**
      * Create an array of resource instances from a collection's JSON data.
      *
      * @param array           $data
@@ -348,18 +330,14 @@ class Resource implements \ArrayAccess
      * @param string $method
      * @param array  $body
      *
-     * @throws \Exception
-     *
      * @return Activity
      */
     protected function runLongOperation($op, $method = 'post', array $body = [])
     {
         $data = $this->runOperation($op, $method, $body);
-        if (!isset($data['_embedded']['activities'][0])) {
-            throw new \Exception('Expected activity not found');
-        }
+        $result = new Result($data, $this->baseUrl, $this->client, get_called_class());
 
-        return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
+        return $result->getActivity();
     }
 
     /**
@@ -400,16 +378,13 @@ class Resource implements \ArrayAccess
     /**
      * Delete the resource.
      *
-     * @return Activity|array
+     * @return Result
      */
     public function delete()
     {
         $data = $this->client->delete($this->getUri())->json();
-        if (isset($data['_embedded']['activities'][0])) {
-            return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
-        }
 
-        return $data;
+        return new Result($data, $this->getUri(), $this->client, get_called_class());
     }
 
     /**
@@ -419,7 +394,7 @@ class Resource implements \ArrayAccess
      *
      * @param array $values
      *
-     * @return Activity|array
+     * @return Result
      */
     public function update(array $values)
     {
@@ -434,11 +409,7 @@ class Resource implements \ArrayAccess
             $this->setData($resourceData + ['_full' => true]);
         }
 
-        if (isset($data['_embedded']['activities'][0])) {
-            return Activity::wrap($data['_embedded']['activities'][0], $this->baseUrl, $this->client);
-        }
-
-        return $data;
+        return new Result($data, $this->baseUrl, $this->client, get_called_class());
     }
 
     /**

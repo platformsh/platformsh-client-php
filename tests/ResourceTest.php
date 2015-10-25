@@ -2,8 +2,6 @@
 
 namespace Platformsh\Client\Tests;
 
-use Platformsh\Client\Model\Resource;
-
 class ResourceTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -32,7 +30,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
               ],
             ],
           ];
-        $this->resource = new Resource($data);
+        $this->resource = new MockResource($data);
     }
 
     /**
@@ -90,7 +88,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidPropertiesBlockUpdate()
     {
-        $resource = new MockResource();
+        $resource = new MockResource([]);
         $this->setExpectedException('\InvalidArgumentException');
         $resource->update(['testProperty' => 2]);
     }
