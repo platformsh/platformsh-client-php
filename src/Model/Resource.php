@@ -386,7 +386,7 @@ abstract class Resource implements \ArrayAccess
      */
     public function delete()
     {
-        $data = $this->client->delete($this->getUri())->json();
+        $data = (array) $this->client->delete($this->getUri())->json();
 
         return new Result($data, $this->getUri(), $this->client, get_called_class());
     }

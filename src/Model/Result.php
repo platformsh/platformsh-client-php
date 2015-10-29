@@ -93,7 +93,7 @@ class Result extends Resource
     /**
      * {@inheritdoc}
      */
-    public function update()
+    public function update(array $values)
     {
        throw new \BadMethodCallException("Cannot update() a Result instance directly. Perhaps use getEntity().");
     }
