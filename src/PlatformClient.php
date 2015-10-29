@@ -7,6 +7,7 @@ use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Project;
+use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
 
@@ -151,7 +152,7 @@ class PlatformClient
      * @param string $value The SSH key value.
      * @param string $title A title for the key (optional).
      *
-     * @return SshKey
+     * @return Result
      */
     public function addSshKey($value, $title = null)
     {
@@ -185,7 +186,7 @@ class PlatformClient
      * @param int    $environments The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
      *
-     * @return Subscription
+     * @return Result
      */
     public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
     {
