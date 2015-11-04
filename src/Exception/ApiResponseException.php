@@ -64,7 +64,8 @@ class ApiResponseException extends BadResponseException
             $json = $response->json();
             foreach ($responseInfoProperties as $property) {
                 if (!empty($json[$property])) {
-                    $details .= " [$property] " . implode('; ', (array) $json[$property]);
+                    $value = $json[$property];
+                    $details .= " [$property] " . (is_scalar($value) ? $value : json_encode($value));
                 }
             }
         } catch (ParseException $parseException) {
