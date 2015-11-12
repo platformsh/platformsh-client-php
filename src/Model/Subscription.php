@@ -34,6 +34,18 @@ class Subscription extends Resource
     const STATUS_DELETED = 'deleted';
 
     /**
+     * {@inheritdoc}
+     *
+     * @return static
+     */
+    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    {
+        $result = parent::create($body, $collectionUrl, $client);
+
+        return new Subscription($result->getData(), $collectionUrl, $client);
+    }
+
+    /**
      * Wait for the subscription's project to be provisioned.
      *
      * @param callable  $onPoll   A function that will be called every time the

@@ -186,7 +186,7 @@ class PlatformClient
      * @param int    $environments The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
      *
-     * @return Result
+     * @return Subscription
      */
     public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
     {
