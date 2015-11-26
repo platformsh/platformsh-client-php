@@ -163,7 +163,7 @@ class Activity extends Resource
 
             case 'environment.backup':
                 return sprintf(
-                  "%s created backup of %s",
+                  "%s created a snapshot of %s",
                   $payload['user']['display_name'],
                   $payload['environment']['title']
                 );
@@ -215,10 +215,10 @@ class Activity extends Resource
 
             case 'environment.restore':
                 return sprintf(
-                  "%s restored %s to %s",
+                  "%s restored %s from snapshot %s",
                   $payload['user']['display_name'],
                   $payload['environment'],
-                  substr($payload['commit'], 0, 7)
+                  substr($payload['backup_name'], 0, 7)
                 );
 
             case 'environment.synchronize':
