@@ -286,9 +286,13 @@ class Connector implements ConnectorInterface
 
             // The access token might change during the request cycle, because
             // the OAuth2Subscriber may refresh it. So we ensure the access
-            // token is saved immediately after each request.
+            // token is saved immediately after each successful request.
             $client->getEmitter()->on('complete', function (CompleteEvent $event) use ($oauth2) {
-                if ($event->getRequest()->getConfig()->get('auth') === 'oauth2') {
+                if ($event->getRequest()->getConfig()->get('auth') !== 'oauth2') {
+                    return;
+                }
+                $response = $event->getResponse();
+                if ($response && substr($response->getStatusCode(), 0, 1) === '2') {
                     $token = $oauth2->getAccessToken();
                     if ($token !== null) {
                         $this->saveToken($token);
