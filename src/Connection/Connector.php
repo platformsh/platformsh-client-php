@@ -8,6 +8,7 @@ use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
+use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
@@ -102,9 +103,8 @@ class Connector implements ConnectorInterface
         } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()->getAccessToken();
-            $this->addTokenToSession($token);
+            $this->saveToken($token);
         }
-        $this->session->save();
     }
 
     /**
@@ -154,8 +154,7 @@ class Connector implements ConnectorInterface
         }
         $token = $grantType->getToken();
         $this->session->set('username', $username);
-        $this->addTokenToSession($token);
-        $this->session->save();
+        $this->saveToken($token);
     }
 
     /**
@@ -163,7 +162,7 @@ class Connector implements ConnectorInterface
      *
      * @param AccessToken $token
      */
-    protected function addTokenToSession(AccessToken $token)
+    protected function saveToken(AccessToken $token)
     {
         $this->session->set('accessToken', $token->getToken());
         $this->session->set('tokenType', $token->getType());
@@ -173,6 +172,7 @@ class Connector implements ConnectorInterface
         if ($token->getRefreshToken()) {
             $this->session->set('refreshToken', $token->getRefreshToken()->getToken());
         }
+        $this->session->save();
     }
 
     /**
@@ -269,17 +269,29 @@ class Connector implements ConnectorInterface
     public function getClient()
     {
         if (!isset($this->client)) {
+            $oauth2 = $this->getOauth2Plugin();
             $options = [
               'defaults' => [
                 'headers' => ['User-Agent' => $this->config['user_agent']],
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
                 'proxy' => $this->config['proxy'],
-                'subscribers' => [$this->getOauth2Plugin()],
+                'subscribers' => [$oauth2],
                 'auth' => 'oauth2',
               ],
             ];
             $client = $this->getGuzzleClient($options);
+
+            // The access token might change during the request cycle, because
+            // the OAuth2Subscriber may refresh it. So we ensure the access
+            // token is saved immediately after each request.
+            $client->getEmitter()->on('complete', function (CompleteEvent $event) use ($oauth2) {
+                if ($event->getRequest()->getConfig()->get('auth') === 'oauth2') {
+                    $token = $oauth2->getAccessToken();
+                    $this->saveToken($token);
+                }
+            });
+
             $this->setUpCache($client);
             $this->client = $client;
         }

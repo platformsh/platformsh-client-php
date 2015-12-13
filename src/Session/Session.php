@@ -9,6 +9,7 @@ class Session implements SessionInterface
 
     protected $id;
     protected $data;
+    protected $original;
     protected $loaded = false;
     protected $storage;
 
@@ -33,6 +34,7 @@ class Session implements SessionInterface
         if (!$this->loaded || $reload) {
             if (isset($this->storage)) {
                 $this->storage->load($this);
+                $this->original = $this->data;
                 $this->loaded = true;
             }
         }
@@ -119,7 +121,7 @@ class Session implements SessionInterface
      */
     public function save()
     {
-        if (!isset($this->storage)) {
+        if (!isset($this->storage) || $this->data === $this->original) {
             return;
         }
 
