@@ -103,7 +103,9 @@ class Connector implements ConnectorInterface
         } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()->getAccessToken();
-            $this->saveToken($token);
+            if ($token !== null) {
+                $this->saveToken($token);
+            }
         }
     }
 
@@ -288,7 +290,9 @@ class Connector implements ConnectorInterface
             $client->getEmitter()->on('complete', function (CompleteEvent $event) use ($oauth2) {
                 if ($event->getRequest()->getConfig()->get('auth') === 'oauth2') {
                     $token = $oauth2->getAccessToken();
-                    $this->saveToken($token);
+                    if ($token !== null) {
+                        $this->saveToken($token);
+                    }
                 }
             });
 
