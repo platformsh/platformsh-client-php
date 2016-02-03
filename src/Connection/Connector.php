@@ -72,13 +72,6 @@ class Connector implements ConnectorInterface
         $this->config = Collection::fromConfig($config, $defaults);
 
         $this->session = $session ?: new Session();
-
-        if (isset($this->config['api_token'])) {
-            $this->setApiToken(
-              $this->config['api_token'],
-              $this->config['api_token_type']
-            );
-        }
     }
 
     /**
@@ -120,22 +113,6 @@ class Connector implements ConnectorInterface
     public function getSession()
     {
         return $this->session;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setApiToken($token, $type = 'access')
-    {
-        if ($type === 'access') {
-            $this->session->set('accessToken', $token);
-        }
-        elseif ($type === 'exchange') {
-            $this->session->set('apiToken', $token);
-        }
-        else {
-            throw new \InvalidArgumentException(sprintf('Invalid API token type: %s', $type));
-        }
     }
 
     /**
@@ -197,7 +174,7 @@ class Connector implements ConnectorInterface
     {
         return $this->session->get('accessToken')
             || $this->session->get('refreshToken')
-            || $this->session->get('apiToken');
+            || $this->config['api_token'];
     }
 
     /**
@@ -244,12 +221,12 @@ class Connector implements ConnectorInterface
             ];
             $oauth2Client = $this->getOauth2Client($options);
             $refreshTokenGrantType = null;
-            if ($this->session->get('apiToken')) {
+            if ($this->config['api_token'] && $this->config['api_token_type'] !== 'access') {
                 $refreshTokenGrantType = new ApiToken(
                   $oauth2Client, [
                     'client_id' => $this->config['client_id'],
                     'client_secret' => $this->config['client_secret'],
-                    'api_token' => $this->session->get('apiToken'),
+                    'api_token' => $this->config['api_token'],
                     'refresh_token' => $this->session->get('refreshToken'),
                     'token_url' => $this->config['token_url'],
                   ]
@@ -266,11 +243,11 @@ class Connector implements ConnectorInterface
                 );
             }
             $this->oauth2Plugin = new Oauth2Subscriber(null, $refreshTokenGrantType);
-            if ($this->session->get('accessToken')) {
+            if ($this->session->get('accessToken') || ($this->config['api_token'] && $this->config['api_token_type'] === 'access')) {
                 $type = $this->session->get('tokenType');
                 // If the token does not expire, the 'expires' time must be null.
                 $expires = $this->session->get('expires') ?: null;
-                $this->oauth2Plugin->setAccessToken($this->session->get('accessToken'), $type, $expires);
+                $this->oauth2Plugin->setAccessToken($this->session->get('accessToken') ?: $this->config['api_token'], $type, $expires);
             }
         }
 
