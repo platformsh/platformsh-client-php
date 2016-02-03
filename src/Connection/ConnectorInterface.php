@@ -19,8 +19,12 @@ interface ConnectorInterface
      * Set the API token to use for Platform.sh requests.
      *
      * @param string $token
+     *   The token value.
+     * @param string $type
+     *   The token type ('access' for permanent access tokens, or 'exchange'
+     *   for exchangeable tokens).
      */
-    public function setApiToken($token);
+    public function setApiToken($token, $type = 'access');
 
     /**
      * Log in to Platform.sh.

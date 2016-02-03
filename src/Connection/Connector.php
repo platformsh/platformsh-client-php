@@ -10,6 +10,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
+use Platformsh\Client\OAuth2\ApiToken;
 use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
@@ -65,14 +66,18 @@ class Connector implements ConnectorInterface
           'cache' => false,
           'token_url' => '/oauth2/token',
           'proxy' => null,
+          'api_token' => null,
+          'api_token_type' => 'access',
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
         $this->session = $session ?: new Session();
 
         if (isset($this->config['api_token'])) {
-            $this->setApiToken($this->config['api_token']);
-            unset($this->config['api_token']);
+            $this->setApiToken(
+              $this->config['api_token'],
+              $this->config['api_token_type']
+            );
         }
     }
 
@@ -120,9 +125,17 @@ class Connector implements ConnectorInterface
     /**
      * @inheritdoc
      */
-    public function setApiToken($token)
+    public function setApiToken($token, $type = 'access')
     {
-        $this->session->set('accessToken', $token);
+        if ($type === 'access') {
+            $this->session->set('accessToken', $token);
+        }
+        elseif ($type === 'exchange') {
+            $this->session->set('apiToken', $token);
+        }
+        else {
+            throw new \InvalidArgumentException(sprintf('Invalid API token type: %s', $type));
+        }
     }
 
     /**
@@ -182,7 +195,9 @@ class Connector implements ConnectorInterface
      */
     public function isLoggedIn()
     {
-        return $this->session->get('accessToken') || $this->session->get('refreshToken');
+        return $this->session->get('accessToken')
+            || $this->session->get('refreshToken')
+            || $this->session->get('apiToken');
     }
 
     /**
@@ -229,7 +244,18 @@ class Connector implements ConnectorInterface
             ];
             $oauth2Client = $this->getOauth2Client($options);
             $refreshTokenGrantType = null;
-            if ($this->session->get('refreshToken')) {
+            if ($this->session->get('apiToken')) {
+                $refreshTokenGrantType = new ApiToken(
+                  $oauth2Client, [
+                    'client_id' => $this->config['client_id'],
+                    'client_secret' => $this->config['client_secret'],
+                    'api_token' => $this->session->get('apiToken'),
+                    'refresh_token' => $this->session->get('refreshToken'),
+                    'token_url' => $this->config['token_url'],
+                  ]
+                );
+            }
+            elseif ($this->session->get('refreshToken')) {
                 $refreshTokenGrantType = new RefreshToken(
                   $oauth2Client, [
                     'client_id' => $this->config['client_id'],
