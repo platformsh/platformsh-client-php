@@ -271,6 +271,23 @@ class Connector implements ConnectorInterface
     /**
      * @inheritdoc
      */
+    public function setApiToken($token, $type = 'access')
+    {
+        $this->config['api_token'] = $token;
+        if ($type !== null) {
+            if (!in_array($type, ['access', 'exchange'])) {
+                throw new \InvalidArgumentException('Invalid API token type: ' . $type);
+            }
+            $this->config['api_token_type'] = $type;
+        }
+        if (isset($this->oauth2Plugin)) {
+            $this->oauth2Plugin = null;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getClient()
     {
         if (!isset($this->client)) {
