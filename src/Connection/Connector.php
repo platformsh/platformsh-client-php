@@ -220,9 +220,9 @@ class Connector implements ConnectorInterface
               ],
             ];
             $oauth2Client = $this->getOauth2Client($options);
-            $refreshTokenGrantType = null;
+            $requestTokenGrantType = null;
             if ($this->config['api_token'] && $this->config['api_token_type'] !== 'access') {
-                $refreshTokenGrantType = new ApiToken(
+                $requestTokenGrantType = new ApiToken(
                   $oauth2Client, [
                     'client_id' => $this->config['client_id'],
                     'client_secret' => $this->config['client_secret'],
@@ -232,8 +232,8 @@ class Connector implements ConnectorInterface
                   ]
                 );
             }
-            elseif ($this->session->get('refreshToken')) {
-                $refreshTokenGrantType = new RefreshToken(
+            elseif (!$this->config['api_token'] && $this->session->get('refreshToken')) {
+                $requestTokenGrantType = new RefreshToken(
                   $oauth2Client, [
                     'client_id' => $this->config['client_id'],
                     'client_secret' => $this->config['client_secret'],
@@ -242,12 +242,20 @@ class Connector implements ConnectorInterface
                   ]
                 );
             }
-            $this->oauth2Plugin = new Oauth2Subscriber(null, $refreshTokenGrantType);
-            if ($this->session->get('accessToken') || ($this->config['api_token'] && $this->config['api_token_type'] === 'access')) {
-                $type = $this->session->get('tokenType');
-                // If the token does not expire, the 'expires' time must be null.
-                $expires = $this->session->get('expires') ?: null;
-                $this->oauth2Plugin->setAccessToken($this->session->get('accessToken') ?: $this->config['api_token'], $type, $expires);
+
+            $this->oauth2Plugin = new Oauth2Subscriber(null, $requestTokenGrantType);
+
+            // If an access token is already available (via an API token or via
+            // the session) then set it in the subscriber.
+            $accessToken = $this->config['api_token'] && $this->config['api_token_type'] === 'access'
+              ? $this->config['api_token']
+              : $this->session->get('accessToken');
+            if ($accessToken) {
+                $this->oauth2Plugin->setAccessToken(
+                  $accessToken,
+                  $this->session->get('tokenType') ?: null,
+                  $this->session->get('expires') ?: null
+                );
             }
         }
 
