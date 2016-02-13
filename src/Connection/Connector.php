@@ -156,6 +156,9 @@ class Connector implements ConnectorInterface
      */
     protected function saveToken(AccessToken $token)
     {
+        if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
+            return;
+        }
         $this->session->set('accessToken', $token->getToken());
         $this->session->set('tokenType', $token->getType());
         if ($token->getExpires()) {
@@ -173,8 +176,8 @@ class Connector implements ConnectorInterface
     public function isLoggedIn()
     {
         return $this->session->get('accessToken')
-            || $this->session->get('refreshToken')
-            || $this->config['api_token'];
+        || $this->session->get('refreshToken')
+        || $this->config['api_token'];
     }
 
     /**
@@ -210,6 +213,13 @@ class Connector implements ConnectorInterface
             if (!$this->isLoggedIn()) {
                 throw new \RuntimeException('Not logged in');
             }
+
+            // Ensure session tokens or other data are not used if an API token
+            // is set.
+            if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
+                $this->session->clear();
+            }
+
             $options = [
               'base_url' => $this->config['accounts'],
               'defaults' => [
@@ -232,7 +242,7 @@ class Connector implements ConnectorInterface
                   ]
                 );
             }
-            elseif (!$this->config['api_token'] && $this->session->get('refreshToken')) {
+            elseif ($this->session->get('refreshToken')) {
                 $requestTokenGrantType = new RefreshToken(
                   $oauth2Client, [
                     'client_id' => $this->config['client_id'],
