@@ -26,16 +26,21 @@ abstract class Resource implements \ArrayAccess
     /** @var array */
     protected $data;
 
+    /** @var bool */
+    protected $isFull = false;
+
     /**
      * @param array           $data
      * @param string          $baseUrl
      * @param ClientInterface $client
+     * @param bool $full
      */
-    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null)
+    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = false)
     {
         $this->setData($data);
         $this->client = $client ?: new Client();
         $this->baseUrl = (string) $baseUrl;
+        $this->isFull = $full;
     }
 
     /**
@@ -116,7 +121,7 @@ abstract class Resource implements \ArrayAccess
      */
     public function ensureFull()
     {
-        if (empty($this->data['_full'])) {
+        if (!$this->isFull) {
             $this->refresh();
         }
     }
@@ -136,9 +141,8 @@ abstract class Resource implements \ArrayAccess
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . $id : $id;
             $request = $client->createRequest('get', $url);
             $data = self::send($request, $client);
-            $data['_full'] = true;
 
-            return new static($data, $url, $client);
+            return new static($data, $url, $client, true);
         } catch (BadResponseException $e) {
             $response = $e->getResponse();
             if ($response && $response->getStatusCode() === 404) {
@@ -348,12 +352,20 @@ abstract class Resource implements \ArrayAccess
      * Check whether a property exists in the resource.
      *
      * @param string $property
+     * @param bool $lazyLoad
      *
      * @return bool
      */
-    public function hasProperty($property)
+    public function hasProperty($property, $lazyLoad = true)
     {
-        return $this->isProperty($property) && array_key_exists($property, $this->data);
+        if (!$this->isProperty($property)) {
+            return false;
+        }
+        if (!array_key_exists($property, $this->data) && $lazyLoad) {
+            $this->ensureFull();
+        }
+
+        return array_key_exists($property, $this->data);
     }
 
     /**
@@ -361,15 +373,18 @@ abstract class Resource implements \ArrayAccess
      *
      * @param string $property
      * @param bool   $required
+     * @param bool   $lazyLoad
      *
      * @throws \InvalidArgumentException If $required is true and the property
      *                                   is not found.
      *
-     * @return mixed
+     * @return mixed|null
+     *   The property value, or null if the property does not exist (and
+     *   $required is false).
      */
-    public function getProperty($property, $required = true)
+    public function getProperty($property, $required = true, $lazyLoad = true)
     {
-        if (!$this->hasProperty($property)) {
+        if (!$this->hasProperty($property, $lazyLoad)) {
             if ($required) {
                 throw new \InvalidArgumentException("Property not found: $property");
             }
@@ -410,7 +425,8 @@ abstract class Resource implements \ArrayAccess
 
         if (isset($data['_embedded']['entity'])) {
             $resourceData = $data['_embedded']['entity'];
-            $this->setData($resourceData + ['_full' => true]);
+            $this->setData($resourceData);
+            $this->isFull = true;
         }
 
         return new Result($data, $this->baseUrl, $this->client, get_called_class());
@@ -452,7 +468,8 @@ abstract class Resource implements \ArrayAccess
     public function refresh(array $options = [])
     {
         $request = $this->client->createRequest('get', $this->getUri(), $options);
-        $this->setData(self::send($request, $this->client) + ['_full' => true]);
+        $this->setData(self::send($request, $this->client));
+        $this->isFull = true;
     }
 
     /**
@@ -539,11 +556,17 @@ abstract class Resource implements \ArrayAccess
     /**
      * Get an array of this resource's properties and their values.
      *
+     * @param bool $lazyLoad
+     *
      * @return array
      */
-    public function getProperties()
+    public function getProperties($lazyLoad = true)
     {
+        if ($lazyLoad) {
+            $this->ensureFull();
+        }
         $keys = $this->getPropertyNames();
+
         return array_intersect_key($this->data, array_flip($keys));
     }
 
@@ -554,6 +577,6 @@ abstract class Resource implements \ArrayAccess
      */
     protected function isProperty($key)
     {
-        return $key !== '_links' && $key !== '_embedded' && $key !== '_full';
+        return $key !== '_links' && $key !== '_embedded';
     }
 }

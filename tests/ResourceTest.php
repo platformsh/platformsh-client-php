@@ -30,7 +30,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
               ],
             ],
           ];
-        $this->resource = new MockResource($data);
+        $this->resource = new MockResource($data, null, null, true);
     }
 
     /**
