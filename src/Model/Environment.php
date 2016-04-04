@@ -42,7 +42,7 @@ class Environment extends Resource
     {
         if (!$this->hasLink('ssh')) {
             $id = $this->data['id'];
-            throw new EnvironmentStateException("The environment '$id' does not have an SSH URL. It may be currently inactive, or you may not have permission to SSH.");
+            throw new EnvironmentStateException("The environment '$id' does not have an SSH URL. It may be currently inactive, or you may not have permission to SSH.", $this);
         }
 
         $sshUrl = parse_url($this->getLink('ssh'));
@@ -70,7 +70,7 @@ class Environment extends Resource
     {
         if (!$this->hasLink('public-url')) {
             $id = $this->data['id'];
-            throw new EnvironmentStateException("The environment '$id' does not have a public URL. It may be inactive.");
+            throw new EnvironmentStateException("The environment '$id' does not have a public URL. It may be inactive.", $this);
         }
 
         return $this->getLink('public-url');
@@ -128,7 +128,7 @@ class Environment extends Resource
     public function delete()
     {
         if ($this->isActive()) {
-            throw new EnvironmentStateException('Active environments cannot be deleted');
+            throw new EnvironmentStateException('Active environments cannot be deleted', $this);
         }
 
         return parent::delete();
@@ -152,7 +152,7 @@ class Environment extends Resource
     public function activate()
     {
         if ($this->isActive()) {
-            throw new EnvironmentStateException('Active environments cannot be activated');
+            throw new EnvironmentStateException('Active environments cannot be activated', $this);
         }
 
         return $this->runLongOperation('activate');
@@ -168,7 +168,7 @@ class Environment extends Resource
     public function deactivate()
     {
         if (!$this->isActive()) {
-            throw new EnvironmentStateException('Inactive environments cannot be deactivated');
+            throw new EnvironmentStateException('Inactive environments cannot be deactivated', $this);
         }
 
         return $this->runLongOperation('deactivate');
