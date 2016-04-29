@@ -138,7 +138,7 @@ abstract class Resource implements \ArrayAccess
     public static function get($id, $collectionUrl = null, ClientInterface $client)
     {
         try {
-            $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . $id : $id;
+            $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . urlencode($id) : $id;
             $request = $client->createRequest('get', $url);
             $data = self::send($request, $client);
 
