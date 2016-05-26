@@ -10,4 +10,4 @@ cache:
   directories:
     - $HOME/.composer/cache
 install:
-  - composer install --prefer-lowest --no-interaction
+  - composer install --no-interaction
