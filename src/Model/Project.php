@@ -216,4 +216,41 @@ class Project extends Resource
 
         return Integration::create($body, $this->getLink('integrations'), $this->client);
     }
+
+    /**
+     * Get a single project activity.
+     *
+     * @param string $id
+     *
+     * @return Activity|false
+     */
+    public function getActivity($id)
+    {
+        return Activity::get($id, $this->getUri() . '/activities', $this->client);
+    }
+
+    /**
+     * Get a list of project activities.
+     *
+     * @param int $limit
+     *   Limit the number of activities to return.
+     * @param string $type
+     *   Filter activities by type.
+     * @param int $startsAt
+     *   A UNIX timestamp for the maximum created date of activities to return.
+     *
+     * @return Activity[]
+     */
+    public function getActivities($limit = 0, $type = null, $startsAt = null)
+    {
+        $options = [];
+        if ($type !== null) {
+            $options['query']['type'] = $type;
+        }
+        if ($startsAt !== null) {
+            $options['query']['starts_at'] = date('c', $startsAt);
+        }
+
+        return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
+    }
 }
