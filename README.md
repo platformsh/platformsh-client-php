@@ -25,8 +25,13 @@ use Platformsh\Client\PlatformClient;
 $client = new PlatformClient();
 
 // Set the API token to use.
+//
 // N.B. you must keep your API token(s) safe!
-$client->getConnector()->setApiToken($myToken);
+//
+// The second parameter is the token type:
+//   - 'exchange' for all newer API tokens (created after April 2016)
+//   - 'access' for older 'personal access tokens'.
+$client->getConnector()->setApiToken($myToken, 'exchange');
 
 // Get the user's first project.
 $projects = $client->getProjects();
