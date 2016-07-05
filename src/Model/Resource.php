@@ -189,7 +189,13 @@ abstract class Resource implements \ArrayAccess
         $response = null;
         try {
             $response = $client->send($request);
-            $data = $response->json();
+            $body = $response->getBody()->getContents();
+            $data = [];
+            if ($body) {
+                $response->getBody()->seek(0);
+                $data = $response->json();
+            }
+
             return (array) $data;
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
