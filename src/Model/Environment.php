@@ -11,21 +11,41 @@ use Platformsh\Client\Exception\OperationUnavailableException;
  *
  * Environments correspond to project Git branches.
  *
- * @property-read string $id
- * @property-read string $status
- * @property-read string $head_commit
- * @property-read string $name
- * @property-read string $parent
- * @property-read string $title
- * @property-read string $created_at
- * @property-read string $updated_at
- * @property-read string $project
- * @property-read bool   $is_dirty
- * @property-read bool   $enable_smtp
- * @property-read bool   $has_code
- * @property-read string $deployment_target
- * @property-read array  $http_access
- * @property-read bool   $is_main
+ * @property-read string      $id
+ *   The primary ID of the environment. This is the same as the 'name' property.
+ * @property-read string      $status
+ *   The status of the environment: active, inactive, or dirty.
+ * @property-read string      $head_commit
+ *   The SHA-1 hash identifying the Git commit at the branch's HEAD.
+ * @property-read string      $name
+ *   The Git branch name of the environment.
+ * @property-read string|null $parent
+ *   The ID (or name) of the parent environment, or null if there is no parent.
+ * @property-read string      $machine_name
+ *   A slug of the ID, sanitized for use in domain names, with a random suffix
+ *   (for uniqueness within a project). Can contain lower-case letters, numbers,
+ *   and hyphens.
+ * @property-read string      $title
+ *   A human-readable title or label for the environment.
+ * @property-read string      $created_at
+ *   The date the environment was created (ISO 8601).
+ * @property-read string      $updated_at
+ *   The date the environment was last updated (ISO 8601).
+ * @property-read string      $project
+ *   The project ID for the environment.
+ * @property-read bool        $is_dirty
+ *   Whether the environment is in a 'dirty' state: deploying or broken.
+ * @property-read bool        $enable_smtp
+ *   Whether outgoing emails should be enabled for an environment.
+ * @property-read bool        $has_code
+ *   Whether the environment has any code committed.
+ * @property-read string      $deployment_target
+ *   The deployment target for an environment (always 'local' for now).
+ * @property-read array       $http_access
+ *   HTTP access control for an environment. An array containing at least
+ *   'is_enabled' (bool), 'addresses' (array), and 'basic_auth' (array).
+ * @property-read bool        $is_main
+ *   Whether the environment is the main, production one.
  */
 class Environment extends Resource
 {
@@ -62,7 +82,7 @@ class Environment extends Resource
      * @throws EnvironmentStateException
      *
      * @deprecated You should use routes to get the correct URL(s)
-     * @see self::getRouteUrls()
+     * @see        self::getRouteUrls()
      *
      * @return string
      */
@@ -80,17 +100,15 @@ class Environment extends Resource
      * Branch (create a new environment).
      *
      * @param string $title The title of the new environment.
-     * @param string $id    The ID of the new environment. Leave blank to generate
-     *                      automatically from the title.
+     * @param string $id    The ID of the new environment. This will be the Git
+     *                      branch name. Leave blank to generate automatically
+     *                      from the title.
      *
      * @return Activity
      */
     public function branch($title, $id = null)
     {
         $id = $id ?: $this->sanitizeId($title);
-        if (!$this->validateId($id)) {
-            throw new \InvalidArgumentException("Invalid environment ID: $id");
-        }
         $body = ['name' => $id, 'title' => $title];
 
         return $this->runLongOperation('branch', 'post', $body);
@@ -109,13 +127,18 @@ class Environment extends Resource
     }
 
     /**
+     * Validate an environment ID.
+     *
+     * @deprecated This is no longer necessary and will be removed in future
+     * versions.
+     *
      * @param string $id
      *
      * @return bool
      */
     public static function validateId($id)
     {
-        return strlen($id) <= 32 && preg_match('/^[a-z0-9\-]+$/i', $id);
+        return !empty($id);
     }
 
     /**
@@ -235,11 +258,11 @@ class Environment extends Resource
     /**
      * Get a list of environment activities.
      *
-     * @param int $limit
+     * @param int    $limit
      *   Limit the number of activities to return.
      * @param string $type
      *   Filter activities by type.
-     * @param int $startsAt
+     * @param int    $startsAt
      *   A UNIX timestamp for the maximum created date of activities to return.
      *
      * @return Activity[]
@@ -349,10 +372,11 @@ class Environment extends Resource
      *
      * @return Activity
      */
-    public function initialize($profile, $repository) {
+    public function initialize($profile, $repository)
+    {
         $values = [
-          'profile' => $profile,
-          'repository' => $repository,
+            'profile' => $profile,
+            'repository' => $repository,
         ];
 
         return $this->runLongOperation('initialize', 'post', $values);
