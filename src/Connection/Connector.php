@@ -100,7 +100,7 @@ class Connector implements ConnectorInterface
             $this->session->clear();
         } elseif ($this->oauth2Plugin) {
             // Save the access token for future requests.
-            $token = $this->getOauth2Plugin()->getAccessToken();
+            $token = $this->getOauth2Plugin()->getAccessToken(false);
             if ($token !== null) {
                 $this->saveToken($token);
             }
@@ -331,7 +331,7 @@ class Connector implements ConnectorInterface
                 }
                 $response = $event->getResponse();
                 if ($response && substr($response->getStatusCode(), 0, 1) === '2') {
-                    $token = $oauth2->getAccessToken();
+                    $token = $oauth2->getAccessToken(false);
                     if ($token !== null) {
                         $this->saveToken($token);
                     }

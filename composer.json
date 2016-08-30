@@ -6,7 +6,8 @@
         "cocur/slugify": "~1.0",
         "guzzlehttp/guzzle": "~5.3",
         "commerceguys/guzzle-oauth2-plugin": "~2.0",
-        "guzzlehttp/cache-subscriber": "~0.1"
+        "guzzlehttp/cache-subscriber": "~0.1",
+        "cweagans/composer-patches": "~1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.5"
@@ -25,5 +26,12 @@
         {
             "name": "Patrick Dawkins"
         }
-    ]
+    ],
+    "extra": {
+        "patches": {
+            "commerceguys/guzzle-oauth2-plugin": {
+                "Make it possible to get the access token without triggering a refresh": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/commit/d2d720015813185d1ad4fa12884cab9bac6a8b25.patch"
+            }
+        }
+    }
 }
