@@ -18,6 +18,7 @@ use GuzzleHttp\Exception\ConnectException;
  * @property-read string[] $environments
  * @property-read string   $completed_at
  * @property-read array    $parameters
+ * @property-read string   $project
  * @property-read string   $state
  * @property-read string   $result
  * @property-read string   $started_at
