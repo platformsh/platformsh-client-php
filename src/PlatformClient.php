@@ -165,7 +165,7 @@ class PlatformClient
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
 
-        return $result['endpoint'];
+        return isset($result['endpoint']) ? $result['endpoint'] : false;
     }
 
     /**
