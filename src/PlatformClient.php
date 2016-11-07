@@ -29,7 +29,7 @@ class PlatformClient
     public function __construct(ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
-        $this->accountsEndpoint = $this->connector->getAccountsEndpoint();;
+        $this->accountsEndpoint = $this->connector->getAccountsEndpoint();
     }
 
     /**
@@ -44,15 +44,35 @@ class PlatformClient
      * Get a single project by its ID.
      *
      * @param string $id
+     * @param string $hostname
+     * @param bool   $https
      *
      * @return Project|false
      */
-    public function getProject($id)
+    public function getProject($id, $hostname = null, $https = true)
     {
+        // Search for a project in the static cache.
+        foreach ($this->getProjects(false) as $project) {
+            if ($project->id === $id) {
+                return $project;
+            }
+        }
+
+        // Look for a project directly if the hostname is known.
+        if ($hostname !== null) {
+            return $this->getProjectDirect($id, $hostname, $https);
+        }
+
+        // Search for a project in the user's list without the static cache.
         foreach ($this->getProjects() as $project) {
             if ($project->id === $id) {
                 return $project;
             }
+        }
+
+        // Use the project locator.
+        if ($url = $this->locateProject($id)) {
+            return Project::get($url, null, $this->connector->getClient());
         }
 
         return false;
@@ -109,6 +129,9 @@ class PlatformClient
      *                         e.g. 'eu.platform.sh' or 'us.platform.sh'.
      * @param bool   $https    Whether to use HTTPS (default: true).
      *
+     * @internal It's now better to use getProject(). This method will be made
+     *           private in a future release.
+     *
      * @return Project|false
      */
     public function getProjectDirect($id, $hostname, $https = true)
@@ -116,6 +139,33 @@ class PlatformClient
         $scheme = $https ? 'https' : 'http';
         $collection = "$scheme://$hostname/api/projects";
         return Project::get($id, $collection, $this->connector->getClient());
+    }
+
+    /**
+     * Locate a project by ID.
+     *
+     * @param string $id
+     *   The project ID.
+     *
+     * @return string
+     *   The project's API endpoint.
+     */
+    protected function locateProject($id)
+    {
+        $client = $this->connector->getClient();
+        $url = $this->accountsEndpoint . 'projects/' . rawurlencode($id);
+        try {
+            $result = (array) $client->get($url)->json();
+        }
+        catch (BadResponseException $e) {
+            $response = $e->getResponse();
+            if ($response && in_array($response->getStatusCode(), [403, 404])) {
+                return false;
+            }
+            throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
+        }
+
+        return $result['endpoint'];
     }
 
     /**
