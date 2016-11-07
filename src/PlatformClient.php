@@ -51,8 +51,8 @@ class PlatformClient
      */
     public function getProject($id, $hostname = null, $https = true)
     {
-        // Search for a project in the static cache.
-        foreach ($this->getProjects(false) as $project) {
+        // Search for a project in the user's project list.
+        foreach ($this->getProjects() as $project) {
             if ($project->id === $id) {
                 return $project;
             }
@@ -61,13 +61,6 @@ class PlatformClient
         // Look for a project directly if the hostname is known.
         if ($hostname !== null) {
             return $this->getProjectDirect($id, $hostname, $https);
-        }
-
-        // Search for a project in the user's list without the static cache.
-        foreach ($this->getProjects() as $project) {
-            if ($project->id === $id) {
-                return $project;
-            }
         }
 
         // Use the project locator.
@@ -159,7 +152,9 @@ class PlatformClient
         }
         catch (BadResponseException $e) {
             $response = $e->getResponse();
-            if ($response && in_array($response->getStatusCode(), [403, 404])) {
+            // @todo Remove 400 from this array when the API is more liberal in validating project IDs.
+            $ignoredErrorCodes = [400, 403, 404];
+            if ($response && in_array($response->getStatusCode(), $ignoredErrorCodes)) {
                 return false;
             }
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
