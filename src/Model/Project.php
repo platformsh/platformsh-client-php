@@ -32,7 +32,7 @@ class Project extends Resource
      */
     public function getSubscriptionId()
     {
-        if ($this->hasProperty('subscription_id')) {
+        if ($this->hasProperty('subscription_id', false)) {
             return $this->getProperty('subscription_id');
         }
 
