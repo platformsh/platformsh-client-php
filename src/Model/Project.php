@@ -253,4 +253,16 @@ class Project extends Resource
 
         return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
     }
+
+    /**
+     * Returns whether the project is suspended.
+     *
+     * @return bool
+     */
+    public function isSuspended()
+    {
+        return isset($this->data['status'])
+          ? $this->data['status'] === 'suspended'
+          : (bool) $this->getProperty('subscription')['suspended'];
+    }
 }
