@@ -121,6 +121,10 @@ class Project extends Resource
             return $this->getProperty('uri');
         }
 
+        if ($rel === '#manage-variables') {
+            return $this->getUri() . '/variables';
+        }
+
         return $this->getUri() . '/' . ltrim($rel, '#');
     }
 
@@ -265,4 +269,70 @@ class Project extends Resource
           ? $this->data['status'] === 'suspended'
           : (bool) $this->getProperty('subscription')['suspended'];
     }
+
+
+    /**
+     * Get a list of variables.
+     *
+     * @param int $limit
+     *
+     * @return Variable[]
+     */
+    public function getVariables($limit = 0)
+    {
+        return Variable::getCollection($this->getLink('#manage-variables'), $limit, [], $this->client);
+    }
+
+    /**
+     * Set a variable.
+     *
+     * @param string $name
+     *   The name of the variable to set.
+     * @param mixed  $value
+     *   The value of the variable to set.  If non-scalar it will be JSON-encoded automatically.
+     * @param bool $json
+     *   True if this value is an encoded JSON value. false if it's a primitive.
+     * @param bool $visibleBuild
+     *   True if this variable should be exposed during the build phase, false otherwise.
+     * @param bool $visibleRuntime
+     *   True if this variable should be exposed during deploy and runtime, false otherwise.
+     *
+     * @return Result
+     */
+    public function setVariable($name, $value, $json = false, $visibleBuild = true, $visibleRuntime = true)
+    {
+        // If $value isn't a scalar, assume it's supposed to be JSON.
+        if (!is_scalar($value)) {
+            $value = json_encode($value);
+            $json = true;
+        }
+        $values = [
+            'value' => $value,
+            'is_json' => $json,
+            'visible_build' => $visibleBuild,
+            'visible_runtime' => $visibleRuntime];
+
+        $existing = $this->getVariable($name);
+        if ($existing) {
+            return $existing->update($values);
+        }
+
+        $values['name'] = $name;
+
+        return Variable::create($values, $this->getLink('#manage-variables'), $this->client);
+    }
+
+    /**
+     * Get a single variable.
+     *
+     * @param string $id
+     *   The name of the variable to retrieve.
+     * @return Variable|false
+     *   The variable requested, or False if it is not defined.
+     */
+    public function getVariable($id)
+    {
+        return Variable::get($id, $this->getLink('#manage-variables'), $this->client);
+    }
+
 }
