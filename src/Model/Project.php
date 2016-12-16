@@ -276,11 +276,11 @@ class Project extends Resource
      *
      * @param int $limit
      *
-     * @return Variable[]
+     * @return ProjectLevelVariable[]
      */
     public function getVariables($limit = 0)
     {
-        return Variable::getCollection($this->getLink('#manage-variables'), $limit, [], $this->client);
+        return ProjectLevelVariable::getCollection($this->getLink('#manage-variables'), $limit, [], $this->client);
     }
 
     /**
@@ -319,7 +319,7 @@ class Project extends Resource
 
         $values['name'] = $name;
 
-        return Variable::create($values, $this->getLink('#manage-variables'), $this->client);
+        return ProjectLevelVariable::create($values, $this->getLink('#manage-variables'), $this->client);
     }
 
     /**
@@ -327,12 +327,12 @@ class Project extends Resource
      *
      * @param string $id
      *   The name of the variable to retrieve.
-     * @return Variable|false
+     * @return ProjectLevelVariable|false
      *   The variable requested, or False if it is not defined.
      */
     public function getVariable($id)
     {
-        return Variable::get($id, $this->getLink('#manage-variables'), $this->client);
+        return ProjectLevelVariable::get($id, $this->getLink('#manage-variables'), $this->client);
     }
 
 }
