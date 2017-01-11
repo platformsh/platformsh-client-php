@@ -77,14 +77,20 @@ class Project extends Resource
     /**
      * Add a new user to a project.
      *
-     * @param string $email An email address.
-     * @param string $role  One of ProjectUser::$roles.
+     * @param string $user   The user's UUID or email address (see $byUuid).
+     * @param string $role   One of ProjectAccess::$roles.
+     * @param bool   $byUuid Set true if $user is a UUID, or false (default) if
+     *                       $user is an email address.
+     *
+     * Note that for legacy reasons, the default for $byUuid is false for
+     * Project::addUser(), but true for Environment::addUser().
      *
      * @return Result
      */
-    public function addUser($email, $role)
+    public function addUser($user, $role, $byUuid = false)
     {
-        $body = ['email' => $email, 'role' => $role];
+        $property = $byUuid ? 'user' : 'email';
+        $body = [$property => $user, 'role' => $role];
 
         return ProjectAccess::create($body, $this->getLink('access'), $this->client);
     }

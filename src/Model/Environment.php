@@ -407,14 +407,20 @@ class Environment extends Resource
     /**
      * Add a new user to the environment.
      *
-     * @param string $user The user's UUID.
-     * @param string $role One of EnvironmentAccess::$roles.
+     * @param string $user   The user's UUID or email address (see $byUuid).
+     * @param string $role   One of EnvironmentAccess::$roles.
+     * @param bool   $byUuid Set true (default) if $user is a UUID, or false if
+     *                       $user is an email address.
+     *
+     * Note that for legacy reasons, the default for $byUuid is false for
+     * Project::addUser(), but true for Environment::addUser().
      *
      * @return Result
      */
-    public function addUser($user, $role)
+    public function addUser($user, $role, $byUuid = true)
     {
-        $body = ['user' => $user, 'role' => $role];
+        $property = $byUuid ? 'user' : 'email';
+        $body = [$property => $user, 'role' => $role];
 
         return EnvironmentAccess::create($body, $this->getLink('#manage-access'), $this->client);
     }
