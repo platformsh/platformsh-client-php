@@ -2,7 +2,6 @@
 
 namespace Platformsh\Client\OAuth2;
 
-use CommerceGuys\Guzzle\Oauth2\AccessToken;
 use CommerceGuys\Guzzle\Oauth2\GrantType\GrantTypeBase;
 use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshTokenGrantTypeInterface;
 

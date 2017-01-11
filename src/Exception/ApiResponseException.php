@@ -47,14 +47,14 @@ class ApiResponseException extends BadResponseException
     {
         $responseInfoProperties = [
             // Platform.sh API errors.
-          'message',
-          'detail',
+            'message',
+            'detail',
             // RESTful module errors.
-          'title',
-          'type',
+            'title',
+            'type',
             // OAuth2 errors.
-          'error',
-          'error_description',
+            'error',
+            'error_description',
         ];
 
         $details = '';

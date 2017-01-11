@@ -81,6 +81,10 @@ class ProjectAccess extends Resource
      *
      * @param int $limit
      *
+     * @deprecated Use PlatformClient::getSshKeys()
+     *
+     * @see \Platformsh\Client\PlatformClient::getSshKeys()
+     *
      * @return SshKey_Platform[]
      */
     public function getSshKeys($limit = 0)
@@ -92,6 +96,10 @@ class ProjectAccess extends Resource
      * Add an SSH key.
      *
      * @param string $key
+     *
+     * @deprecated Use PlatformClient::addSshKey()
+     *
+     * @see \Platformsh\Client\PlatformClient::addSshKey()
      *
      * @return Result
      */
