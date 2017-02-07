@@ -11,6 +11,9 @@ use GuzzleHttp\Url;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 
+/**
+ * The base class for API resources.
+ */
 abstract class Resource implements \ArrayAccess
 {
 
@@ -30,10 +33,15 @@ abstract class Resource implements \ArrayAccess
     protected $isFull = false;
 
     /**
-     * @param array           $data
-     * @param string          $baseUrl
-     * @param ClientInterface $client
-     * @param bool $full
+     * Resource constructor.
+     *
+     * @param array           $data    The raw data for the resource
+     *                                 (as deserialized from JSON).
+     * @param string          $baseUrl The absolute URL to the resource or its
+     *                                 collection.
+     * @param ClientInterface $client  A suitably configured Guzzle client.
+     * @param bool            $full    Whether the data is a complete
+     *                                 representation of the resource.
      */
     public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = false)
     {
@@ -60,6 +68,10 @@ abstract class Resource implements \ArrayAccess
     }
 
     /**
+     * Magic getter, allowing resource properties to be accessed.
+     *
+     * Properties can be documented in implementing classes' docblocks.
+     *
      * @param string $name
      *
      * @return mixed
@@ -84,6 +96,16 @@ abstract class Resource implements \ArrayAccess
     public function offsetGet($offset)
     {
         return $this->getProperty($offset, false);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @throws \BadMethodCallException
+     */
+    public function __set($name)
+    {
+        throw new \BadMethodCallException('Properties are read-only');
     }
 
     /**
@@ -129,11 +151,14 @@ abstract class Resource implements \ArrayAccess
     /**
      * Get a resource by its ID.
      *
-     * @param string          $id
-     * @param string          $collectionUrl
-     * @param ClientInterface $client
+     * @param string          $id            The ID of the resource, or the
+     *                                       full URL.
+     * @param string          $collectionUrl The URL of the collection.
+     * @param ClientInterface $client        A suitably configured Guzzle
+     *                                       client.
      *
-     * @return static|false
+     * @return static|false The resource object, or false if the resource is
+     *                      not found.
      */
     public static function get($id, $collectionUrl = null, ClientInterface $client)
     {
@@ -181,6 +206,8 @@ abstract class Resource implements \ArrayAccess
      *
      * @param RequestInterface $request
      * @param ClientInterface  $client
+     *
+     * @internal
      *
      * @return array
      */
@@ -266,10 +293,12 @@ abstract class Resource implements \ArrayAccess
     /**
      * Get a collection of resources.
      *
-     * @param string          $url
-     * @param int             $limit
-     * @param array           $options
-     * @param ClientInterface $client
+     * @param string          $url     The collection URL.
+     * @param int             $limit   A limit on the number of resources to
+     *                                 return.
+     * @param array           $options An array of additional Guzzle request
+     *                                 options.
+     * @param ClientInterface $client  A suitably configured Guzzle client.
      *
      * @return static[]
      */
@@ -293,9 +322,11 @@ abstract class Resource implements \ArrayAccess
     /**
      * Create an array of resource instances from a collection's JSON data.
      *
-     * @param array           $data
-     * @param string          $baseUrl
-     * @param ClientInterface $client
+     * @param array           $data    The deserialized JSON from the
+     *                                 collection (i.e. a list of resources,
+     *                                 each of which is an array of data).
+     * @param string          $baseUrl The URL to the collection.
+     * @param ClientInterface $client  A suitably configured Guzzle client.
      *
      * @return static[]
      */

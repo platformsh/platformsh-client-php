@@ -25,6 +25,7 @@ class Subscription extends Resource
 
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
     public static $availableRegions = ['eu.platform.sh', 'us.platform.sh'];
+    protected static $required = ['project_region'];
 
     const STATUS_ACTIVE = 'active';
     const STATUS_REQUESTED = 'requested';
@@ -62,14 +63,6 @@ class Subscription extends Resource
                 $onPoll($this);
             }
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function getRequired()
-    {
-        return ['project_region'];
     }
 
     /**
