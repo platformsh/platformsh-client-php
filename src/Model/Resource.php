@@ -99,11 +99,14 @@ abstract class Resource implements \ArrayAccess
     }
 
     /**
+     * Prevent setting magic properties.
+     *
      * @param string $name
+     * @param mixed  $value
      *
      * @throws \BadMethodCallException
      */
-    public function __set($name)
+    public function __set($name, $value)
     {
         throw new \BadMethodCallException('Properties are read-only');
     }
