@@ -271,4 +271,34 @@ class PlatformClient
         $url = $this->accountsEndpoint . 'subscriptions';
         return Subscription::get($id, $url, $this->connector->getClient());
     }
+
+    /**
+     * Estimate the cost of a subscription.
+     *
+     * @param string $plan         The plan (see Subscription::$availablePlans).
+     * @param int    $storage      The allowed storage per environment (in MiB).
+     * @param int    $environments The number of environments.
+     * @param int    $users        The number of users.
+     *
+     * @return array An array containing at least 'total' (a formatted price).
+     */
+    public function getSubscriptionEstimate($plan, $storage, $environments, $users)
+    {
+        $options = [];
+        $options['query'] = [
+            'plan' => $plan,
+            'storage' => $storage,
+            'environments' => $environments,
+            'user_licenses' => $users,
+        ];
+        try {
+            $response = $this->connector
+                ->getClient()
+                ->get($this->accountsEndpoint . 'estimate', $options);
+        } catch (BadResponseException $e) {
+            throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
+        }
+
+        return $response->json();
+    }
 }
