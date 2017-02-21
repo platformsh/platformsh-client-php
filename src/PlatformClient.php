@@ -276,7 +276,7 @@ class PlatformClient
      * Estimate the cost of a subscription.
      *
      * @param string $plan         The plan (see Subscription::$availablePlans).
-     * @param int    $storage      The allowed storage per environment (in MiB).
+     * @param int    $storage      The allowed storage per environment (in GiB).
      * @param int    $environments The number of environments.
      * @param int    $users        The number of users.
      *
