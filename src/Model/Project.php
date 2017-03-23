@@ -339,4 +339,41 @@ class Project extends Resource
         return ProjectLevelVariable::get($id, $this->getLink('#manage-variables'), $this->client);
     }
 
+    /**
+     * Get a list of certificates associated with this project.
+     *
+     * @return Certificate[]
+     */
+    public function getCertificates()
+    {
+        return Certificate::getCollection($this->getUri() . '/certificates', 0, [], $this->client);
+    }
+
+    /**
+     * Get a single certificate.
+     *
+     * @param string $id
+     *
+     * @return Certificate|false
+     */
+    public function getCertificate($id)
+    {
+        return Certificate::get($id, $this->getUri() . '/certificates', $this->client);
+    }
+
+    /**
+     * Add a certificate to the project.
+     *
+     * @param string $certificate
+     * @param string $key
+     * @param array  $chain
+     *
+     * @return Result
+     */
+    public function addCertificate($certificate, $key, array $chain = [])
+    {
+        $options = ['key' => $key, 'certificate' => $certificate, 'chain' => $chain];
+
+        return Certificate::create($options, $this->getUri() . '/certificates', $this->client);
+    }
 }
