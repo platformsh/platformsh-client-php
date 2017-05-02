@@ -107,13 +107,12 @@ class File implements SessionStorageInterface
     public function load(SessionInterface $session)
     {
         $filename = $this->getFilename($session);
-        if (file_exists($filename)) {
+        if (is_readable($filename)) {
             $raw = file_get_contents($filename);
-            if ($raw === false) {
-                throw new \Exception("Failed to read file: $filename");
+            if ($raw !== false) {
+                $data = json_decode($raw, true);
+                $session->setData(is_array($data) ? $data : []);
             }
-            $data = json_decode($raw, true);
-            $session->setData($data);
         }
     }
 }
