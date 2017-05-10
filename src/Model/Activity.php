@@ -294,21 +294,21 @@ class Activity extends Resource
                 return sprintf(
                   "%s added route %s",
                   $payload['user']['display_name'],
-                  $payload['route']['route']
+                  $payload['route']['id']
                 );
 
             case 'environment.route.delete':
                 return sprintf(
                   "%s deleted route %s",
                   $payload['user']['display_name'],
-                  $payload['route']['route']
+                  $payload['route']['id']
                 );
 
             case 'environment.route.update':
                 return sprintf(
                   "%s modified route %s",
                   $payload['user']['display_name'],
-                  $payload['route']['route']
+                  $payload['route']['id']
                 );
 
             case 'environment.subscription.update':
