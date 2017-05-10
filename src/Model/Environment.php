@@ -274,7 +274,7 @@ class Environment extends Resource
             $options['query']['type'] = $type;
         }
         if ($startsAt !== null) {
-            $options['query']['starts_at'] = date('c', $startsAt);
+            $options['query']['starts_at'] = Activity::formatStartsAt($startsAt);
         }
 
         return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);

@@ -326,4 +326,22 @@ class Activity extends Resource
         }
         return $type;
     }
+
+    /**
+     * @param int $timestamp
+     *
+     * @return false|string
+     */
+    public static function formatStartsAt($timestamp)
+    {
+        $tz = date_default_timezone_get();
+        date_default_timezone_set('UTC');
+        $date = date('c', $timestamp);
+        date_default_timezone_set($tz);
+        if (!$date) {
+            throw new \RuntimeException(sprintf('Failed to format timestamp: %d', $timestamp));
+        }
+
+        return $date;
+    }
 }
