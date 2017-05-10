@@ -129,97 +129,97 @@ class Activity extends Resource
         switch ($type) {
             case 'project.domain.create':
                 return sprintf(
-                  "%s added domain %s",
-                  $payload['user']['display_name'],
-                  $payload['domain']['name']
+                    '%s added domain %s',
+                    $payload['user']['display_name'],
+                    $payload['domain']['name']
                 );
 
             case 'project.domain.delete':
                 return sprintf(
-                  "%s deleted domain %s",
-                  $payload['user']['display_name'],
-                  $payload['domain']['name']
+                    '%s deleted domain %s',
+                    $payload['user']['display_name'],
+                    $payload['domain']['name']
                 );
 
             case 'project.domain.update':
                 return sprintf(
-                  "%s updated domain %s",
-                  $payload['user']['display_name'],
-                  $payload['domain']['name']
+                    '%s updated domain %s',
+                    $payload['user']['display_name'],
+                    $payload['domain']['name']
                 );
 
             case 'project.modify.title':
                 return sprintf(
-                  "%s changed project name to %s",
-                  $payload['user']['display_name'],
-                  $payload['new_title']
+                    '%s changed project name to %s',
+                    $payload['user']['display_name'],
+                    $payload['new_title']
                 );
 
             case 'environment.activate':
                 return sprintf(
-                  "%s activated environment %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
+                    '%s activated environment %s',
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.backup':
                 return sprintf(
-                  "%s created a snapshot of %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
+                    '%s created a snapshot of %s',
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.branch':
                 return sprintf(
-                  "%s branched %s from %s",
-                  $payload['user']['display_name'],
-                  $payload['outcome']['title'],
-                  $payload['parent']['title']
+                    '%s branched %s from %s',
+                    $payload['user']['display_name'],
+                    $payload['outcome']['title'],
+                    $payload['parent']['title']
                 );
 
             case 'environment.delete':
                 return sprintf(
-                  "%s deleted environment %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
+                    '%s deleted environment %s',
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.deactivate':
                 return sprintf(
-                  "%s deactivated environment %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
+                    '%s deactivated environment %s',
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.initialize':
                 return sprintf(
-                  "%s initialized environment %s with profile %s",
-                  $payload['user']['display_name'],
-                  $payload['outcome']['title'],
-                  $payload['profile']
+                    '%s initialized environment %s with profile %s',
+                    $payload['user']['display_name'],
+                    $payload['outcome']['title'],
+                    $payload['profile']
                 );
 
             case 'environment.merge':
                 return sprintf(
-                  "%s merged %s into %s",
-                  $payload['user']['display_name'],
-                  $payload['outcome']['title'],
-                  $payload['environment']['title']
+                    '%s merged %s into %s',
+                    $payload['user']['display_name'],
+                    $payload['outcome']['title'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.push':
                 return sprintf(
-                  "%s pushed to %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
+                    '%s pushed to %s',
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.restore':
                 return sprintf(
-                  "%s restored %s from snapshot %s",
-                  $payload['user']['display_name'],
-                  $payload['environment'],
-                  substr($payload['backup_name'], 0, 7)
+                    '%s restored %s from snapshot %s',
+                    $payload['user']['display_name'],
+                    $payload['environment'],
+                    substr($payload['backup_name'], 0, 7)
                 );
 
             case 'environment.synchronize':
@@ -232,96 +232,124 @@ class Activity extends Resource
                     $syncType = 'data';
                 }
                 return sprintf(
-                  "%s synced %s's %s with %s",
-                  $payload['user']['display_name'],
-                  $payload['outcome']['title'],
-                  $syncType,
-                  $payload['environment']['title']
+                    "%s synced %s's %s with %s",
+                    $payload['user']['display_name'],
+                    $payload['outcome']['title'],
+                    $syncType,
+                    $payload['environment']['title']
                 );
 
             case 'environment.access.add':
                 return sprintf(
-                  "%s added %s to %s",
-                  $payload['user']['display_name'],
-                  $payload['access']['display_name'],
-                  $payload['environment']['title']
+                    '%s added %s to %s',
+                    $payload['user']['display_name'],
+                    $payload['access']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.access.remove':
                 return sprintf(
-                  "%s removed %s from %s",
-                  $payload['user']['display_name'],
-                  $payload['access']['display_name'],
-                  $payload['environment']['title']
+                    '%s removed %s from %s',
+                    $payload['user']['display_name'],
+                    $payload['access']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.variable.create':
                 return sprintf(
-                  "%s added variable %s",
-                  $payload['user']['display_name'],
-                  $payload['variable']['name']
+                    '%s added environment variable %s',
+                    $payload['user']['display_name'],
+                    $payload['variable']['name']
                 );
 
             case 'environment.variable.delete':
                 return sprintf(
-                  "%s deleted variable %s",
-                  $payload['user']['display_name'],
-                  $payload['variable']['name']
+                    '%s deleted environment variable %s',
+                    $payload['user']['display_name'],
+                    $payload['variable']['name']
                 );
 
             case 'environment.variable.update':
                 return sprintf(
-                  "%s modified variable %s",
-                  $payload['user']['display_name'],
-                  $payload['variable']['name']
+                    '%s modified environment variable %s',
+                    $payload['user']['display_name'],
+                    $payload['variable']['name']
                 );
 
             case 'environment.update.http_access':
                 return sprintf(
-                  "%s updated HTTP Access settings on environment %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
-                );
-
-            case 'environment.update.smtp':
-                return sprintf(
-                  "%s updated SMTP settings on environment %s",
-                  $payload['user']['display_name'],
-                  $payload['environment']['title']
+                    '%s updated HTTP Access settings on environment %s',
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'environment.route.create':
                 return sprintf(
-                  "%s added route %s",
-                  $payload['user']['display_name'],
-                  $payload['route']['id']
+                    '%s added route %s',
+                    $payload['user']['display_name'],
+                    $payload['route']['id']
                 );
 
             case 'environment.route.delete':
                 return sprintf(
-                  "%s deleted route %s",
-                  $payload['user']['display_name'],
-                  $payload['route']['id']
+                    '%s deleted route %s',
+                    $payload['user']['display_name'],
+                    $payload['route']['id']
                 );
 
             case 'environment.route.update':
                 return sprintf(
-                  "%s modified route %s",
-                  $payload['user']['display_name'],
-                  $payload['route']['id']
+                    '%s modified route %s',
+                    $payload['user']['display_name'],
+                    $payload['route']['id']
                 );
 
             case 'environment.subscription.update':
                 return sprintf(
-                  "%s modified subscription",
-                  $payload['user']['display_name']
+                    "%s modified subscription",
+                    $payload['user']['display_name']
+                );
+
+            case 'environment.update.restrict_robots':
+                return sprintf(
+                    "%s updated the robots.txt settings on environment %s",
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
+                );
+
+            case 'environment.update.smtp':
+                return sprintf(
+                    "%s updated SMTP settings on environment %s",
+                    $payload['user']['display_name'],
+                    $payload['environment']['title']
                 );
 
             case 'project.create':
                 return sprintf(
-                  "%s created a new project %s",
-                  $payload['user']['display_name'],
-                  $payload['outcome']['title']
+                    '%s created a new project %s',
+                    $payload['user']['display_name'],
+                    $payload['outcome']['title']
+                );
+
+            case 'project.variable.create':
+                return sprintf(
+                    "%s added project variable %s",
+                    $payload['user']['display_name'],
+                    $payload['variable']['name']
+                );
+
+            case 'project.variable.delete':
+                return sprintf(
+                    "%s deleted project variable %s",
+                    $payload['user']['display_name'],
+                    $payload['variable']['name']
+                );
+
+            case 'project.variable.update':
+                return sprintf(
+                    "%s modified project variable %s",
+                    $payload['user']['display_name'],
+                    $payload['variable']['name']
                 );
         }
         return $type;
