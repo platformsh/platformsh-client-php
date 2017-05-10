@@ -306,20 +306,20 @@ class Activity extends Resource
 
             case 'environment.subscription.update':
                 return sprintf(
-                    "%s modified subscription",
+                    '%s modified subscription',
                     $payload['user']['display_name']
                 );
 
             case 'environment.update.restrict_robots':
                 return sprintf(
-                    "%s updated the robots.txt settings on environment %s",
+                    '%s updated the robots.txt settings on environment %s',
                     $payload['user']['display_name'],
                     $payload['environment']['title']
                 );
 
             case 'environment.update.smtp':
                 return sprintf(
-                    "%s updated SMTP settings on environment %s",
+                    '%s updated SMTP settings on environment %s',
                     $payload['user']['display_name'],
                     $payload['environment']['title']
                 );
@@ -333,21 +333,21 @@ class Activity extends Resource
 
             case 'project.variable.create':
                 return sprintf(
-                    "%s added project variable %s",
+                    '%s added project variable %s',
                     $payload['user']['display_name'],
                     $payload['variable']['name']
                 );
 
             case 'project.variable.delete':
                 return sprintf(
-                    "%s deleted project variable %s",
+                    '%s deleted project variable %s',
                     $payload['user']['display_name'],
                     $payload['variable']['name']
                 );
 
             case 'project.variable.update':
                 return sprintf(
-                    "%s modified project variable %s",
+                    '%s modified project variable %s',
                     $payload['user']['display_name'],
                     $payload['variable']['name']
                 );
