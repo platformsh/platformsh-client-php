@@ -195,7 +195,7 @@ class Activity extends Resource
                 return sprintf(
                     '%s initialized environment %s with profile %s',
                     $payload['user']['display_name'],
-                    $payload['outcome']['title'],
+                    $payload['environment']['title'],
                     $payload['profile']
                 );
 
