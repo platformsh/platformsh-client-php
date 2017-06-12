@@ -55,25 +55,80 @@ class Environment extends Resource
      * @param string $app An application name.
      *
      * @throws EnvironmentStateException
+     * @throws OperationUnavailableException
      *
      * @return string
      */
     public function getSshUrl($app = '')
     {
+        $urls = $this->getSshUrls();
+        if ($this->hasLink('ssh')) {
+            $urls[''] = $this->getLink('ssh');
+        }
+        if (isset($urls[$app])) {
+            return $this->convertSshUrl($urls[$app]);
+        }
+
+        return $this->constructLegacySshUrl($app);
+    }
+
+    /**
+     * Get the SSH URL via the legacy 'ssh' link.
+     *
+     * @param string $app
+     *
+     * @return string
+     */
+    private function constructLegacySshUrl($app)
+    {
         if (!$this->hasLink('ssh')) {
             $id = $this->data['id'];
-            throw new EnvironmentStateException("The environment '$id' does not have an SSH URL. It may be currently inactive, or you may not have permission to SSH.", $this);
+            if (!$this->isActive()) {
+                throw new EnvironmentStateException("No SSH URL found for environment '$id'. It is not currently active.", $this);
+            }
+            throw new OperationUnavailableException("No SSH URL found for environment '$id'. You may not have permission to SSH.");
         }
 
-        $sshUrl = parse_url($this->getLink('ssh'));
-        $host = $sshUrl['host'];
-        $user = $sshUrl['user'];
+        $suffix = $app ? '--' . $app : '';
 
-        if ($app) {
-            $user .= '--' . $app;
+        return $this->convertSshUrl($this->getLink('ssh'), $suffix);
+    }
+
+    /**
+     * Convert a full SSH URL (with schema) into a normal SSH connection string.
+     *
+     * @param string $url             The URL (starting with ssh://).
+     * @param string $username_suffix A suffix to append to the username.
+     *
+     * @return string
+     */
+    private function convertSshUrl($url, $username_suffix = '')
+    {
+        $parsed = parse_url($url);
+        if (!$parsed) {
+            throw new \InvalidArgumentException('Invalid URL: ' . $url);
         }
 
-        return $user . '@' . $host;
+        return $parsed['user'] . $username_suffix . '@' . $parsed['host'];
+    }
+
+    /**
+     * Returns a list of SSH URLs, keyed by app name.
+     *
+     * @return string[]
+     */
+    public function getSshUrls()
+    {
+        $prefix = 'pf:ssh:';
+        $prefixLength = strlen($prefix);
+        $sshUrls = [];
+        foreach ($this->data['_links'] as $rel => $link) {
+            if (strpos($rel, $prefix) === 0 && isset($link['href'])) {
+                $sshUrls[substr($rel, $prefixLength)] = $link['href'];
+            }
+        }
+
+        return $sshUrls;
     }
 
     /**
@@ -90,7 +145,10 @@ class Environment extends Resource
     {
         if (!$this->hasLink('public-url')) {
             $id = $this->data['id'];
-            throw new EnvironmentStateException("The environment '$id' does not have a public URL. It may be inactive.", $this);
+            if (!$this->isActive()) {
+                throw new EnvironmentStateException("No public URL found for environment '$id'. It is not currently active.", $this);
+            }
+            throw new OperationUnavailableException("No public URL found for environment '$id'.");
         }
 
         return $this->getLink('public-url');
