@@ -124,8 +124,8 @@ class Environment extends Resource
                 $sshUrls[substr($rel, $prefixLength)] = $this->convertSshUrl($link['href']);
             }
         }
-        if ($this->hasLink('ssh')) {
-            $urls[''] = $this->convertSshUrl($this->getLink('ssh'));
+        if (empty($sshUrls) && $this->hasLink('ssh')) {
+            $sshUrls[''] = $this->convertSshUrl($this->getLink('ssh'));
         }
 
         return $sshUrls;
