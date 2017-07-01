@@ -62,11 +62,8 @@ class Environment extends Resource
     public function getSshUrl($app = '')
     {
         $urls = $this->getSshUrls();
-        if ($this->hasLink('ssh')) {
-            $urls[''] = $this->getLink('ssh');
-        }
         if (isset($urls[$app])) {
-            return $this->convertSshUrl($urls[$app]);
+            return $urls[$app];
         }
 
         return $this->constructLegacySshUrl($app);
@@ -124,8 +121,11 @@ class Environment extends Resource
         $sshUrls = [];
         foreach ($this->data['_links'] as $rel => $link) {
             if (strpos($rel, $prefix) === 0 && isset($link['href'])) {
-                $sshUrls[substr($rel, $prefixLength)] = $link['href'];
+                $sshUrls[substr($rel, $prefixLength)] = $this->convertSshUrl($link['href']);
             }
+        }
+        if ($this->hasLink('ssh')) {
+            $urls[''] = $this->convertSshUrl($this->getLink('ssh'));
         }
 
         return $sshUrls;
