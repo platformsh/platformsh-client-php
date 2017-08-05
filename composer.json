@@ -3,7 +3,7 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
-        "cocur/slugify": "~1.0",
+        "cocur/slugify": "^2.0 || ~1.0",
         "guzzlehttp/guzzle": "~5.3",
         "commerceguys/guzzle-oauth2-plugin": "~2.0",
         "guzzlehttp/cache-subscriber": "~0.1",
