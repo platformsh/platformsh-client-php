@@ -157,17 +157,22 @@ class Environment extends Resource
     /**
      * Branch (create a new environment).
      *
-     * @param string $title The title of the new environment.
-     * @param string $id    The ID of the new environment. This will be the Git
-     *                      branch name. Leave blank to generate automatically
-     *                      from the title.
+     * @param string $title       The title of the new environment.
+     * @param string $id          The ID of the new environment. This will be the Git
+     *                            branch name. Leave blank to generate automatically
+     *                            from the title.
+     * @param bool   $cloneParent Whether to clone data from the parent
+     *                            environment while branching.
      *
      * @return Activity
      */
-    public function branch($title, $id = null)
+    public function branch($title, $id = null, $cloneParent = true)
     {
         $id = $id ?: $this->sanitizeId($title);
         $body = ['name' => $id, 'title' => $title];
+        if (!$cloneParent) {
+            $body['clone_parent'] = false;
+        }
 
         return $this->runLongOperation('branch', 'post', $body);
     }
