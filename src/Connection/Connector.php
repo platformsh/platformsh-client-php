@@ -287,7 +287,7 @@ class Connector implements ConnectorInterface
      */
     private function getHandlerStack()
     {
-        $this->stack = isset($this->stack) ?: HandlerStack::create();
+        $this->stack = isset($this->stack) ? $this->stack : HandlerStack::create();
 
         return $this->stack;
     }
