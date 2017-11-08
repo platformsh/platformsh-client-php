@@ -3,14 +3,11 @@
 namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\HandlerStack;
-use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
-use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 use Sainsburys\Guzzle\Oauth2\AccessToken;
 use Sainsburys\Guzzle\Oauth2\GrantType\RefreshToken;
 use Sainsburys\Guzzle\Oauth2\Middleware\OAuthMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use Kevinrob\GuzzleCache\CacheMiddleware;
 use Platformsh\Client\OAuth2\ApiToken;
 use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
@@ -46,8 +43,6 @@ class Connector implements ConnectorInterface
      *     - verify (bool): Whether or not SSL verification should be enabled
      *       (default: true).
      *     - user_agent (string): The HTTP User-Agent for API requests.
-     *     - cache (array|bool): Caching. Set to false (the default) to disable
-     *       caching. @todo implement other options
      *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
      *       Use a string to specify an HTTP proxy, or an array to specify
      *       different proxies for different protocols.
@@ -65,7 +60,6 @@ class Connector implements ConnectorInterface
           'debug' => false,
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
-          'cache' => false,
           'token_url' => '/oauth2/token',
           'proxy' => null,
           'api_token' => null,
@@ -272,23 +266,6 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * Set up caching on a Guzzle client.
-     *
-     * @param HandlerStack $stack
-     */
-    protected function setUpCache(HandlerStack $stack)
-    {
-        if ($this->config['cache'] === false) {
-            return;
-        }
-        $options = is_array($this->config['cache']) ? $this->config['cache'] : [];
-        if (empty($options['pool'])) {
-            $middleware = new CacheMiddleware(new PrivateCacheStrategy(new Psr6CacheStorage($options['pool'])));
-            $stack->push($middleware, 'cache');
-        }
-    }
-
-    /**
      * @inheritdoc
      */
     public function setApiToken($token, $type = 'access')
@@ -326,7 +303,6 @@ class Connector implements ConnectorInterface
             $stack = $this->getHandlerStack();
             $stack->push($oauth2->onBefore());
             $stack->push($oauth2->onFailure(3));
-            $this->setUpCache($stack);
 
             $options = [
                 'handler' => $stack,
