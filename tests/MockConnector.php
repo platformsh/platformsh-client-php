@@ -2,8 +2,6 @@
 
 namespace Platformsh\Client\Tests;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Ring\Client\MockHandler;
 use Platformsh\Client\Connection\Connector;
 
 class MockConnector extends Connector
@@ -23,7 +21,6 @@ class MockConnector extends Connector
         $this->mockValues = $values;
         $this->mockStatus = $status;
 
-        // Remove the cached client object.
         $this->client = null;
     }
 
@@ -43,9 +40,9 @@ class MockConnector extends Connector
      * Add a mock handler so that API responses will be intercepted with the
      * mockStatus and mockValues properties.
      */
-    protected function getGuzzleClient(array $options)
+    public function getClient()
     {
-        return $this->getMockClient($this->mockValues, $this->mockStatus, $options);
+        return $this->getMockClient($this->mockValues, $this->mockStatus);
     }
 
     /**
@@ -73,13 +70,13 @@ class MockConnector extends Connector
      *
      * @return \GuzzleHttp\ClientInterface
      */
-    protected function getMockClient($values, $status, array $options = [])
+    private function getMockClient($values, $status, array $options = [])
     {
-        $handler = new MockHandler([
-          'status' => $status,
-          'body' => json_encode($values),
-        ]);
-
-        return new Client(['handler' => $handler] + $options);
+        return new MockClient(
+            [
+                'mockStatus' => $status,
+                'mockValues' => $values,
+            ] + $options
+        );
     }
 }
