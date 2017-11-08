@@ -2,14 +2,15 @@
 
 namespace Platformsh\Client\Connection;
 
-use CommerceGuys\Guzzle\Oauth2\AccessToken;
-use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
-use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
+use GuzzleHttp\HandlerStack;
+use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
+use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
+use Sainsburys\Guzzle\Oauth2\AccessToken;
+use Sainsburys\Guzzle\Oauth2\GrantType\RefreshToken;
+use Sainsburys\Guzzle\Oauth2\Middleware\OAuthMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Collection;
-use GuzzleHttp\Event\CompleteEvent;
-use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
+use Kevinrob\GuzzleCache\CacheMiddleware;
 use Platformsh\Client\OAuth2\ApiToken;
 use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
@@ -17,21 +18,23 @@ use Platformsh\Client\Session\SessionInterface;
 
 class Connector implements ConnectorInterface
 {
-
-    /** @var Collection */
-    protected $config;
+    /** @var array */
+    protected $config = [];
 
     /** @var ClientInterface */
     protected $client;
 
-    /** @var Oauth2Subscriber|null */
-    protected $oauth2Plugin;
+    /** @var OAuthMiddleware|null */
+    protected $oauthMiddleware;
 
     /** @var SessionInterface */
     protected $session;
 
     /** @var bool */
     protected $loggedOut = false;
+
+    /** @var HandlerStack */
+    protected $stack;
 
     /**
      * @param array            $config
@@ -43,9 +46,8 @@ class Connector implements ConnectorInterface
      *     - verify (bool): Whether or not SSL verification should be enabled
      *       (default: true).
      *     - user_agent (string): The HTTP User-Agent for API requests.
-     *     - cache (array|bool): Caching. Set to true to enable in-memory
-     *       caching, to false (the default) to disable caching, or to an array
-     *       of options as expected by the Guzzle cache subscriber.
+     *     - cache (array|bool): Caching. Set to false (the default) to disable
+     *       caching. @todo implement other options
      *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
      *       Use a string to specify an HTTP proxy, or an array to specify
      *       different proxies for different protocols.
@@ -53,7 +55,7 @@ class Connector implements ConnectorInterface
      */
     public function __construct(array $config = [], SessionInterface $session = null)
     {
-        $version = '0.1.x';
+        $version = '2.0.x';
         $url = 'https://github.com/platformsh/platformsh-client-php';
 
         $defaults = [
@@ -69,7 +71,7 @@ class Connector implements ConnectorInterface
           'api_token' => null,
           'api_token_type' => 'access',
         ];
-        $this->config = Collection::fromConfig($config, $defaults);
+        $this->config = $config + $defaults;
 
         $this->session = $session ?: new Session();
     }
@@ -98,9 +100,10 @@ class Connector implements ConnectorInterface
     {
         if ($this->loggedOut) {
             $this->session->clear();
-        } elseif ($this->oauth2Plugin) {
+        } elseif ($this->oauthMiddleware) {
             // Save the access token for future requests.
-            $token = $this->getOauth2Plugin()->getAccessToken(false);
+            // @todo patch the middleware to allow getting an access token without implicit refresh
+            $token = $this->getOauthMiddleware()->getAccessToken(false);
             if ($token !== null) {
                 $this->saveToken($token);
             }
@@ -125,12 +128,10 @@ class Connector implements ConnectorInterface
             return;
         }
         $client = $this->getGuzzleClient([
-          'base_url' => $this->config['accounts'],
-          'defaults' => [
+            'base_uri' => $this->config['accounts'],
             'debug' => $this->config['debug'],
             'verify' => $this->config['verify'],
             'proxy' => $this->config['proxy'],
-          ],
         ]);
         $grantType = new PasswordCredentialsWithTfa(
           $client, [
@@ -201,15 +202,15 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * Get an OAuth2 subscriber to add to Guzzle clients.
+     * Get an OAuth2 middleware to add to Guzzle clients.
      *
      * @throws \RuntimeException
      *
-     * @return Oauth2Subscriber
+     * @return OAuthMiddleware
      */
-    protected function getOauth2Plugin()
+    protected function getOauthMiddleware()
     {
-        if (!$this->oauth2Plugin) {
+        if (!$this->oauthMiddleware) {
             if (!$this->isLoggedIn()) {
                 throw new \RuntimeException('Not logged in');
             }
@@ -221,13 +222,11 @@ class Connector implements ConnectorInterface
             }
 
             $options = [
-              'base_url' => $this->config['accounts'],
-              'defaults' => [
+                'base_uri' => $this->config['accounts'],
                 'headers' => ['User-Agent' => $this->config['user_agent']],
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
                 'proxy' => $this->config['proxy'],
-              ],
             ];
             $oauth2Client = $this->getOauth2Client($options);
             $requestTokenGrantType = null;
@@ -253,7 +252,7 @@ class Connector implements ConnectorInterface
                 );
             }
 
-            $this->oauth2Plugin = new Oauth2Subscriber(null, $requestTokenGrantType);
+            $this->oauthMiddleware = new OAuthMiddleware($oauth2Client, $requestTokenGrantType);
 
             // If an access token is already available (via an API token or via
             // the session) then set it in the subscriber.
@@ -261,7 +260,7 @@ class Connector implements ConnectorInterface
               ? $this->config['api_token']
               : $this->session->get('accessToken');
             if ($accessToken) {
-                $this->oauth2Plugin->setAccessToken(
+                $this->oauthMiddleware->setAccessToken(
                   $accessToken,
                   $this->session->get('tokenType') ?: null,
                   $this->session->get('expires') ?: null
@@ -269,21 +268,24 @@ class Connector implements ConnectorInterface
             }
         }
 
-        return $this->oauth2Plugin;
+        return $this->oauthMiddleware;
     }
 
     /**
      * Set up caching on a Guzzle client.
      *
-     * @param ClientInterface $client
+     * @param HandlerStack $stack
      */
-    protected function setUpCache(ClientInterface $client)
+    protected function setUpCache(HandlerStack $stack)
     {
         if ($this->config['cache'] === false) {
             return;
         }
         $options = is_array($this->config['cache']) ? $this->config['cache'] : [];
-        CacheSubscriber::attach($client, $options);
+        if (empty($options['pool'])) {
+            $middleware = new CacheMiddleware(new PrivateCacheStrategy(new Psr6CacheStorage($options['pool'])));
+            $stack->push($middleware, 'cache');
+        }
     }
 
     /**
@@ -298,9 +300,19 @@ class Connector implements ConnectorInterface
             }
             $this->config['api_token_type'] = $type;
         }
-        if (isset($this->oauth2Plugin)) {
-            $this->oauth2Plugin = null;
+        if (isset($this->oauthMiddleware)) {
+            $this->oauthMiddleware = null;
         }
+    }
+
+    /**
+     * @return HandlerStack
+     */
+    private function getHandlerStack()
+    {
+        $this->stack = isset($this->stack) ?: HandlerStack::create();
+
+        return $this->stack;
     }
 
     /**
@@ -309,36 +321,44 @@ class Connector implements ConnectorInterface
     public function getClient()
     {
         if (!isset($this->client)) {
-            $oauth2 = $this->getOauth2Plugin();
+            $oauth2 = $this->getOauthMiddleware();
+
+            $stack = $this->getHandlerStack();
+            $stack->push($oauth2->onBefore());
+            $stack->push($oauth2->onFailure(3));
+            $this->setUpCache($stack);
+
             $options = [
-              'defaults' => [
+                'handler' => $stack,
                 'headers' => ['User-Agent' => $this->config['user_agent']],
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
                 'proxy' => $this->config['proxy'],
-                'subscribers' => [$oauth2],
                 'auth' => 'oauth2',
-              ],
             ];
-            $client = $this->getGuzzleClient($options);
 
             // The access token might change during the request cycle, because
-            // the OAuth2Subscriber may refresh it. So we ensure the access
-            // token is saved immediately after each successful request.
-            $client->getEmitter()->on('complete', function (CompleteEvent $event) use ($oauth2) {
-                if ($event->getRequest()->getConfig()->get('auth') !== 'oauth2') {
-                    return;
-                }
-                $response = $event->getResponse();
-                if ($response && substr($response->getStatusCode(), 0, 1) === '2') {
-                    $token = $oauth2->getAccessToken(false);
-                    if ($token !== null) {
-                        $this->saveToken($token);
-                    }
-                }
-            });
+            // the OAuth middleware may refresh it. So we ensure the access token
+            // is saved immediately after each successful request.
+//            $this->stack->push(function (callable $handler) {
+//                return function (RequestInterface $request, array $options) use ($handler) {
+//                    if ($request->hasHeader('Authorization') {
+//                        $response = $event->getResponse();
+//                        if ($response && substr($response->getStatusCode(), 0, 1) === '2') {
+//                            // @todo patch the middleware to allow getting an access token without implicit refresh
+//                            $token = $oauth2->getAccessToken(false);
+//                            if ($token !== null) {
+//                                $this->saveToken($token);
+//                            }
+//                        }
+//                    }
+//
+//                    return $handler($request, $options);
+//                };
+//            });
 
-            $this->setUpCache($client);
+            $client = $this->getGuzzleClient($options);
+
             $this->client = $client;
         }
 

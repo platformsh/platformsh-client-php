@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\OAuth2;
 
-use CommerceGuys\Guzzle\Oauth2\GrantType\PasswordCredentials;
+use Sainsburys\Guzzle\Oauth2\GrantType\PasswordCredentials;
 
 class PasswordCredentialsWithTfa extends PasswordCredentials
 {

@@ -101,10 +101,9 @@ class PlatformClient
     public function getAccountInfo($reset = false)
     {
         if (!isset($this->accountInfo) || $reset) {
-            $client = $this->connector->getClient();
             $url = $this->accountsEndpoint . 'me';
             try {
-                $this->accountInfo = (array) $client->get($url)->json();
+                $this->accountInfo = $this->simpleGet($url);
             }
             catch (BadResponseException $e) {
                 throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
@@ -112,6 +111,26 @@ class PlatformClient
         }
 
         return $this->accountInfo;
+    }
+
+    /**
+     * Get a URL and return the JSON-decoded response.
+     *
+     * @param string $url
+     * @param array  $options
+     *
+     * @return array
+     */
+    private function simpleGet($url, array $options = [])
+    {
+        return (array) \GuzzleHttp\json_decode(
+          $this->getConnector()
+               ->getClient()
+               ->request('get', $url, $options)
+               ->getBody()
+               ->getContents(),
+          true
+        );
     }
 
     /**
@@ -145,10 +164,9 @@ class PlatformClient
      */
     protected function locateProject($id)
     {
-        $client = $this->connector->getClient();
         $url = $this->accountsEndpoint . 'projects/' . rawurlencode($id);
         try {
-            $result = (array) $client->get($url)->json();
+            $result = $this->simpleGet($url);
         }
         catch (BadResponseException $e) {
             $response = $e->getResponse();
@@ -292,13 +310,9 @@ class PlatformClient
             'user_licenses' => $users,
         ];
         try {
-            $response = $this->connector
-                ->getClient()
-                ->get($this->accountsEndpoint . 'estimate', $options);
+            return $this->simpleGet($this->accountsEndpoint . 'estimate', $options);
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
-
-        return $response->json();
     }
 }

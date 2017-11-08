@@ -3,7 +3,7 @@
 namespace Platformsh\Client\Tests;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Ring\Client\MockHandler;
+use GuzzleHttp\Handler\MockHandler;
 use Platformsh\Client\Connection\Connector;
 
 class MockConnector extends Connector

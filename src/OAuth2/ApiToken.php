@@ -2,8 +2,8 @@
 
 namespace Platformsh\Client\OAuth2;
 
-use CommerceGuys\Guzzle\Oauth2\GrantType\GrantTypeBase;
-use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshTokenGrantTypeInterface;
+use Sainsburys\Guzzle\Oauth2\GrantType\GrantTypeBase;
+use Sainsburys\Guzzle\Oauth2\GrantType\RefreshTokenGrantTypeInterface;
 
 /**
  * Extends the RefreshToken grant type to support API tokens.

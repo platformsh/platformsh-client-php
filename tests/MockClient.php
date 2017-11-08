@@ -3,7 +3,7 @@
 namespace Platformsh\Client\Tests;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Ring\Client\MockHandler;
+use GuzzleHttp\Handler\MockHandler;
 
 class MockClient extends Client
 {
