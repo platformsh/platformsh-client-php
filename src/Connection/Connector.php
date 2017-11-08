@@ -278,11 +278,8 @@ class Connector implements ConnectorInterface
      */
     protected function setUpCache(HandlerStack $stack)
     {
-        if ($this->config['cache'] === false) {
-            return;
-        }
         $options = is_array($this->config['cache']) ? $this->config['cache'] : [];
-        if (empty($options['pool'])) {
+        if (!empty($options['pool'])) {
             $middleware = new CacheMiddleware(new PrivateCacheStrategy(new Psr6CacheStorage($options['pool'])));
             $stack->push($middleware, 'cache');
         }
