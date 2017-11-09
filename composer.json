@@ -3,11 +3,10 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
-        "cocur/slugify": "^2.0 || ~1.0",
-        "guzzlehttp/guzzle": "~5.3",
-        "commerceguys/guzzle-oauth2-plugin": "~2.0",
-        "guzzlehttp/cache-subscriber": "~0.1",
-        "cweagans/composer-patches": "~1.0"
+        "cocur/slugify": "^2.0",
+        "guzzlehttp/guzzle": "^6.3",
+        "sainsburys/guzzle-oauth2-plugin": "^3.0",
+        "kevinrob/guzzle-cache-middleware": "^2.1"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.5"
@@ -26,12 +25,5 @@
         {
             "name": "Patrick Dawkins"
         }
-    ],
-    "extra": {
-        "patches": {
-            "commerceguys/guzzle-oauth2-plugin": {
-                "Make it possible to get the access token without triggering a refresh": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/commit/d2d720015813185d1ad4fa12884cab9bac6a8b25.patch"
-            }
-        }
-    }
+    ]
 }
