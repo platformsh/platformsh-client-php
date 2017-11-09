@@ -62,7 +62,7 @@ class Session implements SessionInterface
      */
     public function set($key, $value)
     {
-        if (is_object($value)) {
+        if (is_object($value) && !$value instanceof \JsonSerializable) {
             throw new \InvalidArgumentException('Invalid session data type: object');
         }
         $this->data[$key] = $value;

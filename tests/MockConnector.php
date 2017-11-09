@@ -46,24 +46,6 @@ class MockConnector extends Connector
     }
 
     /**
-     * @inheritdoc
-     *
-     * Ensure the OAuth2 client will always receive a successful token
-     * response.
-     */
-    protected function getOauth2Client(array $options)
-    {
-        $values = [
-          'token_type' => 'bearer',
-          'expires_in' => 3600,
-          'access_token' => 'test',
-          'refresh_token' => 'test',
-        ];
-
-        return $this->getMockClient($values, 200, $options);
-    }
-
-    /**
      * @param array $values
      * @param int   $status
      * @param array $options
