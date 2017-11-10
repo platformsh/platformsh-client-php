@@ -7,11 +7,20 @@ use Platformsh\Client\Session\Storage\SessionStorageInterface;
 class Session implements SessionInterface
 {
 
-    protected $id;
-    protected $data;
-    protected $original;
-    protected $loaded = false;
-    protected $storage;
+    /** @var string */
+    private $id;
+
+    /** @var array */
+    private $data = [];
+
+    /** @var array */
+    private $original = [];
+
+    /** @var bool */
+    private $loaded = false;
+
+    /** @var SessionStorageInterface|null */
+    private $storage;
 
     /**
      * @param string                  $id   A unique session ID.
@@ -27,16 +36,14 @@ class Session implements SessionInterface
     }
 
     /**
-     * @inheritdoc
+     * Load session data, if storage is defined.
      */
-    public function load($reload = false)
+    private function load()
     {
-        if (!$this->loaded || $reload) {
-            if (isset($this->storage)) {
-                $this->storage->load($this);
-                $this->original = $this->data;
-                $this->loaded = true;
-            }
+        if (!$this->loaded && isset($this->storage)) {
+            $this->data = $this->storage->load($this->id);
+            $this->original = $this->data;
+            $this->loaded = true;
         }
     }
 
@@ -47,14 +54,6 @@ class Session implements SessionInterface
     {
         $this->storage = $storage;
         $this->load();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function add(array $data)
-    {
-        $this->data = array_merge($this->data, $data);
     }
 
     /**
@@ -73,39 +72,7 @@ class Session implements SessionInterface
      */
     public function get($key)
     {
-        return isset($this->data[$key]) ? $this->data[$key] : false;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setData(array $data)
-    {
-        $this->data = $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
+        return isset($this->data[$key]) ? $this->data[$key] : null;
     }
 
     /**
@@ -125,6 +92,6 @@ class Session implements SessionInterface
             return;
         }
 
-        $this->storage->save($this);
+        $this->storage->save($this->id, $this->data);
     }
 }

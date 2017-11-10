@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "30efbb529a329a566ae5cce22939adf0",
+    "content-hash": "ce88312163b8bf47cfc31ee47ace0895",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -371,8 +371,8 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@github.com:pjcdawkins/platformsh-oauth2-php.git",
-                "reference": "d76e6890f117193d7f547d5b6063490d84de8f9a"
+                "url": "https://github.com/pjcdawkins/platformsh-oauth2-php.git",
+                "reference": "961ef56f912c01e0f2493c368c3f1aded2155090"
             },
             "dist": {
                 "type": "zip",
@@ -403,7 +403,7 @@
                 "source": "https://github.com/pjcdawkins/platformsh-oauth2-php/tree/master",
                 "issues": "https://github.com/pjcdawkins/platformsh-oauth2-php/issues"
             },
-            "time": "2017-11-10T10:13:01+00:00"
+            "time": "2017-11-10T14:17:17+00:00"
         },
         {
             "name": "psr/http-message",

@@ -15,13 +15,6 @@ interface SessionInterface
     public function setStorage(SessionStorageInterface $storage);
 
     /**
-     * Add data to the session. New values will be merged with existing ones.
-     *
-     * @param array $data
-     */
-    public function add(array $data);
-
-    /**
      * Set a particular session value.
      *
      * @param string $key
@@ -34,46 +27,9 @@ interface SessionInterface
      *
      * @param string $key
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function get($key);
-
-    /**
-     * Set the entire session data.
-     *
-     * @param array $data
-     */
-    public function setData(array $data);
-
-    /**
-     * Get all the session data.
-     *
-     * @return array
-     */
-    public function getData();
-
-    /**
-     * Set the session ID.
-     *
-     * @param string $id
-     */
-    public function setId($id);
-
-    /**
-     * Get the session ID.
-     *
-     * @return string
-     */
-    public function getId();
-
-    /**
-     * Load session data, if storage is defined.
-     *
-     * @param bool $reload
-     *
-     * @return bool
-     */
-    public function load($reload = false);
 
     /**
      * Save the session, if storage is defined.

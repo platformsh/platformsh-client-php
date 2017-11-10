@@ -13,7 +13,7 @@
     },
     "repositories": [{
         "type": "vcs",
-        "url": "git@github.com:pjcdawkins/platformsh-oauth2-php.git"
+        "url": "https://github.com/pjcdawkins/platformsh-oauth2-php.git"
     }],
     "autoload": {
         "psr-4": {

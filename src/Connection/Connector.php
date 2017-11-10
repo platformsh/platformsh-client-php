@@ -14,8 +14,6 @@ use Platformsh\Client\Session\SessionInterface;
 use Platformsh\OAuth2\Client\Provider\Platformsh;
 use Platformsh\OAuth2\Client\Grant\ApiToken;
 use Platformsh\OAuth2\Client\GuzzleMiddleware;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 class Connector implements ConnectorInterface
 {
@@ -36,6 +34,24 @@ class Connector implements ConnectorInterface
 
     /** @var bool */
     protected $loggedOut = false;
+
+    /**
+     * @var array $storageKeys
+     *
+     * These keys are used for token storage for backwards compatibility with
+     * the commerceguys/guzzle-oauth2-plugin package. The left-hand side is
+     * the key in the AccessToken constructor. The right-hand side is the key
+     * that will be stored.
+     */
+    private $storageKeys = [
+        'access_token' => 'accessToken',
+        'refresh_token' => 'refreshToken',
+        'token_type' => 'tokenType',
+        'scope' => 'scope',
+        'expires' => 'expires',
+        'expires_in' => 'expiresIn',
+        'resource_owner_id' => 'resourceOwnerId,'
+    ];
 
     /**
      * @param array            $config
@@ -67,21 +83,11 @@ class Connector implements ConnectorInterface
           'token_url' => '/oauth2/token',
           'proxy' => null,
           'api_token' => null,
-          'api_token_type' => 'access',
+          'api_token_type' => 'exchange',
         ];
         $this->config = $config + $defaults;
 
         $this->session = $session ?: new Session();
-    }
-
-    /**
-     * Get the configured accounts endpoint URL.
-     *
-     * @return string
-     */
-    public function getAccountsEndpoint()
-    {
-        return $this->config['accounts'];
     }
 
     /**
@@ -98,12 +104,6 @@ class Connector implements ConnectorInterface
     {
         if ($this->loggedOut) {
             $this->session->clear();
-        } elseif ($this->oauthMiddleware) {
-            // Save the access token for future requests.
-            $token = $this->getOauthMiddleware()->getAccessToken(false);
-            if ($token !== null) {
-                $this->saveToken($token);
-            }
         }
     }
 
@@ -113,6 +113,14 @@ class Connector implements ConnectorInterface
     public function getSession()
     {
         return $this->session;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAccountsEndpoint()
+    {
+        return $this->config['accounts'];
     }
 
     /**
@@ -139,7 +147,6 @@ class Connector implements ConnectorInterface
           'clientId' => $this->config['client_id'],
           'clientSecret' => $this->config['client_secret'],
           'base_uri' => $this->config['accounts'],
-            // @todo make sure the following work
           'debug' => $this->config['debug'],
           'verify' => $this->config['verify'],
           'proxy' => $this->config['proxy'],
@@ -156,18 +163,39 @@ class Connector implements ConnectorInterface
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
             return;
         }
-        $this->session->set('token', $token);
+        foreach ($token->jsonSerialize() as $name => $value) {
+            if (isset($this->storageKeys[$name])) {
+                $this->session->set($this->storageKeys[$name], $value);
+            }
+        }
         $this->session->save();
     }
 
     /**
+     * Load the current access token.
+     *
      * @return AccessToken|null
      */
     protected function loadToken()
     {
-        $token = $this->session->get('token');
+        if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
+            return new AccessToken(['access_token' => $this->config['api_token']]);
+        }
+        if (!$this->session->get($this->storageKeys['access_token'])) {
+            return null;
+        }
 
-        return $token ? new AccessToken($token) : null;
+        // These keys are used for saving in the session for backwards
+        // compatibility with the commerceguys/guzzle-oauth2-plugin package.
+        $values = [];
+        foreach ($this->storageKeys as $tokenKey => $sessionKey) {
+            $value = $this->session->get($sessionKey);
+            if ($value !== null) {
+                $values[$tokenKey] = $value;
+            }
+        }
+
+        return new AccessToken($values);
     }
 
     /**
@@ -175,7 +203,7 @@ class Connector implements ConnectorInterface
      */
     public function isLoggedIn()
     {
-        return $this->session->get('token') || $this->config['api_token'];
+        return $this->session->get($this->storageKeys['access_token']) || $this->config['api_token'];
     }
 
     /**
@@ -192,12 +220,6 @@ class Connector implements ConnectorInterface
                 throw new \RuntimeException('Not logged in');
             }
 
-            // Ensure session tokens or other data are not used if an API token
-            // is set.
-            if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
-                $this->session->clear();
-            }
-
             $grant = new ClientCredentials();
             $grantOptions = [];
 
@@ -208,13 +230,13 @@ class Connector implements ConnectorInterface
             }
 
             $this->oauthMiddleware = new GuzzleMiddleware($this->getProvider(), $grant, $grantOptions);
+            $this->oauthMiddleware->setTokenSaveCallback(function (AccessToken $token) {
+                $this->saveToken($token);
+            });
 
             // If an access token is already available (via an API token or via
-            // the session) then set it in the subscriber.
-            $accessToken = $this->config['api_token'] && $this->config['api_token_type'] === 'access'
-              ? new AccessToken(['access_token' => $this->config['api_token']])
-              : $this->loadToken();
-            if ($accessToken) {
+            // the session) then set it in the middleware in advance.
+            if ($accessToken = $this->loadToken()) {
                 $this->oauthMiddleware->setAccessToken($accessToken);
             }
         }
@@ -225,15 +247,13 @@ class Connector implements ConnectorInterface
     /**
      * @inheritdoc
      */
-    public function setApiToken($token, $type = 'access')
+    public function setApiToken($token, $type)
     {
         $this->config['api_token'] = $token;
-        if ($type !== null) {
-            if (!in_array($type, ['access', 'exchange'])) {
-                throw new \InvalidArgumentException('Invalid API token type: ' . $type);
-            }
-            $this->config['api_token_type'] = $type;
+        if (!in_array($type, ['access', 'exchange'])) {
+            throw new \InvalidArgumentException('Invalid API token type: ' . $type);
         }
+        $this->config['api_token_type'] = $type;
         if (isset($this->oauthMiddleware)) {
             $this->oauthMiddleware = null;
         }
@@ -247,25 +267,6 @@ class Connector implements ConnectorInterface
         if (!isset($this->client)) {
             $stack = HandlerStack::create();
             $stack->push($this->getOauthMiddleware());
-
-            // The access token might change during the request cycle, because
-            // the OAuth middleware may refresh it. So we ensure the access token
-            // is saved immediately after each successful request.
-            $stack->push(function (callable $next) {
-                return function (RequestInterface $request, array $options) use ($next) {
-                    return $next($request, $options)->then(function (ResponseInterface $response) {
-                        if ($response && substr($response->getStatusCode(), 0, 1) === '2') {
-                            $middleware = $this->getOauthMiddleware();
-                            $token = $middleware->getAccessToken(false);
-                            if ($token !== null) {
-                                $this->saveToken($token);
-                            }
-                        }
-
-                        return $response;
-                    });
-                };
-            });
 
             $this->client = new Client([
               'handler' => $stack,

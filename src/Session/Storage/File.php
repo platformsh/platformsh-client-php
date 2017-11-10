@@ -2,8 +2,6 @@
 
 namespace Platformsh\Client\Session\Storage;
 
-use Platformsh\Client\Session\SessionInterface;
-
 class File implements SessionStorageInterface
 {
 
@@ -42,34 +40,31 @@ class File implements SessionStorageInterface
     /**
      * @inheritdoc
      */
-    public function save(SessionInterface $session)
+    public function save($sessionId, array $data)
     {
-        $data = $session->getData();
-        $filename = $this->getFilename($session);
+        $filename = $this->getFilename($sessionId);
         if (empty($data)) {
             if (file_exists($filename)) {
                 unlink($filename);
             }
-            return true;
+            return;
         }
         $this->mkDir(dirname($filename));
-        $result = file_put_contents($filename, json_encode($data));
+        $result = file_put_contents($filename, json_encode($data), LOCK_EX);
         if ($result === false) {
             throw new \Exception("Failed to save session to file: $filename");
         }
         chmod($filename, self::FILE_MODE);
-
-        return true;
     }
 
     /**
-     * @param SessionInterface $session
+     * @param string $sessionId
      *
      * @return string
      */
-    protected function getFilename(SessionInterface $session)
+    protected function getFilename($sessionId)
     {
-        $id = preg_replace('/[^\w\-]+/', '-', $session->getId());
+        $id = preg_replace('/[^\w\-]+/', '-', $sessionId);
         $dir = $this->getDirectory();
 
         return "$dir/sess-$id/sess-$id.json";
@@ -104,15 +99,17 @@ class File implements SessionStorageInterface
     /**
      * @inheritdoc
      */
-    public function load(SessionInterface $session)
+    public function load($sessionId)
     {
-        $filename = $this->getFilename($session);
+        $data = [];
+        $filename = $this->getFilename($sessionId);
         if (is_readable($filename)) {
             $raw = file_get_contents($filename);
             if ($raw !== false) {
                 $data = json_decode($raw, true);
-                $session->setData(is_array($data) ? $data : []);
             }
         }
+
+        return is_array($data) ? $data : [];
     }
 }
