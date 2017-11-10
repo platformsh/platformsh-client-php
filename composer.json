@@ -3,6 +3,7 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
+        "php": ">=5.6.0",
         "cocur/slugify": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
         "platformsh/oauth2": "dev-master"
@@ -28,5 +29,10 @@
         {
             "name": "Patrick Dawkins"
         }
-    ]
+    ],
+    "config": {
+        "platform": {
+            "php": "5.6"
+        }
+    }
 }
