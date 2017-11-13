@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce88312163b8bf47cfc31ee47ace0895",
+    "content-hash": "e6ae3aef3cbae726a96b1b86e71d1656",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -368,26 +368,34 @@
         },
         {
             "name": "platformsh/oauth2",
-            "version": "dev-master",
+            "version": "0.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/pjcdawkins/platformsh-oauth2-php.git",
-                "reference": "961ef56f912c01e0f2493c368c3f1aded2155090"
+                "url": "https://github.com/platformsh/platformsh-oauth2-php.git",
+                "reference": "c8be1ee40f718390eafdca8b15d45efe67188e06"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pjcdawkins/platformsh-oauth2-php/zipball/d76e6890f117193d7f547d5b6063490d84de8f9a",
-                "reference": "d76e6890f117193d7f547d5b6063490d84de8f9a",
+                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/c8be1ee40f718390eafdca8b15d45efe67188e06",
+                "reference": "c8be1ee40f718390eafdca8b15d45efe67188e06",
                 "shasum": ""
             },
             "require": {
                 "league/oauth2-client": "^2.2",
                 "php": ">=5.6.0"
             },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7"
+            },
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Platformsh\\OAuth2\\Client\\": "src"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Platformsh\\OAuth2\\Client\\Tests\\": "tests"
                 }
             },
             "license": [
@@ -400,10 +408,10 @@
             ],
             "description": "Platform.sh OAuth2 client",
             "support": {
-                "source": "https://github.com/pjcdawkins/platformsh-oauth2-php/tree/master",
-                "issues": "https://github.com/pjcdawkins/platformsh-oauth2-php/issues"
+                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/0.0.1",
+                "issues": "https://github.com/platformsh/platformsh-oauth2-php/issues"
             },
-            "time": "2017-11-10T14:17:17+00:00"
+            "time": "2017-11-13T09:10:25+00:00"
         },
         {
             "name": "psr/http-message",
@@ -1470,16 +1478,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.3.10",
+            "version": "v3.3.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "8c7bf1e7d5d6b05a690b715729cb4cd0c0a99c46"
+                "reference": "0938408c4faa518d95230deabb5f595bf0de31b9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/8c7bf1e7d5d6b05a690b715729cb4cd0c0a99c46",
-                "reference": "8c7bf1e7d5d6b05a690b715729cb4cd0c0a99c46",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/0938408c4faa518d95230deabb5f595bf0de31b9",
+                "reference": "0938408c4faa518d95230deabb5f595bf0de31b9",
                 "shasum": ""
             },
             "require": {
@@ -1521,7 +1529,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2017-10-05T14:43:42+00:00"
+            "time": "2017-11-10T18:26:04+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -1576,9 +1584,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "platformsh/oauth2": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
