@@ -3,9 +3,8 @@
 namespace Platformsh\Client\Exception;
 
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Message\RequestInterface;
-use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\Exception\ParseException;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class ApiResponseException extends BadResponseException
 {
@@ -19,7 +18,8 @@ class ApiResponseException extends BadResponseException
     public static function create(
       RequestInterface $request,
       ResponseInterface $response = null,
-      \Exception $previous = null
+      \Exception $previous = null,
+      array $ctx = []
     ) {
         $e = parent::create($request, $response, $previous);
         if ($response === null) {
@@ -59,22 +59,22 @@ class ApiResponseException extends BadResponseException
 
         $details = '';
 
+        $response->getBody()->seek(0);
+        $contents = $response->getBody()->getContents();
+
         try {
-            $response->getBody()->seek(0);
-            $json = $response->json();
+            $json = \GuzzleHttp\json_decode($contents, true);
             foreach ($responseInfoProperties as $property) {
                 if (!empty($json[$property])) {
                     $value = $json[$property];
                     $details .= " [$property] " . (is_scalar($value) ? $value : json_encode($value));
                 }
             }
-        } catch (ParseException $parseException) {
+        } catch (\InvalidArgumentException $parseException) {
             // Occasionally the response body may not be JSON.
-            $response->getBody()->seek(0);
-            $body = $response->getBody()->getContents();
-            if ($body) {
+            if ($contents) {
                 $details .= " [extra] Non-JSON response body";
-                $details .= " [body] " . $body;
+                $details .= " [body] " . $contents;
             }
             else {
                 $details .= " [extra] Empty response body";

@@ -5,9 +5,8 @@ namespace Platformsh\Client\Model;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ParseException;
-use GuzzleHttp\Message\RequestInterface;
-use GuzzleHttp\Url;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 
@@ -167,7 +166,7 @@ abstract class Resource implements \ArrayAccess
     {
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . urlencode($id) : $id;
-            $request = $client->createRequest('get', $url);
+            $request = new Request('get', $url);
             $data = self::send($request, $client);
 
             return new static($data, $url, $client, true);
@@ -196,7 +195,7 @@ abstract class Resource implements \ArrayAccess
             throw new \InvalidArgumentException($message);
         }
 
-        $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
+        $request = new Request('post', $collectionUrl, [], \GuzzleHttp\json_encode($body));
         $data = self::send($request, $client);
 
         return new Result($data, $collectionUrl, $client, get_called_class());
@@ -209,27 +208,29 @@ abstract class Resource implements \ArrayAccess
      *
      * @param RequestInterface $request
      * @param ClientInterface  $client
+     * @param array            $options
      *
      * @internal
      *
      * @return array
      */
-    public static function send(RequestInterface $request, ClientInterface $client)
+    public static function send(RequestInterface $request, ClientInterface $client, array $options = [])
     {
         $response = null;
         try {
-            $response = $client->send($request);
+            $response = $client->send($request, $options);
             $body = $response->getBody()->getContents();
             $data = [];
             if ($body) {
                 $response->getBody()->seek(0);
-                $data = $response->json();
+                $body = $response->getBody()->getContents();
+                $data = \GuzzleHttp\json_decode($body, true);
             }
 
             return (array) $data;
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
-        } catch (ParseException $e) {
+        } catch (\InvalidArgumentException $e) {
             throw ApiResponseException::create($request, $response);
         }
     }
@@ -246,8 +247,9 @@ abstract class Resource implements \ArrayAccess
     protected function sendRequest($url, $method = 'get', array $options = [])
     {
         return $this->send(
-          $this->client->createRequest($method, $url, $options),
-          $this->client
+          new Request($method, $url),
+          $this->client,
+          $options
         );
     }
 
@@ -307,12 +309,12 @@ abstract class Resource implements \ArrayAccess
      */
     public static function getCollection($url, $limit = 0, array $options = [], ClientInterface $client)
     {
-        if ($limit) {
-            // @todo uncomment this when the API implements a 'count' parameter
+        // @todo uncomment this when the API implements a 'count' parameter
+        // if ($limit) {
             // $options['query']['count'] = $limit;
-        }
-        $request = $client->createRequest('get', $url, $options);
-        $data = self::send($request, $client);
+        // }
+        $request = new Request('get', $url);
+        $data = self::send($request, $client, $options);
 
         // @todo remove this when the API implements a 'count' parameter
         if ($limit) {
@@ -361,10 +363,9 @@ abstract class Resource implements \ArrayAccess
         if (!empty($body)) {
             $options['json'] = $body;
         }
-        $request = $this->client
-          ->createRequest($method, $this->getLink("#$op"), $options);
+        $request= new Request($method, $this->getLink("#$op"));
 
-        return $this->send($request, $this->client);
+        return $this->send($request, $this->client, $options);
     }
 
     /**
@@ -507,8 +508,8 @@ abstract class Resource implements \ArrayAccess
      */
     public function refresh(array $options = [])
     {
-        $request = $this->client->createRequest('get', $this->getUri(), $options);
-        $this->setData(self::send($request, $this->client));
+        $request = new Request('get', $this->getUri());
+        $this->setData(self::send($request, $this->client, $options));
         $this->isFull = true;
     }
 
@@ -578,8 +579,9 @@ abstract class Resource implements \ArrayAccess
         if (empty($baseUrl)) {
             throw new \RuntimeException('No base URL');
         }
-        $base = Url::fromString($baseUrl);
-        return (string) $base->combine($relativeUrl);
+        $base = \GuzzleHttp\Psr7\uri_for($baseUrl);
+
+        return $base->withPath($relativeUrl)->__toString();
     }
 
     /**

@@ -50,20 +50,20 @@ interface ConnectorInterface
     public function getClient();
 
     /**
+     * Set the API token to use for Platform.sh requests.
+     *
+     * @param string $token
+     *   The token value.
+     * @param string $type
+     *   The token type 'exchange' for exchangeable tokens (recommended), or
+     *   'access' for direct personal access tokens.
+     */
+    public function setApiToken($token, $type);
+
+    /**
      * Get the configured accounts endpoint URL.
      *
      * @return string
      */
     public function getAccountsEndpoint();
-
-    /**
-     * Set the API token to use for Platform.sh requests.
-     *
-     * @param string $token
-     *   The token value.
-     * @param string|null $type
-     *   The token type ('access' for personal access tokens, or 'exchange'
-     *   for exchangeable tokens).
-     */
-    public function setApiToken($token, $type = 'access');
 }

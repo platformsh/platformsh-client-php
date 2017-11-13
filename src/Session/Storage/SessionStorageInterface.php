@@ -2,22 +2,22 @@
 
 namespace Platformsh\Client\Session\Storage;
 
-use Platformsh\Client\Session\SessionInterface;
-
 interface SessionStorageInterface
 {
+    /**
+     * Load data from a session.
+     *
+     * @param string $sessionId
+     *
+     * @return array
+     */
+    public function load($sessionId);
 
     /**
-     * @throws \Exception
+     * Save data to a session.
      *
-     * @param SessionInterface $session
+     * @param string $sessionId
+     * @param array  $data
      */
-    public function load(SessionInterface $session);
-
-    /**
-     * @throws \Exception
-     *
-     * @param SessionInterface $session
-     */
-    public function save(SessionInterface $session);
+    public function save($sessionId, array $data);
 }
