@@ -5,6 +5,8 @@ This is a PHP library for accessing the Platform.sh API.
 Our API is not stable yet. We recommend you use the [Platform.sh
 CLI](https://github.com/platformsh/platformsh-cli) for most purposes.
 
+[![Build Status](https://travis-ci.org/platformsh/platformsh-client-php.svg?branch=master)](https://travis-ci.org/platformsh/platformsh-client-php)
+
 ## Install
 
 Add this requirement to your `composer.json` file:
