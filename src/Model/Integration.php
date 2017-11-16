@@ -19,6 +19,7 @@ class Integration extends Resource
       'bitbucket',
       'hipchat',
       'github',
+      'gitlab',
       'webhook',
       'health.email',
       'health.pagerduty',
