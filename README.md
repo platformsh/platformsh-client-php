@@ -9,11 +9,8 @@ CLI](https://github.com/platformsh/platformsh-cli) for most purposes.
 
 ## Install
 
-Add this requirement to your `composer.json` file:
-```
-    "require": {
-        "platformsh/client": "@stable"
-    }
+```sh
+composer require platformsh/client
 ```
 
 ## Usage
