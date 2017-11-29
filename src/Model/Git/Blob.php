@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\Model\Git;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Resource;
 
@@ -19,13 +19,13 @@ class Blob extends Resource
     /**
      * Get the Blob object for an SHA hash.
      *
-     * @param string $sha
-     * @param string $baseUrl
-     * @param Client $client
+     * @param string          $sha
+     * @param string          $baseUrl
+     * @param ClientInterface $client
      *
      * @return static|false
      */
-    public static function fromSha($sha, $baseUrl, Client $client)
+    public static function fromSha($sha, $baseUrl, ClientInterface $client)
     {
         $url = Project::getProjectBaseFromUrl($baseUrl) . '/git/blobs';
 
