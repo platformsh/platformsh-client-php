@@ -109,7 +109,7 @@ class Tree extends Resource
             return $object;
         }
         if ($object instanceof Tree) {
-            throw new GitObjectTypeException('The requested file is a directory: ' . $path);
+            throw new GitObjectTypeException('The requested file is a directory', $path);
         }
 
         return false;
@@ -134,6 +134,6 @@ class Tree extends Resource
         if ($object instanceof Tree) {
             return $object;
         }
-        throw new GitObjectTypeException('Not a directory: ' . $path);
+        throw new GitObjectTypeException('Not a directory', $path);
     }
 }
