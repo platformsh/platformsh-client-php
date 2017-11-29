@@ -5,6 +5,7 @@ namespace Platformsh\Client\Model;
 use Cocur\Slugify\Slugify;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
+use Platformsh\Client\Model\Git\Commit;
 
 /**
  * A Platform.sh environment.
@@ -49,6 +50,18 @@ use Platformsh\Client\Exception\OperationUnavailableException;
  */
 class Environment extends Resource
 {
+    /**
+     * Get the Git commit for the HEAD of this environment.
+     *
+     * @return Commit|false
+     */
+    public function getHeadCommit()
+    {
+        $base = Project::getProjectBaseFromUrl($this->getUri()) . '/git/commits';
+
+        return Commit::get($this->head_commit, $base, $this->client);
+    }
+
     /**
      * Get the SSH URL for the environment.
      *
