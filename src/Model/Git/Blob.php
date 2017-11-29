@@ -5,6 +5,7 @@ namespace Platformsh\Client\Model\Git;
 use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Resource;
+use sskaje\converter\base\Base;
 
 /**
  * Git blob resource.
@@ -44,7 +45,11 @@ class Blob extends Resource
         }
 
         if ($this->encoding === 'base64') {
-            $raw = base64_decode($this->content);
+            // PHP's built-in base64_decode() function does not work for
+            // binary content encoded according to RFC 4648. The
+            // sskaje/base-converter library is used instead.
+            $base64 = new Base();
+            $raw = $base64->decode('base64.MSB', $this->content);
             if ($raw === false) {
                 throw new \RuntimeException('Failed to decode content');
             }
