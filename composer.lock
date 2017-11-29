@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "938e384245137cd59a5da77206d92da9",
+    "content-hash": "03d139694c2b711bea00ded2c7c0f173",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -525,43 +525,6 @@
                 "promises"
             ],
             "time": "2016-12-22T14:09:01+00:00"
-        },
-        {
-            "name": "sskaje/base-converter",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/sskaje/base_converter.git",
-                "reference": "ff204c6fd547a9718a0acfc66d4cf33d257e899d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/sskaje/base_converter/zipball/ff204c6fd547a9718a0acfc66d4cf33d257e899d",
-                "reference": "ff204c6fd547a9718a0acfc66d4cf33d257e899d",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "sskaje\\converter\\": "converter"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "sskaje",
-                    "email": "sskaje@gmail.com",
-                    "homepage": "https://sskaje.me"
-                }
-            ],
-            "description": "sskaje's BaseXX Encode/Decode class, a PHP implemention of RFC 3548, supports Base16/Base32/Base64 in both LSB and MSB, and another Base32 used by VMware",
-            "time": "2017-01-22T03:29:11+00:00"
         }
     ],
     "packages-dev": [
@@ -1679,9 +1642,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "sskaje/base-converter": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
