@@ -2,6 +2,8 @@
 
 namespace Platformsh\Client\Model;
 
+use function GuzzleHttp\Psr7\uri_for;
+
 /**
  * A Platform.sh project.
  *
@@ -375,5 +377,21 @@ class Project extends Resource
         $options = ['key' => $key, 'certificate' => $certificate, 'chain' => $chain];
 
         return Certificate::create($options, $this->getUri() . '/certificates', $this->client);
+    }
+
+    /**
+     * Find the project base URL from another project resource's URL.
+     *
+     * @param string $url
+     *
+     * @return string
+     */
+    public static function getProjectBaseFromUrl($url)
+    {
+        if (preg_match('#/api/projects/([^/]+)#', $url, $matches)) {
+            return uri_for($url)->withPath('/api/projects/' . $matches[1])->__toString();
+        }
+
+        throw new \RuntimeException('Failed to find project ID from URL: ' . $url);
     }
 }
