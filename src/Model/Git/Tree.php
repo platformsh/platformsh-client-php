@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model\Git;
 
 use GuzzleHttp\ClientInterface;
+use Platformsh\Client\Exception\GitObjectTypeException;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Resource;
 
@@ -93,13 +94,22 @@ class Tree extends Resource
      *
      * @param string $path
      *
+     * @throws GitObjectTypeException if the path is a directory.
+     *
      * @return Blob|false
+     *   A Blob object, or false if the blob is not found.
      */
     public function getBlob($path)
     {
         $object = $this->getObjectRecursive($path);
+        if ($object === false) {
+            return false;
+        }
         if ($object instanceof Blob) {
             return $object;
+        }
+        if ($object instanceof Tree) {
+            throw new GitObjectTypeException('The requested file is a directory: ' . $path);
         }
 
         return false;
@@ -110,15 +120,20 @@ class Tree extends Resource
      *
      * @param string $path
      *
+     * @throws GitObjectTypeException if the path is not a directory.
+     *
      * @return Tree|false
+     *   A Tree object or false if the tree is not found.
      */
     public function getTree($path)
     {
         $object = $this->getObjectRecursive($path);
+        if ($object === false) {
+            return false;
+        }
         if ($object instanceof Tree) {
             return $object;
         }
-
-        return false;
+        throw new GitObjectTypeException('Not a directory: ' . $path);
     }
 }
