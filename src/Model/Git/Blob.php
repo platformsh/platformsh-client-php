@@ -44,7 +44,7 @@ class Blob extends Resource
         }
 
         if ($this->encoding === 'base64') {
-            $raw = base64_decode($this->content);
+            $raw = base64_decode($this->content, true);
             if ($raw === false) {
                 throw new \RuntimeException('Failed to decode content');
             }
