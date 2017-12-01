@@ -42,13 +42,10 @@ class Tree extends Resource
      */
     public function getObject($path)
     {
-        $data = false;
-        foreach ($this->tree as $objectData) {
-            if ($objectData['path'] === $path) {
-                $data = $objectData;
-                break;
-            }
+        if ($path === '' || $path === '.') {
+            return $this;
         }
+        $data = $this->getObjectData($path);
         if ($data === false) {
             return false;
         }
@@ -63,6 +60,24 @@ class Tree extends Resource
     }
 
     /**
+     * Find an object definition by its path.
+     *
+     * @param string $path
+     *
+     * @return array|false
+     */
+    private function getObjectData($path)
+    {
+        foreach ($this->tree as $objectData) {
+            if ($objectData['path'] === $path) {
+                return $objectData;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get an object recursively in this tree.
      *
      * @param string $path
@@ -71,22 +86,30 @@ class Tree extends Resource
      */
     private function getObjectRecursive($path)
     {
-        if (strpos($path, '/') === false && strpos($path, '\\') !== false) {
-            $path = str_replace('\\', '/', $path);
-        }
-        $parts = explode('/', trim($path, '/'));
-        $object = false;
-        $tree = $this;
-        while ($part = array_shift($parts)) {
+        $tree = $object = $this;
+        foreach ($this->splitPath($path) as $part) {
             $object = $tree->getObject($part);
-            if ($object instanceof Tree) {
-                $tree = $object;
-            } else {
+            if (!$object instanceof Tree) {
                 return $object;
             }
+            $tree = $object;
         }
 
         return $object;
+    }
+
+    /**
+     * Split a tree path into parts.
+     *
+     * @param string $path
+     *
+     * @return string[]
+     */
+    private function splitPath($path)
+    {
+        $path = trim(str_replace('\\', '/', $path), '/');
+
+        return explode('/', $path);
     }
 
     /**
