@@ -374,16 +374,17 @@ class Environment extends Resource
      * @param string $name
      * @param mixed  $value
      * @param bool   $json
+     * @param bool   $enabled
      *
      * @return Result
      */
-    public function setVariable($name, $value, $json = false)
+    public function setVariable($name, $value, $json = false, $enabled = true)
     {
         if (!is_scalar($value)) {
             $value = json_encode($value);
             $json = true;
         }
-        $values = ['value' => $value, 'is_json' => $json, 'is_enabled' => true];
+        $values = ['value' => $value, 'is_json' => $json, 'is_enabled' => $enabled];
         $existing = $this->getVariable($name);
         if ($existing) {
             return $existing->update($values);
