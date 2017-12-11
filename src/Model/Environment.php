@@ -383,7 +383,7 @@ class Environment extends Resource
             $value = json_encode($value);
             $json = true;
         }
-        $values = ['value' => $value, 'is_json' => $json];
+        $values = ['value' => $value, 'is_json' => $json, 'is_enabled' => true];
         $existing = $this->getVariable($name);
         if ($existing) {
             return $existing->update($values);
