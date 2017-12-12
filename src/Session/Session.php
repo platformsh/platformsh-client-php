@@ -33,6 +33,7 @@ class Session implements SessionInterface
     {
         if (!$this->loaded || $reload) {
             if (isset($this->storage)) {
+                $this->data = [];
                 $this->storage->load($this);
                 $this->original = $this->data;
                 $this->loaded = true;
