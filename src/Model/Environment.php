@@ -5,6 +5,7 @@ namespace Platformsh\Client\Model;
 use Cocur\Slugify\Slugify;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
+use Platformsh\Client\Model\Deployment\EnvironmentDeployment;
 use Platformsh\Client\Model\Git\Commit;
 
 /**
@@ -50,6 +51,23 @@ use Platformsh\Client\Model\Git\Commit;
  */
 class Environment extends Resource
 {
+    /**
+     * Get the current deployment of this environment.
+     *
+     * @throws \RuntimeException if no current deployment is found.
+     *
+     * @return EnvironmentDeployment
+     */
+    public function getCurrentDeployment()
+    {
+        $deployment = EnvironmentDeployment::get('current', $this->getUri() . '/deployments', $this->client);
+        if (!$deployment) {
+            throw new EnvironmentStateException('Current deployment not found', $this);
+        }
+
+        return $deployment;
+    }
+
     /**
      * Get the Git commit for the HEAD of this environment.
      *
