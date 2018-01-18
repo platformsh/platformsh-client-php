@@ -311,9 +311,13 @@ class Activity extends Resource
                 );
 
             case 'environment.update.restrict_robots':
+                $indexingAllowed = !$payload['environment']['restrict_robots'];
+                $verb = $indexingAllowed ? 'enabled' : 'disabled';
+
                 return sprintf(
-                    '%s updated the robots.txt settings on environment %s',
+                    '%s %s indexing by search engines on environment %s',
                     $payload['user']['display_name'],
+                    $verb,
                     $payload['environment']['title']
                 );
 
