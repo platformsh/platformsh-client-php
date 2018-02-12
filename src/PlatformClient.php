@@ -7,6 +7,7 @@ use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Project;
+use Platformsh\Client\Model\Region;
 use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
@@ -242,12 +243,14 @@ class PlatformClient
     /**
      * Create a new Platform.sh subscription.
      *
-     * @param string $region  The region. See Subscription::$availableRegions.
-     * @param string $plan    The plan. See Subscription::$availablePlans.
-     * @param string $title   The project title.
-     * @param int    $storage The storage of each environment, in MiB.
-     * @param int    $environments The number of available environments.
+     * @param string $region             The region ID. See getRegions().
+     * @param string $plan               The plan. See Subscription::$availablePlans.
+     * @param string $title              The project title.
+     * @param int    $storage            The storage of each environment, in MiB.
+     * @param int    $environments       The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
+     *
+     * @see PlatformClient::getRegions().
      *
      * @return Subscription
      */
@@ -314,5 +317,15 @@ class PlatformClient
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
+    }
+
+    /**
+     * Get a list of available regions.
+     *
+     * @return Region[]
+     */
+    public function getRegions()
+    {
+        return Region::getCollection($this->accountsEndpoint . 'regions', 0, [], $this->getConnector()->getClient());
     }
 }
