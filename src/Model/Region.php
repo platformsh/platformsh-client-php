@@ -22,6 +22,8 @@ class Region extends Resource
     protected function setData(array $data)
     {
         $data = isset($data['regions'][0]) ? $data['regions'][0] : $data;
+        $data['available'] = !empty($data['available']);
+        $data['private'] = !empty($data['private']);
         $this->data = $data;
     }
 
