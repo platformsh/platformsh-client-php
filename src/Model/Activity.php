@@ -214,6 +214,13 @@ class Activity extends Resource
                     $payload['environment']['title']
                 );
 
+            case 'environment.redeploy':
+                return sprintf(
+                  '%s redeployed environment %s',
+                  $payload['user']['display_name'],
+                  $payload['environment']['title']
+                );
+
             case 'environment.restore':
                 return sprintf(
                     '%s restored %s from snapshot %s',
