@@ -519,4 +519,14 @@ class Environment extends Resource
 
         return EnvironmentAccess::create($body, $this->getLink('#manage-access'), $this->client);
     }
+
+    /**
+     * Redeploy the environment.
+     *
+     * @return Activity
+     */
+    public function redeploy()
+    {
+        return $this->runLongOperation('redeploy');
+    }
 }
