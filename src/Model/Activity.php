@@ -23,6 +23,7 @@ use GuzzleHttp\Exception\ConnectException;
  * @property-read string   $result
  * @property-read string   $started_at
  * @property-read string   $type
+ * @property-read string   $description The HTML description of the activity.
  * @property-read array    $payload
  */
 class Activity extends Resource
