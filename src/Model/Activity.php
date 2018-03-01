@@ -120,10 +120,22 @@ class Activity extends Resource
     /**
      * Get a human-readable description of the activity.
      *
+     * @param bool $html Whether to include HTML in the output.
+     *
+     * @deprecated
+     *   Use the "description" property instead, for a description wrapped in
+     *   HTML tags. Or for plain text, just run it through strip_tags().
+     *
      * @return string
      */
-    public function getDescription()
+    public function getDescription($html = false)
     {
+        if ($this->hasProperty('description')) {
+            $description = $this->getProperty('description');
+
+            return $html ? $description : strip_tags($description);
+        }
+
         $type = $this->getProperty('type');
         $payload = $this->getProperty('payload');
         switch ($type) {
