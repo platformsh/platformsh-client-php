@@ -103,11 +103,9 @@ class Environment extends Resource
     /**
      * Get the SSH URL via the legacy 'ssh' link.
      *
-     * @param string $app
-     *
      * @return string
      */
-    private function constructLegacySshUrl($app)
+    private function constructLegacySshUrl()
     {
         if (!$this->hasLink('ssh')) {
             $id = $this->data['id'];
@@ -117,9 +115,7 @@ class Environment extends Resource
             throw new OperationUnavailableException("No SSH URL found for environment '$id'. You may not have permission to SSH.");
         }
 
-        $suffix = $app ? '--' . $app : '';
-
-        return $this->convertSshUrl($this->getLink('ssh'), $suffix);
+        return $this->convertSshUrl($this->getLink('ssh'));
     }
 
     /**
