@@ -15,6 +15,9 @@ namespace Platformsh\Client\Model;
  *   The name of the variable.
  * @property-read string $value
  *   The value of the variable.
+ * @property-read bool $is_sensitive
+ *   Whether the variable is sensitive. If so, it will not be copied to child
+ *   environments, and its value will not be returned in the API.
  * @property-read bool   $is_enabled
  *   Whether the variable is enabled.
  * @property-read bool   $is_json
@@ -25,6 +28,8 @@ namespace Platformsh\Client\Model;
  *   The time the variable was last updated (ISO 8601).
  * @property-read bool   $inherited
  *   Whether the variable was inherited from a parent environment.
+ * @property-read bool   $is_inheritable
+ *   Whether the variable is allowed to be inherited by a child environment.
  */
 class Variable extends Resource
 {
