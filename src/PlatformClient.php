@@ -232,9 +232,13 @@ class PlatformClient
      * @param int    $environments       The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
      *
-     * @see PlatformClient::getRegions().
+     * @see PlatformClient::getRegions()
+     * @see Subscription::wait()
      *
      * @return Subscription
+     *   A subscription, representing a project. Use Subscription::wait() or
+     *   similar code to wait for the subscription's project to be provisioned
+     *   and activated.
      */
     public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
     {

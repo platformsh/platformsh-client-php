@@ -37,6 +37,10 @@ class Subscription extends Resource
     /**
      * {@inheritdoc}
      *
+     * @internal Use PlatformClient::createSubscription() to create a new subscription.
+     *
+     * @see \Platformsh\Client\PlatformClient::createSubscription()
+     *
      * @return static
      */
     public static function create(array $body, $collectionUrl, ClientInterface $client)
