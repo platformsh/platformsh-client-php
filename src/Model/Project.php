@@ -394,4 +394,14 @@ class Project extends Resource
 
         throw new \RuntimeException('Failed to find project ID from URL: ' . $url);
     }
+
+    /**
+     * Clear the project's build cache.
+     *
+     * @return Result
+     */
+    public function clearBuildCache()
+    {
+        return $this->runOperation('clear-build-cache');
+    }
 }
