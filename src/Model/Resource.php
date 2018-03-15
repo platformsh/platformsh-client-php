@@ -352,7 +352,7 @@ abstract class Resource implements \ArrayAccess
      * @param string $method
      * @param array  $body
      *
-     * @return array
+     * @return Result
      */
     protected function runOperation($op, $method = 'post', array $body = [])
     {
@@ -364,8 +364,9 @@ abstract class Resource implements \ArrayAccess
             $options['json'] = $body;
         }
         $request= new Request($method, $this->getLink("#$op"));
+        $data = $this->send($request, $this->client, $options);
 
-        return $this->send($request, $this->client, $options);
+        return new Result($data, $this->baseUrl, $this->client, get_called_class());
     }
 
     /**
@@ -379,8 +380,7 @@ abstract class Resource implements \ArrayAccess
      */
     protected function runLongOperation($op, $method = 'post', array $body = [])
     {
-        $data = $this->runOperation($op, $method, $body);
-        $result = new Result($data, $this->baseUrl, $this->client, get_called_class());
+        $result = $this->runOperation($op, $method, $body);
         $activities = $result->getActivities();
         if (count($activities) !== 1) {
             trigger_error(sprintf("Expected one activity, found %d", count($activities)), E_USER_WARNING);
@@ -462,11 +462,9 @@ abstract class Resource implements \ArrayAccess
             $message = "Cannot update resource due to validation error(s): " . implode('; ', $errors);
             throw new \InvalidArgumentException($message);
         }
-        $data = $this->runOperation('edit', 'patch', $values);
-
+        $data = $this->runOperation('edit', 'patch', $values)->getData();
         if (isset($data['_embedded']['entity'])) {
-            $resourceData = $data['_embedded']['entity'];
-            $this->setData($resourceData);
+            $this->setData($data['_embedded']['entity']);
             $this->isFull = true;
         }
 

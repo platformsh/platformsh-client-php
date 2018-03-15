@@ -18,7 +18,7 @@ class Result extends Resource
      */
     public function __construct(array $data, $baseUrl, ClientInterface $client, $className)
     {
-        parent::__construct($data, $baseUrl, $client);
+        parent::__construct($data, $baseUrl, $client, true);
         $this->setResourceClass($className);
     }
 
