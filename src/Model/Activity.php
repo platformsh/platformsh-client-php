@@ -131,7 +131,7 @@ class Activity extends Resource
      */
     public function getDescription($html = false)
     {
-        if ($this->hasProperty('description')) {
+        if ($this->hasProperty('description', false)) {
             $description = $this->getProperty('description');
 
             return $html ? $description : strip_tags($description);
