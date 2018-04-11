@@ -2,8 +2,7 @@
 
 This is a PHP library for accessing the Platform.sh API.
 
-Our API is not stable yet. We recommend you use the [Platform.sh
-CLI](https://github.com/platformsh/platformsh-cli) for most purposes.
+We recommend you use the [Platform.sh CLI](https://github.com/platformsh/platformsh-cli) (which uses this library) for most purposes.
 
 [![Build Status](https://travis-ci.org/platformsh/platformsh-client-php.svg?branch=master)](https://travis-ci.org/platformsh/platformsh-client-php)
 
@@ -26,10 +25,6 @@ $client = new PlatformClient();
 // Set the API token to use.
 //
 // N.B. you must keep your API token(s) safe!
-//
-// The second parameter is the token type:
-//   - 'exchange' for all newer API tokens (created after April 2016)
-//   - 'access' for older 'personal access tokens'.
 $client->getConnector()->setApiToken($myToken, 'exchange');
 
 // Get the user's first project.
