@@ -179,7 +179,11 @@ class Connector implements ConnectorInterface
     protected function loadToken()
     {
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
-            return new AccessToken(['access_token' => $this->config['api_token']]);
+            return new AccessToken([
+                'access_token' => $this->config['api_token'],
+                // Skip local expiry checking.
+                'expires' => 2147483647,
+            ]);
         }
         if (!$this->session->get($this->storageKeys['access_token'])) {
             return null;
