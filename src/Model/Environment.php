@@ -306,19 +306,27 @@ class Environment extends Resource
     /**
      * Synchronize an environment with its parent.
      *
-     * @param bool $code
-     * @param bool $data
+     * @param bool $code   Synchronize code.
+     * @param bool $data   Synchronize data.
+     * @param bool $rebase Synchronize code by rebasing instead of merging.
      *
      * @throws \InvalidArgumentException
      *
      * @return Activity
      */
-    public function synchronize($data = false, $code = false)
+    public function synchronize($data = false, $code = false, $rebase = false)
     {
         if (!$data && !$code) {
             throw new \InvalidArgumentException('Nothing to synchronize: you must specify $data or $code');
         }
-        $body = ['synchronize_data' => $data, 'synchronize_code' => $code];
+        $body = [
+            'synchronize_data' => $data,
+            'synchronize_code' => $code,
+        ];
+        if ($rebase) {
+            // @todo always add this (when the rebase option is GA)
+            $body['rebase'] = $rebase;
+        }
 
         return $this->runLongOperation('synchronize', 'post', $body);
     }
