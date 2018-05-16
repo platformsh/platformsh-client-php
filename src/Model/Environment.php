@@ -397,16 +397,26 @@ class Environment extends ApiResourceBase
      * @param mixed  $value
      * @param bool   $json
      * @param bool   $enabled
+     * @param bool   $sensitive
      *
      * @return Result
      */
-    public function setVariable($name, $value, $json = false, $enabled = true)
+    public function setVariable(
+        $name,
+        $value,
+        $json = false,
+        $enabled = true,
+        $sensitive = false
+    )
     {
         if (!is_scalar($value)) {
             $value = json_encode($value);
             $json = true;
         }
         $values = ['value' => $value, 'is_json' => $json, 'is_enabled' => $enabled];
+        if ($sensitive) {
+            $values['is_sensitive'] = $sensitive;
+        }
         $existing = $this->getVariable($name);
         if ($existing) {
             return $existing->update($values);

@@ -12,9 +12,12 @@ namespace Platformsh\Client\Model;
  * @property-read string $name
  *   The name of the variable.
  * @property-read string $value
- *   The value of the variable.
+ *   The value of the variable. This is not readable if $is_sensitive is true.
  * @property-read bool   $is_json
  *   Whether the variable's value is a JSON string.
+ * @property-read bool $is_sensitive
+ *   Whether the variable is sensitive. If so, its value will not be returned
+ *   in the API.
  * @property-read bool   $visible_build
  *   Whether the variable should be visible at build time.
  * @property-read bool   $visible_runtime

@@ -14,10 +14,10 @@ namespace Platformsh\Client\Model;
  * @property-read string $name
  *   The name of the variable.
  * @property-read string $value
- *   The value of the variable.
+ *   The value of the variable. This is not readable if $is_sensitive is true.
  * @property-read bool $is_sensitive
- *   Whether the variable is sensitive. If so, it will not be copied to child
- *   environments, and its value will not be returned in the API.
+ *   Whether the variable is sensitive. If so, its value will not be returned
+ *   in the API.
  * @property-read bool   $is_enabled
  *   Whether the variable is enabled.
  * @property-read bool   $is_json

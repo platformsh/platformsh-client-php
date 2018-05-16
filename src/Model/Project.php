@@ -309,16 +309,24 @@ class Project extends ApiResourceBase
      * @param mixed  $value
      *   The value of the variable to set.  If non-scalar it will be JSON-encoded automatically.
      * @param bool $json
-     *   True if this value is an encoded JSON value. false if it's a primitive.
+     *   Whether this variable's value is JSON-encoded.
      * @param bool $visibleBuild
-     *   True if this variable should be exposed during the build phase, false otherwise.
+     *   Whether this this variable should be exposed during the build phase.
      * @param bool $visibleRuntime
-     *   True if this variable should be exposed during deploy and runtime, false otherwise.
+     *   Whether this variable should be exposed during deploy and runtime.
+     * @param bool $sensitive
+     *   Whether this variable's value should be readable via the API.
      *
      * @return Result
      */
-    public function setVariable($name, $value, $json = false, $visibleBuild = true, $visibleRuntime = true)
-    {
+    public function setVariable(
+        $name,
+        $value,
+        $json = false,
+        $visibleBuild = true,
+        $visibleRuntime = true,
+        $sensitive = false
+    ) {
         // If $value isn't a scalar, assume it's supposed to be JSON.
         if (!is_scalar($value)) {
             $value = json_encode($value);
@@ -329,6 +337,9 @@ class Project extends ApiResourceBase
             'is_json' => $json,
             'visible_build' => $visibleBuild,
             'visible_runtime' => $visibleRuntime];
+        if ($sensitive) {
+            $values['is_sensitive'] = $sensitive;
+        }
 
         $existing = $this->getVariable($name);
         if ($existing) {
