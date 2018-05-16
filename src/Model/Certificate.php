@@ -15,7 +15,7 @@ namespace Platformsh\Client\Model;
  * @property-read string   $updated_at
  * @property-read string   $expires_at
  */
-class Certificate extends Resource
+class Certificate extends ApiResourceBase
 {
     /** @var array */
     protected static $required = ['key', 'certificate'];

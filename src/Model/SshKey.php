@@ -9,7 +9,7 @@ namespace Platformsh\Client\Model;
  * @property-read int    $key_id
  * @property-read string $fingerprint
  */
-class SshKey extends Resource
+class SshKey extends ApiResourceBase
 {
 
     protected static $required = ['value'];

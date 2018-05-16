@@ -8,7 +8,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $id
  * @property-read string $role
  */
-class ProjectAccess extends Resource
+class ProjectAccess extends ApiResourceBase
 {
 
     /** @var array */

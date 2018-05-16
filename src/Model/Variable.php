@@ -31,7 +31,7 @@ namespace Platformsh\Client\Model;
  * @property-read bool   $is_inheritable
  *   Whether the variable is allowed to be inherited by a child environment.
  */
-class Variable extends Resource
+class Variable extends ApiResourceBase
 {
 
     /**

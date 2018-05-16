@@ -2,9 +2,10 @@
 
 namespace Platformsh\Client\Tests;
 
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 
-class MockResource extends Resource {
+class MockApiResource extends ApiResourceBase
+{
 
     protected static $required = ['testProperty'];
 

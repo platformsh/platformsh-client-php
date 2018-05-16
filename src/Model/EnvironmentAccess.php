@@ -10,7 +10,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $project The project ID
  * @property-read string $environment The environment ID
  */
-class EnvironmentAccess extends Resource
+class EnvironmentAccess extends ApiResourceBase
 {
 
     /** @var array */

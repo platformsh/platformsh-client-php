@@ -14,7 +14,7 @@ use GuzzleHttp\ClientInterface;
  * @property-read string $zone
  * @property-read string $endpoint
  */
-class Region extends Resource
+class Region extends ApiResourceBase
 {
     /**
      * @inheritdoc

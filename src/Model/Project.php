@@ -13,7 +13,7 @@ use function GuzzleHttp\Psr7\uri_for;
  * @property-read string $updated_at
  * @property-read string $owner
  */
-class Project extends Resource
+class Project extends ApiResourceBase
 {
     /**
      * Prevent deletion.

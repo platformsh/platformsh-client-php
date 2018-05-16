@@ -7,7 +7,7 @@ use GuzzleHttp\ClientInterface;
 /**
  * A class wrapping the result of an API call.
  */
-class Result extends Resource
+class Result extends ApiResourceBase
 {
     protected $resourceClass;
 

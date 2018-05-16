@@ -4,7 +4,7 @@ namespace Platformsh\Client\Model\Git;
 
 use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Model\Project;
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 
 /**
  * Git ref resource.
@@ -16,7 +16,7 @@ use Platformsh\Client\Model\Resource;
  * @property-read array  $object
  *   An object containing 'type' and 'sha'.
  */
-class Ref extends Resource
+class Ref extends ApiResourceBase
 {
     /**
      * Get a Ref object in a project.

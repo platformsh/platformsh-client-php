@@ -12,6 +12,6 @@ namespace Platformsh\Client\Model;
  * @property-read string $display_name
  * @property-read string $email
  */
-class Account extends Resource
+class Account extends ApiResourceBase
 {
 }

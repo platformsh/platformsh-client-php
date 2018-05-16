@@ -11,7 +11,7 @@ namespace Platformsh\Client\Model;
  * @see \Platformsh\Client\PlatformClient::getSshKey()
  * @see \Platformsh\Client\PlatformClient::getSshKeys()
  */
-class SshKey_Platform extends Resource
+class SshKey_Platform extends ApiResourceBase
 {
 
     protected static $required = ['key'];

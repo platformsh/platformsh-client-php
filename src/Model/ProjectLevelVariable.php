@@ -24,6 +24,6 @@ namespace Platformsh\Client\Model;
  * @property-read string $updated_at
  *   The time the variable was last updated (ISO 8601).
  */
-class ProjectLevelVariable extends Resource
+class ProjectLevelVariable extends ApiResourceBase
 {
 }

@@ -13,7 +13,7 @@ use Platformsh\Client\Exception\OperationUnavailableException;
 /**
  * The base class for API resources.
  */
-abstract class Resource implements \ArrayAccess
+abstract class ApiResourceBase implements \ArrayAccess
 {
 
     /** @var array */

@@ -15,7 +15,7 @@ namespace Platformsh\Client\Model;
  * @property-read string|null $to
  * @property-read string      $type
  */
-class Route extends Resource
+class Route extends ApiResourceBase
 {
 
 }

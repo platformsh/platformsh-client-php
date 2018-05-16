@@ -8,7 +8,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     /** @var array */
     protected $properties;
 
-    /** @var \Platformsh\Client\Model\Resource */
+    /** @var \Platformsh\Client\Model\ApiResourceBase */
     protected $resource;
 
     public function setUp()
@@ -30,7 +30,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
               ],
             ],
           ];
-        $this->resource = new MockResource($data, null, null, true);
+        $this->resource = new MockApiResource($data, null, null, true);
     }
 
     /**
@@ -80,7 +80,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     {
         $mockClient = new MockClient();
         $this->setExpectedException('\InvalidArgumentException');
-        MockResource::create([], '', $mockClient);
+        MockApiResource::create([], '', $mockClient);
     }
 
     /**
@@ -88,7 +88,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidPropertiesBlockUpdate()
     {
-        $resource = new MockResource([]);
+        $resource = new MockApiResource([]);
         $this->setExpectedException('\InvalidArgumentException');
         $resource->update(['testProperty' => 2]);
     }

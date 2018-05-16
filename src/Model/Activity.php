@@ -26,7 +26,7 @@ use GuzzleHttp\Exception\ConnectException;
  * @property-read string   $description The HTML description of the activity.
  * @property-read array    $payload
  */
-class Activity extends Resource
+class Activity extends ApiResourceBase
 {
 
     const RESULT_SUCCESS = 'success';

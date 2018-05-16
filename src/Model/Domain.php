@@ -11,7 +11,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $updated_at
  * @property-read array  $ssl
  */
-class Domain extends Resource
+class Domain extends ApiResourceBase
 {
 
     /** @var array */

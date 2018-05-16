@@ -8,7 +8,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $id
  * @property-read string $type
  */
-class Integration extends Resource
+class Integration extends ApiResourceBase
 {
 
     /** @var array */

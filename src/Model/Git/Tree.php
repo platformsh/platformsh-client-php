@@ -5,7 +5,7 @@ namespace Platformsh\Client\Model\Git;
 use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Exception\GitObjectTypeException;
 use Platformsh\Client\Model\Project;
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 
 /**
  * Git tree resource.
@@ -14,7 +14,7 @@ use Platformsh\Client\Model\Resource;
  * @property-read string $sha
  * @property-read array  $tree
  */
-class Tree extends Resource
+class Tree extends ApiResourceBase
 {
     /**
      * Get the Tree object for an SHA hash.

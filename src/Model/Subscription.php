@@ -20,7 +20,7 @@ use GuzzleHttp\ClientInterface;
  * @property-read string $project_region_label
  * @property-read string $project_ui
  */
-class Subscription extends Resource
+class Subscription extends ApiResourceBase
 {
 
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];

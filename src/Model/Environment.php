@@ -49,7 +49,7 @@ use Platformsh\Client\Model\Git\Commit;
  * @property-read bool        $is_main
  *   Whether the environment is the main, production one.
  */
-class Environment extends Resource
+class Environment extends ApiResourceBase
 {
     /**
      * Get the current deployment of this environment.
