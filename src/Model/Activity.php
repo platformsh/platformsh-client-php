@@ -104,9 +104,15 @@ class Activity extends ApiResourceBase
     /**
      * Restore the backup associated with this activity.
      *
+     * @param string|null $target The name of the target environment to which
+     *                            the backup should be restored (this could be
+     *                            the name of an existing environment, or a new
+     *                            environment). Leave this null to restore to
+     *                            the backup's original environment.
+     *
      * @return Activity
      */
-    public function restore()
+    public function restore($target = null)
     {
         if ($this->getProperty('type') !== 'environment.backup') {
             throw new \BadMethodCallException('Cannot restore activity (wrong type)');
@@ -115,7 +121,12 @@ class Activity extends ApiResourceBase
             throw new \BadMethodCallException('Cannot restore backup (not complete)');
         }
 
-        return $this->runLongOperation('restore');
+        $options = [];
+        if ($target !== null) {
+            $options['environment_name'] = $target;
+        }
+
+        return $this->runLongOperation('restore', 'post', $options);
     }
 
     /**
