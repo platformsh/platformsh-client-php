@@ -74,7 +74,7 @@ class Connector implements ConnectorInterface
         $url = 'https://github.com/platformsh/platformsh-client-php';
 
         $defaults = [
-          'accounts' => 'https://accounts.platform.sh/api/platform/',
+          'accounts' => 'https://accounts.platform.sh/api/v1/',
           'client_id' => 'platformsh-client-php',
           'client_secret' => '',
           'debug' => false,
