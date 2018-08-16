@@ -1,8 +1,9 @@
 <?php
 
-namespace Platformsh\Client\Model;
+namespace Platformsh\Client\Model\Billing;
 
 use GuzzleHttp\ClientInterface;
+use Platformsh\Client\Model\ApiResourceBase;
 
 /**
  * Represents a Platform.sh plan record.
