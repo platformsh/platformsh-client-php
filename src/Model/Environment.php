@@ -375,7 +375,16 @@ class Environment extends ApiResourceBase
             $options['query']['starts_at'] = Activity::formatStartsAt($startsAt);
         }
 
-        return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
+        $activities = Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
+
+        // Guarantee the type filter (works around a temporary bug).
+        if ($type !== null) {
+            $activities = array_filter($activities, function (Activity $activity) use ($type) {
+                return $activity->type === $type;
+            });
+        }
+
+        return $activities;
     }
 
     /**
