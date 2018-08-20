@@ -552,4 +552,17 @@ class Environment extends Resource
     {
         return $this->runLongOperation('redeploy');
     }
+
+    /**
+     * Get a list of environment backups.
+     *
+     * @param int $limit
+     *   Limit the number of backups to return.
+     *
+     * @return Backup[]
+     */
+    public function getBackups($limit = 0)
+    {
+        return Backup::getCollection($this->getUri() . '/backups', $limit, [], $this->client);
+    }
 }
