@@ -104,15 +104,19 @@ class Activity extends ApiResourceBase
     /**
      * Restore the backup associated with this activity.
      *
-     * @param string|null $target The name of the target environment to which
-     *                            the backup should be restored (this could be
-     *                            the name of an existing environment, or a new
-     *                            environment). Leave this null to restore to
-     *                            the backup's original environment.
+     * @param string|null $target     The name of the target environment to
+     *                                which the backup should be restored (this
+     *                                could be the name of an existing
+     *                                environment, or a new environment). Leave
+     *                                this null to restore to the backup's
+     *                                original environment.
+     * @param string|null $branchFrom If a new environment will be created
+     *                                (depending on $target), this specifies
+     *                                the name of the parent branch.
      *
      * @return Activity
      */
-    public function restore($target = null)
+    public function restore($target = null, $branchFrom = null)
     {
         if ($this->getProperty('type') !== 'environment.backup') {
             throw new \BadMethodCallException('Cannot restore activity (wrong type)');
@@ -124,6 +128,9 @@ class Activity extends ApiResourceBase
         $options = [];
         if ($target !== null) {
             $options['environment_name'] = $target;
+        }
+        if ($branchFrom !== null) {
+            $options['branch_from'] = $branchFrom;
         }
 
         return $this->runLongOperation('restore', 'post', $options);
