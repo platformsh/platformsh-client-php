@@ -76,8 +76,9 @@ class Result extends ApiResourceBase
      *
      * @throws \Exception If no entity was embedded.
      *
-     * @return Resource
-     *   An instance of Resource.
+     * @return ApiResourceBase
+     *   An instance of ApiResourceBase - the implementing class name was set
+     *   when this Result was instantiated.
      */
     public function getEntity()
     {
