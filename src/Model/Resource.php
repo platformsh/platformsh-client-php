@@ -556,7 +556,7 @@ abstract class Resource implements \ArrayAccess
      *
      * @return bool
      */
-    private function isOperationAvailable($op)
+    protected function isOperationAvailable($op)
     {
         return isset($this->data['_links']["#$op"]['href']);
     }
