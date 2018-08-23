@@ -356,7 +356,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     protected function runOperation($op, $method = 'post', array $body = [])
     {
-        if (!$this->operationAvailable($op)) {
+        if (!$this->operationAvailable($op, true)) {
             throw new OperationUnavailableException("Operation not available: $op");
         }
         $options = [];
@@ -523,10 +523,41 @@ abstract class ApiResourceBase implements \ArrayAccess
      * Check whether an operation is available on the resource.
      *
      * @param string $op
+     * @param bool   $refreshDuringCheck
      *
      * @return bool
      */
-    public function operationAvailable($op)
+    public function operationAvailable($op, $refreshDuringCheck = false)
+    {
+        // Ensure this resource is a full representation.
+        if (!$this->isFull) {
+            $this->refresh();
+            $refreshDuringCheck = false;
+        }
+
+        // Check if the operation is available in the HAL links.
+        $available = $this->isOperationAvailable($op);
+        if ($available) {
+            return true;
+        }
+
+        // If not, and $refreshDuringCheck is on, then refresh the resource.
+        if ($refreshDuringCheck) {
+            $this->refresh();
+            $available = $this->isOperationAvailable($op);
+        }
+
+        return $available;
+    }
+
+    /**
+     * Internal: check whether an operation is available on the resource.
+     *
+     * @param string $op
+     *
+     * @return bool
+     */
+    private function isOperationAvailable($op)
     {
         return isset($this->data['_links']["#$op"]['href']);
     }
