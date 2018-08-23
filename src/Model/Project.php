@@ -135,18 +135,6 @@ class Project extends Resource
     }
 
     /**
-     * @inheritdoc
-     */
-    public function operationAvailable($op)
-    {
-        if (!parent::operationAvailable($op)) {
-            $this->ensureFull();
-        }
-
-        return parent::operationAvailable($op);
-    }
-
-    /**
      * Get a list of environments for the project.
      *
      * @param int $limit

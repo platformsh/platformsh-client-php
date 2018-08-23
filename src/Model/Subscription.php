@@ -171,12 +171,13 @@ class Subscription extends Resource
     /**
      * @inheritdoc
      */
-    public function operationAvailable($op)
+    public function operationAvailable($op, $refreshDuringCheck = false)
     {
         if ($op === 'edit') {
             return true;
         }
-        return parent::operationAvailable($op);
+
+        return parent::operationAvailable($op, $refreshDuringCheck);
     }
 
     /**
