@@ -5,6 +5,8 @@ namespace Platformsh\Client\Model;
 use Cocur\Slugify\Slugify;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
+use Platformsh\Client\Model\Backups\BackupConfig;
+use Platformsh\Client\Model\Backups\Policy;
 use Platformsh\Client\Model\Deployment\EnvironmentDeployment;
 use Platformsh\Client\Model\Git\Commit;
 
@@ -48,6 +50,9 @@ use Platformsh\Client\Model\Git\Commit;
  *   'is_enabled' (bool), 'addresses' (array), and 'basic_auth' (array).
  * @property-read bool        $is_main
  *   Whether the environment is the main, production one.
+ * @property-read array       $backups
+ *   The backup configuration. It's recommended to use getBackupConfig() instead
+ *   of using this array directly.
  */
 class Environment extends Resource
 {
@@ -564,5 +569,38 @@ class Environment extends Resource
     public function getBackups($limit = 0)
     {
         return Backup::getCollection($this->getUri() . '/backups', $limit, [], $this->client);
+    }
+
+    /**
+     * Get the scheduled backup configuration for this environment.
+     *
+     * @return BackupConfig
+     */
+    public function getBackupConfig()
+    {
+        // In legacy versions the 'backups' key might not exist on the
+        // environment.
+        return BackupConfig::fromData($this->getProperty('backups', false) ?: []);
+    }
+
+    /**
+     * Add a scheduled backup policy.
+     *
+     * @param \Platformsh\Client\Model\Backups\Policy $policy
+     *
+     * @return \Platformsh\Client\Model\Result
+     */
+    public function addBackupPolicy(Policy $policy)
+    {
+        $backups = isset($this->data['backups']) ? $this->data['backups'] : [];
+        $backups['schedule'][] = [
+            'interval' => $policy->getInterval(),
+            'count' => $policy->getCount(),
+        ];
+        if (!isset($backups['manual_count'])) {
+            $backups['manual_count'] = 3;
+        }
+
+        return $this->update(['backups' => $backups]);
     }
 }
