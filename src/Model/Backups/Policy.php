@@ -2,6 +2,8 @@
 
 namespace Platformsh\Client\Model\Backups;
 
+use Platformsh\Client\Model\Type\Duration;
+
 class Policy
 {
     private $interval;
@@ -39,5 +41,15 @@ class Policy
     public function getCount()
     {
         return $this->count;
+    }
+
+    /**
+     * Get the configured interval, in seconds.
+     *
+     * @return int
+     */
+    public function getIntervalAsSeconds()
+    {
+        return (new Duration($this->interval))->getSeconds();
     }
 }
