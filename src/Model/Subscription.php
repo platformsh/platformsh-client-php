@@ -30,7 +30,7 @@ class Subscription extends Resource
     const STATUS_ACTIVE = 'active';
     const STATUS_REQUESTED = 'requested';
     const STATUS_PROVISIONING = 'provisioning';
-    const STATUS_FAILED = 'provisioning Failure';
+    const STATUS_FAILED = 'provisioning failure';
     const STATUS_SUSPENDED = 'suspended';
     const STATUS_DELETED = 'deleted';
 
@@ -115,7 +115,8 @@ class Subscription extends Resource
      *
      * This could be one of Subscription::STATUS_ACTIVE,
      * Subscription::STATUS_REQUESTED, Subscription::STATUS_PROVISIONING,
-     * Subscription::STATUS_SUSPENDED, or Subscription::STATUS_DELETED.
+     * Subscription::STATUS_FAILED, Subscription::STATUS_SUSPENDED,
+     * or Subscription::STATUS_DELETED.
      *
      * @return string
      */
