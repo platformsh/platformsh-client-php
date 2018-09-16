@@ -2,10 +2,9 @@
 
 namespace Platformsh\Client\Tests\Model\Type;
 
-use PHPUnit\Framework\TestCase;
 use Platformsh\Client\Model\Type\Duration;
 
-class DurationTest extends TestCase
+class DurationTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testStringToSeconds()
