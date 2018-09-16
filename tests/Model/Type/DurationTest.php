@@ -48,8 +48,8 @@ class DurationTest extends TestCase
             86400 => '1d',
         ];
         $actual = [];
-        foreach (array_keys($expected) as $string) {
-            $actual[$string] = (new Duration($string))->__toString();
+        foreach (array_keys($expected) as $seconds) {
+            $actual[$seconds] = (new Duration($seconds))->__toString();
         }
         $this->assertEquals($expected, $actual);
     }
