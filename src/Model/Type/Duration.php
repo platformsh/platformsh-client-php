@@ -76,4 +76,22 @@ class Duration
 
         return $unit * $amount;
     }
+
+    /**
+     * Compares the current Duration object to another one.
+     *
+     * @param \Platformsh\Client\Model\Type\Duration $other
+     *
+     * @return int
+     *     0 if the durations are equal, 1 if the current duration is greater,
+     *     and -1 if the $other duration is greater.
+     */
+    public function compare(Duration $other)
+    {
+        $a = $this->getSeconds();
+        $b = $other->getSeconds();
+
+        // In a future version (PHP 7+) this can be replaced with $a <=> $b.
+        return $a > $b ? 1 : ($b > $a ? -1 : 0);
+    }
 }

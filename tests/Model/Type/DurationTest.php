@@ -53,4 +53,22 @@ class DurationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testCompare()
+    {
+        $expected = [
+            ['1s', '1m', -1],
+            ['1h', '1m', 1],
+            ['1h', '60m', 0],
+            ['1d', '86400s', 0],
+        ];
+        $actual = [];
+        foreach ($expected as $key => $expectation) {
+            list($a, $b) = $expectation;
+            $actual[$key] = [
+                $a, $b, (new Duration($a))->compare(new Duration($b))
+            ];
+        }
+        $this->assertEquals($expected, $actual);
+    }
+
 }
