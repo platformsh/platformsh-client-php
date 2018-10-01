@@ -9,9 +9,23 @@ use GuzzleHttp\Url;
  *
  * @property-read string $id
  * @property-read string $title
+ * @property-read string $description
+ * @property-read string|null $default_domain
+ *   The default domain of the project: the domain that would substitute for a
+ *   route hostname placeholder of '{default}'.
  * @property-read string $created_at
+ *   The date the project was created (ISO 8601).
  * @property-read string $updated_at
+ *   The date the project was last updated (ISO 8601).
+ * @property-read array  $repository
+ *   Information about the project repository, including 'url' (the Git URL) and
+ *   'client_ssh_key' (the public deploy key of the project).
+ * @property-read array  $status
+ *   The project status (as a 'code' and 'message').
+ * @property-read array  $subscription
+ *   Data relating to the project's subscription.
  * @property-read string $owner
+ *   The ID of the project's owner.
  */
 class Project extends Resource
 {
@@ -22,27 +36,26 @@ class Project extends Resource
      */
     public function delete()
     {
-        throw new \BadMethodCallException("Projects should not be deleted directly. Delete the subscription instead.");
+        throw new \BadMethodCallException("Projects cannot be deleted directly. Delete the subscription instead.");
     }
 
     /**
      * Get the subscription ID for the project.
      *
-     * @todo when APIs are unified, this can be a property
-     *
      * @return int
      */
     public function getSubscriptionId()
     {
-        if ($this->hasProperty('subscription_id', false)) {
-            return $this->getProperty('subscription_id');
-        }
-
+        $id = false;
         if (isset($this->data['subscription']['license_uri'])) {
-            return basename($this->data['subscription']['license_uri']);
+            $id = (int) basename($this->data['subscription']['license_uri']);
         }
 
-        throw new \RuntimeException('Subscription ID not found');
+        if (!$id) {
+            throw new \RuntimeException('Subscription ID not found');
+        }
+
+        return $id;
     }
 
     /**
@@ -52,16 +65,7 @@ class Project extends Resource
      */
     public function getGitUrl()
     {
-        // The collection doesn't provide a Git URL, but it does provide the
-        // right host, so the URL can be calculated.
-        if (!$this->hasProperty('repository', false)) {
-            $host = parse_url($this->getUri(), PHP_URL_HOST);
-
-            return "{$this->id}@git.{$host}:{$this->id}.git";
-        }
-        $repository = $this->getProperty('repository');
-
-        return $repository['url'];
+        return $this->getProperty('repository')['url'];
     }
 
     /**
@@ -110,21 +114,13 @@ class Project extends Resource
     /**
      * @inheritdoc
      *
-     * The accounts API does not (yet) return HAL links. This is a collection
-     * of workarounds for that issue.
+     * The project API does not return HAL links for every sub-resource. This
+     * works around that issue.
      */
     public function getLink($rel, $absolute = true)
     {
         if ($this->hasLink($rel)) {
             return parent::getLink($rel, $absolute);
-        }
-
-        if ($rel === 'self') {
-            return $this->getProperty('endpoint');
-        }
-
-        if ($rel === '#ui') {
-            return $this->getProperty('uri');
         }
 
         if ($rel === '#manage-variables') {

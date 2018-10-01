@@ -52,13 +52,6 @@ class PlatformClient
      */
     public function getProject($id, $hostname = null, $https = true)
     {
-        // Search for a project in the user's project list.
-        foreach ($this->getProjects() as $project) {
-            if ($project->id === $id) {
-                return $project;
-            }
-        }
-
         // Look for a project directly if the hostname is known.
         if ($hostname !== null) {
             return $this->getProjectDirect($id, $hostname, $https);
@@ -75,18 +68,23 @@ class PlatformClient
     /**
      * Get the logged-in user's projects.
      *
-     * @param bool $reset
+     * @param bool|null $reset Deprecated flag, no longer used.
      *
      * @return Project[]
      */
-    public function getProjects($reset = false)
+    public function getProjects($reset = null)
     {
-        $data = $this->getAccountInfo($reset);
-        $client = $this->connector->getClient();
+        if ($reset !== null) {
+            @trigger_error('The "$reset" flag on the PlatformClient::getProjects() method is deprecated: it is no longer used and will be removed.', E_USER_DEPRECATED);
+        }
         $projects = [];
-        foreach ($data['projects'] as $project) {
-            // Each project has its own endpoint on a Platform.sh region.
-            $projects[] = new Project($project, $project['endpoint'], $client);
+        foreach ($this->getSubscriptions() as $subscription) {
+            if ($subscription->isActive()) {
+                $project = $subscription->getProject();
+                if ($project !== false) {
+                    $projects[$project->id] = $project;
+                }
+            }
         }
 
         return $projects;
