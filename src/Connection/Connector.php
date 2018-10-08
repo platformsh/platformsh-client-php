@@ -4,7 +4,9 @@ namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\HandlerStack;
+use function GuzzleHttp\Psr7\uri_for;
 use League\OAuth2\Client\Grant\ClientCredentials;
 use League\OAuth2\Client\Grant\Password;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -80,6 +82,7 @@ class Connector implements ConnectorInterface
           'debug' => false,
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
+          'revoke_url' => '/oauth2/revoke',
           'token_url' => '/oauth2/token',
           'proxy' => null,
           'api_token' => null,
@@ -92,12 +95,50 @@ class Connector implements ConnectorInterface
 
     /**
      * @inheritdoc
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException if tokens cannot be revoked.
      */
     public function logOut()
     {
         $this->loggedOut = true;
-        $this->session->clear();
-        $this->session->save();
+
+        try {
+            $this->revokeTokens();
+        } catch (BadResponseException $e) {
+            // Retry the request once.
+            if ($e->getResponse() && $e->getResponse()->getStatusCode() < 500) {
+                $this->revokeTokens();
+            }
+        } finally {
+            $this->session->clear();
+            $this->session->save();
+        }
+    }
+
+    /**
+     * Revokes the access and refresh tokens saved in the session.
+     *
+     * @see Connector::logOut()
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function revokeTokens()
+    {
+        $revocations = array_filter([
+            'refresh_token' => $this->session->get('refreshToken'),
+            'access_token' => $this->session->get('accessToken'),
+        ]);
+        $url = uri_for($this->config['accounts'])
+            ->withPath($this->config['revoke_url'])
+            ->__toString();
+        foreach ($revocations as $type => $token) {
+            $this->getClient()->request('post', $url, [
+                'form_params' => [
+                    'token' => $token,
+                    'token_type_hint' => $type,
+                ],
+            ]);
+        }
     }
 
     public function __destruct()
