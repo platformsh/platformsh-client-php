@@ -9,7 +9,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Event\CompleteEvent;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
+use GuzzleHttp\Url;
 use Platformsh\Client\OAuth2\ApiToken;
 use Platformsh\Client\OAuth2\PasswordCredentialsWithTfa;
 use Platformsh\Client\Session\Session;
@@ -64,6 +66,7 @@ class Connector implements ConnectorInterface
           'verify' => true,
           'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
           'cache' => false,
+          'revoke_url' => '/oauth2/revoke',
           'token_url' => '/oauth2/token',
           'proxy' => null,
           'api_token' => null,
@@ -90,8 +93,40 @@ class Connector implements ConnectorInterface
     public function logOut()
     {
         $this->loggedOut = true;
-        $this->session->clear();
-        $this->session->save();
+
+        try {
+            $this->revokeTokens();
+        } catch (BadResponseException $e) {
+            // Retry the request once.
+            if ($e->getResponse() && $e->getResponse()->getStatusCode() < 500) {
+                $this->revokeTokens();
+            }
+        } finally {
+            $this->session->clear();
+            $this->session->save();
+        }
+    }
+
+    /**
+     * Revokes the access and refresh tokens saved in the session.
+     */
+    private function revokeTokens()
+    {
+        $revocations = array_filter([
+            'refresh_token' => $this->session->get('refreshToken'),
+            'access_token' => $this->session->get('accessToken'),
+        ]);
+        $url = Url::fromString($this->config['accounts'])
+            ->combine($this->config['revoke_url'])
+            ->__toString();
+        foreach ($revocations as $type => $token) {
+            $this->getClient()->post($url, [
+                'body' => [
+                    'token' => $token,
+                    'token_type_hint' => $type,
+                ],
+            ]);
+        }
     }
 
     public function __destruct()
