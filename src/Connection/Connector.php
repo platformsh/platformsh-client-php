@@ -16,6 +16,7 @@ use Platformsh\Client\Session\SessionInterface;
 use Platformsh\OAuth2\Client\Provider\Platformsh;
 use Platformsh\OAuth2\Client\Grant\ApiToken;
 use Platformsh\OAuth2\Client\GuzzleMiddleware;
+use Platformsh\Client\Session\Storage\File;
 
 class Connector implements ConnectorInterface
 {
@@ -72,16 +73,14 @@ class Connector implements ConnectorInterface
      */
     public function __construct(array $config = [], SessionInterface $session = null)
     {
-        $version = '2.0.x';
-        $url = 'https://github.com/platformsh/platformsh-client-php';
-
         $defaults = [
           'accounts' => 'https://accounts.platform.sh/api/v1/',
           'client_id' => 'platformsh-client-php',
           'client_secret' => '',
           'debug' => false,
           'verify' => true,
-          'user_agent' => "Platform.sh-Client-PHP/$version (+$url)",
+          'user_agent' => null,
+          'cache' => false,
           'revoke_url' => '/oauth2/revoke',
           'token_url' => '/oauth2/token',
           'proxy' => null,
@@ -90,7 +89,34 @@ class Connector implements ConnectorInterface
         ];
         $this->config = $config + $defaults;
 
-        $this->session = $session ?: new Session();
+        if (!isset($this->config['user_agent'])) {
+            $this->config['user_agent'] = $this->defaultUserAgent();
+        }
+
+        if (isset($session)) {
+            $this->session = $session;
+        } else {
+            // Assign file storage to the session by default.
+            $this->session = new Session();
+            $this->session->setStorage(new File());
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function defaultUserAgent()
+    {
+        $version = trim(file_get_contents(__DIR__ . '/../../version.txt')) ?: '2.0.x';
+
+        return sprintf(
+            '%s/%s (%s; %s; PHP %s)',
+            'Platform.sh-Client-PHP',
+            $version,
+            php_uname('s'),
+            php_uname('r'),
+            PHP_VERSION
+        );
     }
 
     /**
