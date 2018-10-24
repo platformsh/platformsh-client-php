@@ -2,6 +2,8 @@
 
 namespace Platformsh\Client\Model;
 
+use GuzzleHttp\Exception\BadResponseException;
+
 /**
  * A project integration.
  *
@@ -57,5 +59,33 @@ class Integration extends Resource
         $options['auth'] = null;
 
         $this->sendRequest($hookUrl, 'post', $options);
+    }
+
+    /**
+     * Validate the integration via the API.
+     *
+     * @throws \RuntimeException If an unexpected error occurs.
+     *
+     * @return array
+     *   An array of errors, as returned by the API. An empty array indicates
+     *   the integration is valid.
+     */
+    public function validate()
+    {
+        try {
+            $this->runOperation('validate', 'post');
+
+            return [];
+        } catch (BadResponseException $e) {
+            $response = $e->getResponse();
+            if ($response && $response->getStatusCode() === 400) {
+                $response->getBody()->seek(0);
+                $data = $response->json();
+                if (isset($data['detail']) && is_array($data['detail'])) {
+                    return $data['detail'];
+                }
+            }
+            throw $e;
+        }
     }
 }
