@@ -13,16 +13,62 @@ class File implements SessionStorageInterface
     protected $directory;
 
     /**
-     * @param string $directory A directory where session files will be saved
-     *                          (default: ~/.platformsh/.session)
+     * @param string|null $directory
+     *   A writable directory where session files will be saved. Leave null
+     *   to use the default.
      */
     public function __construct($directory = null)
     {
-        $this->directory = $directory ?: $this->getHomeDirectory() . '/.platformsh/.session';
+        $this->directory = $directory ?: $this->getDefaultDirectory();
     }
 
     /**
-     * @throws \Exception
+     * Get the default directory for session files.
+     *
+     * @return string
+     */
+    protected function getDefaultDirectory()
+    {
+        // Default to ~/.platformsh/.session, but if it's not writable, fall
+        // back to the temporary directory.
+        $default = $this->getHomeDirectory() . '/.platformsh/.session';
+        if ($this->canWrite($default)) {
+            return $default;
+        }
+        $temp = sys_get_temp_dir() . '/.platformsh-client/.session';
+        if ($this->canWrite($temp)) {
+            return $temp;
+        }
+
+        throw new \RuntimeException('Unable to find a writable session storage directory');
+    }
+
+    /**
+     * Tests whether a file path is writable (even if it doesn't exist).
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    protected function canWrite($path)
+    {
+        if (is_writable($path)) {
+            return true;
+        }
+
+        $current = $path;
+        while (!file_exists($current) && ($parent = dirname($current)) && $parent !== $current) {
+            if (is_writable($parent)) {
+                return true;
+            }
+            $current = $parent;
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds the user's home directory.
      *
      * @return string
      */
@@ -33,7 +79,7 @@ class File implements SessionStorageInterface
             $home = $userProfile;
         }
         if (!$home || !is_dir($home)) {
-            throw new \Exception('Could not determine home directory');
+            throw new \RuntimeException('Could not determine home directory');
         }
 
         return $home;
