@@ -14,6 +14,15 @@ class SshKey extends ApiResourceBase
 
     protected static $required = ['value'];
 
+    protected static $allowedAlgorithms = [
+        'ssh-rsa',
+        'ssh-dsa',
+        'ssh-ed25519',
+        'ecdsa-sha2-nistp256',
+        'ecdsa-sha2-nistp384',
+        'ecdsa-sha2-nistp521',
+    ];
+
     /**
      * @inheritdoc
      */
@@ -39,7 +48,7 @@ class SshKey extends ApiResourceBase
             return false;
         }
         list($type, $key) = explode(' ', $value, 3);
-        if (!in_array($type, ['ssh-rsa', 'ssh-dsa']) || base64_decode($key, true) === false) {
+        if (!in_array($type, static::$allowedAlgorithms) || base64_decode($key, true) === false) {
             return false;
         }
 
