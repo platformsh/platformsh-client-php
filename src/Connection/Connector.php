@@ -33,9 +33,6 @@ class Connector implements ConnectorInterface
     /** @var SessionInterface */
     protected $session;
 
-    /** @var bool */
-    protected $loggedOut = false;
-
     /**
      * @param array            $config
      *     Possible configuration keys are:
@@ -117,7 +114,7 @@ class Connector implements ConnectorInterface
      */
     public function logOut()
     {
-        $this->loggedOut = true;
+        $this->oauth2Plugin = null;
 
         try {
             $this->revokeTokens();
@@ -156,9 +153,7 @@ class Connector implements ConnectorInterface
 
     public function __destruct()
     {
-        if ($this->loggedOut) {
-            $this->session->clear();
-        } elseif ($this->oauth2Plugin) {
+        if ($this->oauth2Plugin) {
             // Save the access token for future requests.
             $token = $this->getOauth2Plugin()->getAccessToken(false);
             if ($token !== null) {
@@ -180,13 +175,10 @@ class Connector implements ConnectorInterface
      */
     public function logIn($username, $password, $force = false, $totp = null)
     {
-        $this->loggedOut = false;
         if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
         }
-        if ($this->isLoggedIn()) {
-            $this->logOut();
-        }
+        $this->logOut();
         $client = $this->getGuzzleClient([
           'base_url' => $this->config['accounts'],
           'defaults' => [
@@ -210,7 +202,6 @@ class Connector implements ConnectorInterface
         $token = $grantType->getToken();
         $this->session->set('username', $username);
         $this->saveToken($token);
-        $this->loggedOut = false;
     }
 
     /**
