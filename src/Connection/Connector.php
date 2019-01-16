@@ -184,6 +184,9 @@ class Connector implements ConnectorInterface
         if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
         }
+        if ($this->isLoggedIn()) {
+            $this->logOut();
+        }
         $client = $this->getGuzzleClient([
           'base_url' => $this->config['accounts'],
           'defaults' => [
@@ -207,6 +210,7 @@ class Connector implements ConnectorInterface
         $token = $grantType->getToken();
         $this->session->set('username', $username);
         $this->saveToken($token);
+        $this->loggedOut = false;
     }
 
     /**
