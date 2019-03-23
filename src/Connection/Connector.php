@@ -126,8 +126,6 @@ class Connector implements ConnectorInterface
      */
     public function logOut()
     {
-        $this->loggedOut = true;
-
         try {
             $this->revokeTokens();
         } catch (BadResponseException $e) {
@@ -167,13 +165,6 @@ class Connector implements ConnectorInterface
         }
     }
 
-    public function __destruct()
-    {
-        if ($this->loggedOut) {
-            $this->session->clear();
-        }
-    }
-
     /**
      * @inheritdoc
      */
@@ -195,9 +186,11 @@ class Connector implements ConnectorInterface
      */
     public function logIn($username, $password, $force = false, $totp = null)
     {
-        $this->loggedOut = false;
         if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
+        }
+        if ($this->isLoggedIn()) {
+            $this->logOut();
         }
         $token = $this->getProvider()->getAccessToken(new Password(), [
             'username' => $username,
