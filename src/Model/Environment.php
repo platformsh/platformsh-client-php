@@ -103,7 +103,7 @@ class Environment extends Resource
             return $urls[$app];
         }
 
-        return $this->constructLegacySshUrl($app);
+        return $this->constructLegacySshUrl();
     }
 
     /**
