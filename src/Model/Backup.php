@@ -15,7 +15,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $updated_at
  * @property-read string $expires_at
  */
-class Backup extends ApiResourceBase
+class Backup extends Resource
 {
     const STATUS_CREATED = 'CREATED';
     const STATUS_DELETED = 'DELETED';
