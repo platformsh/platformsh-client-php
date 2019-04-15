@@ -322,6 +322,10 @@ class Connector implements ConnectorInterface
                   $this->session->get('expires') ?: null
                 );
             }
+
+            $this->oauth2Plugin->setTokenSaveCallback(function (AccessToken $token) {
+                $this->saveToken($token);
+            });
         }
 
         return $this->oauth2Plugin;
@@ -376,22 +380,6 @@ class Connector implements ConnectorInterface
               ],
             ];
             $client = $this->getGuzzleClient($options);
-
-            // The access token might change during the request cycle, because
-            // the OAuth2Subscriber may refresh it. So we ensure the access
-            // token is saved immediately after each successful request.
-            $client->getEmitter()->on('complete', function (CompleteEvent $event) use ($oauth2) {
-                if ($event->getRequest()->getConfig()->get('auth') !== 'oauth2') {
-                    return;
-                }
-                $response = $event->getResponse();
-                if ($response && substr($response->getStatusCode(), 0, 1) === '2') {
-                    $token = $oauth2->getAccessToken(false);
-                    if ($token !== null) {
-                        $this->saveToken($token);
-                    }
-                }
-            });
 
             $this->setUpCache($client);
             $this->client = $client;

@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "03d139694c2b711bea00ded2c7c0f173",
+    "content-hash": "2c166590620c127edce9f978b1c11df2",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -94,7 +94,8 @@
             "type": "library",
             "extra": {
                 "patches_applied": {
-                    "Make it possible to get the access token without triggering a refresh": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/commit/d2d720015813185d1ad4fa12884cab9bac6a8b25.patch"
+                    "Make it possible to get the access token without triggering a refresh": "patches/commerceguys/guzzle-oauth2-plugin/get-access-token-no-refresh.patch",
+                    "Support a token save callback": "patches/commerceguys/guzzle-oauth2-plugin/token-save-callback.patch"
                 }
             },
             "autoload": {
@@ -1160,6 +1161,7 @@
                 "mock",
                 "xunit"
             ],
+            "abandoned": true,
             "time": "2015-10-02T06:51:40+00:00"
         },
         {

@@ -1,0 +1,55 @@
+From c2006642c2cbbf4a5d468f4bda79adb5792b79e0 Mon Sep 17 00:00:00 2001
+From: Patrick Dawkins <pjcdawkins@gmail.com>
+Date: Mon, 15 Apr 2019 15:42:10 -0400
+Subject: [PATCH] Support a token save callback
+
+---
+ src/Oauth2Subscriber.php | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/src/Oauth2Subscriber.php b/src/Oauth2Subscriber.php
+index 67158bd..28e5389 100644
+--- a/src/Oauth2Subscriber.php
++++ b/src/Oauth2Subscriber.php
+@@ -22,6 +22,9 @@ class Oauth2Subscriber implements SubscriberInterface
+     /** @var RefreshTokenGrantTypeInterface */
+     protected $refreshTokenGrantType;
+ 
++    /** @var callable|null */
++    protected $tokenSave;
++
+     /**
+      * Create a new Oauth2 subscriber.
+      *
+@@ -55,8 +58,14 @@ public function onError(ErrorEvent $event)
+             $request = $event->getRequest();
+             if ($request->getConfig()->get('auth') == 'oauth2' && !$request->getConfig()->get('retried')) {
+                 if ($token = $this->acquireAccessToken()) {
++                    // Save the new token.
+                     $this->accessToken = $token;
+                     $this->refreshToken = $token->getRefreshToken();
++                    if (is_callable($this->tokenSave)) {
++                        call_user_func($this->tokenSave, $token);
++                    }
++
++                    // Retry the request.
+                     $request->getConfig()->set('retried', true);
+                     $event->intercept($event->getClient()->send($request));
+                 }
+@@ -172,4 +181,16 @@ public function setRefreshToken($refreshToken)
+         }
+         $this->refreshToken = $refreshToken;
+     }
++
++    /**
++     * Set a callback that will save a token whenever a new one is acquired.
++     *
++     * @param callable $tokenSave
++     *   A callback accepting one argument (the AccessToken) that will save a
++     *   token.
++     */
++    public function setTokenSaveCallback(callable $tokenSave)
++    {
++        $this->tokenSave = $tokenSave;
++    }
+ }
