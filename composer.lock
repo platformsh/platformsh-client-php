@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "198d2060c13d56c7011de4748478349a",
+    "content-hash": "8aa25deb5e980d89757c53b48337959e",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -95,7 +95,7 @@
             "extra": {
                 "patches_applied": {
                     "Make it possible to get the access token without triggering a refresh": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/commit/d2d720015813185d1ad4fa12884cab9bac6a8b25.patch",
-                    "Support a token save callback": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/commit/c2006642c2cbbf4a5d468f4bda79adb5792b79e0.patch"
+                    "Support a token save callback": "https://github.com/commerceguys/guzzle-oauth2-plugin/compare/master...pjcdawkins:token-save-callback.patch"
                 }
             },
             "autoload": {
