@@ -8,6 +8,7 @@ use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Billing\PlanRecord;
 use Platformsh\Client\Model\Billing\PlanRecordQuery;
+use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Region;
 use Platformsh\Client\Model\Result;
@@ -323,6 +324,16 @@ class PlatformClient
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
+    }
+
+    /**
+     * Get a list of available plans.
+     *
+     * @return Plan[]
+     */
+    public function getPlans()
+    {
+        return Plan::getCollection($this->accountsEndpoint . 'plans', 0, [], $this->getConnector()->getClient());
     }
 
     /**
