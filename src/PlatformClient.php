@@ -303,14 +303,15 @@ class PlatformClient
     /**
      * Estimate the cost of a subscription.
      *
-     * @param string $plan         The plan (see Subscription::$availablePlans).
-     * @param int    $storage      The allowed storage per environment (in GiB).
-     * @param int    $environments The number of environments.
-     * @param int    $users        The number of users.
+     * @param string      $plan         The plan machine name.
+     * @param int         $storage      The allowed storage per environment (GiB).
+     * @param int         $environments The number of environments.
+     * @param int         $users        The number of users.
+     * @param string|null $countryCode  A two-letter country code.
      *
      * @return array An array containing at least 'total' (a formatted price).
      */
-    public function getSubscriptionEstimate($plan, $storage, $environments, $users)
+    public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null)
     {
         $options = [];
         $options['query'] = [
@@ -319,11 +320,11 @@ class PlatformClient
             'environments' => $environments,
             'user_licenses' => $users,
         ];
-        try {
-            return $this->simpleGet($this->accountsEndpoint . 'estimate', $options);
-        } catch (BadResponseException $e) {
-            throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
+        if ($countryCode !== null) {
+            $options['query']['country_code'] = $countryCode;
         }
+
+        return $this->simpleGet($this->accountsEndpoint . 'subscriptions/estimate', $options);
     }
 
     /**
