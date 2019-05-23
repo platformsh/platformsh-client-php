@@ -8,6 +8,7 @@ use Platformsh\Client\Exception\OperationUnavailableException;
 use Platformsh\Client\Model\Backups\BackupConfig;
 use Platformsh\Client\Model\Backups\Policy;
 use Platformsh\Client\Model\Deployment\EnvironmentDeployment;
+use Platformsh\Client\Model\Deployment\Worker;
 use Platformsh\Client\Model\Git\Commit;
 use Platformsh\Client\Model\Type\Duration;
 
@@ -89,7 +90,9 @@ class Environment extends Resource
     /**
      * Get the SSH URL for the environment.
      *
-     * @param string $app An application name.
+     * @param string $app An application name. If there is no published URL for
+     *                    this app name, the 'legacy' URL (without an app name)
+     *                    will be returned.
      *
      * @throws EnvironmentStateException
      * @throws OperationUnavailableException
@@ -103,7 +106,35 @@ class Environment extends Resource
             return $urls[$app];
         }
 
+        // Fall back to the legacy SSH URL.
         return $this->constructLegacySshUrl();
+    }
+
+    /**
+     * Get the SSH URL for a worker.
+     *
+     * Workers themselves can be listed via getCurrentDeployment()->workers.
+     *
+     * @param Worker $worker
+     *
+     * @return string
+     */
+    public function getWorkerSshUrl(Worker $worker)
+    {
+        list($app, $worker) = explode('--', $worker->name, 2);
+
+        $prefix = 'pf:ssh:';
+        foreach ($this->data['_links'] as $rel => $link) {
+            if ($rel === $prefix . $app && isset($link['href'])) {
+                return $this->convertSshUrl($link['href'], '--' . $worker);
+            }
+        }
+
+        throw new \RuntimeException(sprintf(
+            'Unable to find the SSH URL for the app "%s" containing the worker "%s"',
+            $app,
+            $worker
+        ));
     }
 
     /**
