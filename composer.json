@@ -3,12 +3,18 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
+        "php": ">=5.5.9",
         "cocur/slugify": "^2.0 || ~1.0",
         "guzzlehttp/guzzle": "~5.3",
-        "commerceguys/guzzle-oauth2-plugin": "~2.0",
-        "guzzlehttp/cache-subscriber": "~0.1",
-        "cweagans/composer-patches": "~1.0"
+        "commerceguys/guzzle-oauth2-plugin": "dev-pjcdawkins@dev",
+        "guzzlehttp/cache-subscriber": "~0.1"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin"
+        }
+    ],
     "require-dev": {
         "phpunit/phpunit": "~4.5"
     },
@@ -27,12 +33,9 @@
             "name": "Patrick Dawkins"
         }
     ],
-    "extra": {
-        "patches": {
-            "commerceguys/guzzle-oauth2-plugin": {
-                "Make it possible to get the access token without triggering a refresh": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/commit/d2d720015813185d1ad4fa12884cab9bac6a8b25.patch",
-                "Support a token save callback": "https://github.com/commerceguys/guzzle-oauth2-plugin/compare/master...pjcdawkins:token-save-callback.patch"
-            }
+    "config": {
+        "platform": {
+            "php": "5.5.9"
         }
     }
 }
