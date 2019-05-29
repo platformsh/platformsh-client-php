@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4719bd99e193c0b63b06beecaadb5c32",
+    "content-hash": "d41fe98db8fdcb03d08a939ddb96adee",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -69,58 +69,6 @@
                 "slugify"
             ],
             "time": "2017-03-23T21:52:55+00:00"
-        },
-        {
-            "name": "commerceguys/guzzle-oauth2-plugin",
-            "version": "dev-pjcdawkins",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
-                "reference": "acaef5043d1be4a9575e2ff8e5ca51e5d0e4b6ac"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/acaef5043d1be4a9575e2ff8e5ca51e5d0e4b6ac",
-                "reference": "acaef5043d1be4a9575e2ff8e5ca51e5d0e4b6ac",
-                "shasum": ""
-            },
-            "require": {
-                "firebase/php-jwt": "~2.0",
-                "guzzlehttp/guzzle": "~5.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "CommerceGuys\\Guzzle\\Oauth2\\": "src"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "CommerceGuys\\Guzzle\\Oauth2\\Tests\\": "tests"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Bojan Zivanovic"
-                },
-                {
-                    "name": "Damien Tournoud"
-                },
-                {
-                    "name": "Patrick Dawkins"
-                }
-            ],
-            "description": "An OAuth2 plugin (subscriber) for Guzzle",
-            "support": {
-                "source": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/tree/pjcdawkins"
-            },
-            "time": "2019-05-29T20:27:45+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -441,6 +389,51 @@
                 "stream"
             ],
             "time": "2014-10-12T19:18:40+00:00"
+        },
+        {
+            "name": "pjcdawkins/guzzle-oauth2-plugin",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
+                "reference": "4bbb1261a18f419f5fe1f15cdf47d384cc94cfe0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/4bbb1261a18f419f5fe1f15cdf47d384cc94cfe0",
+                "reference": "4bbb1261a18f419f5fe1f15cdf47d384cc94cfe0",
+                "shasum": ""
+            },
+            "require": {
+                "firebase/php-jwt": "~2.0",
+                "guzzlehttp/guzzle": "~5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "CommerceGuys\\Guzzle\\Oauth2\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bojan Zivanovic"
+                },
+                {
+                    "name": "Damien Tournoud"
+                },
+                {
+                    "name": "Patrick Dawkins"
+                }
+            ],
+            "description": "An OAuth2 plugin (subscriber) for Guzzle (forked from commerceguys/guzzle-oauth2-plugin)",
+            "time": "2019-05-29T20:51:02+00:00"
         },
         {
             "name": "react/promise",
@@ -1673,9 +1666,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "commerceguys/guzzle-oauth2-plugin": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
