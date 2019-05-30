@@ -1,11 +1,16 @@
 <?php
 
+/** @noinspection PhpDocMissingThrowsInspection */
+/** @noinspection PhpUnhandledExceptionInspection */
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
+use function GuzzleHttp\Psr7\uri_for;
 use Psr\Http\Message\RequestInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Exception\OperationUnavailableException;
@@ -162,7 +167,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      * @return static|false The resource object, or false if the resource is
      *                      not found.
      */
-    public static function get($id, $collectionUrl = null, ClientInterface $client)
+    public static function get($id, $collectionUrl, ClientInterface $client)
     {
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . urlencode($id) : $id;
@@ -228,10 +233,8 @@ abstract class ApiResourceBase implements \ArrayAccess
             }
 
             return (array) $data;
-        } catch (BadResponseException $e) {
-            throw ApiResponseException::create($e->getRequest(), $e->getResponse());
-        } catch (\InvalidArgumentException $e) {
-            throw ApiResponseException::create($request, $response);
+        } catch (GuzzleException $e) {
+            throw ApiResponseException::wrapGuzzleException($e);
         }
     }
 
@@ -300,14 +303,14 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @param string          $url     The collection URL.
      * @param int             $limit   A limit on the number of resources to
-     *                                 return.
+     *                                 return. Use 0 for no limit.
      * @param array           $options An array of additional Guzzle request
      *                                 options.
      * @param ClientInterface $client  A suitably configured Guzzle client.
      *
      * @return static[]
      */
-    public static function getCollection($url, $limit = 0, array $options = [], ClientInterface $client)
+    public static function getCollection($url, $limit, array $options, ClientInterface $client)
     {
         // @todo uncomment this when the API implements a 'count' parameter
         // if ($limit) {
@@ -608,7 +611,7 @@ abstract class ApiResourceBase implements \ArrayAccess
         if (empty($baseUrl)) {
             throw new \RuntimeException('No base URL');
         }
-        $base = \GuzzleHttp\Psr7\uri_for($baseUrl);
+        $base = uri_for($baseUrl);
 
         return $base->withPath($relativeUrl)->__toString();
     }

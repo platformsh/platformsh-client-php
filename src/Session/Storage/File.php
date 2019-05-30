@@ -85,6 +85,7 @@ class File implements SessionStorageInterface
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     public function save($sessionId, array $data)
     {

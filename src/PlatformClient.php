@@ -3,6 +3,7 @@
 namespace Platformsh\Client;
 
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\GuzzleException;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
@@ -52,6 +53,7 @@ class PlatformClient
      * @param bool   $https
      *
      * @return Project|false
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getProject($id, $hostname = null, $https = true)
     {
@@ -81,6 +83,7 @@ class PlatformClient
      * @param bool $reset
      *
      * @return Project[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getProjects($reset = false)
     {
@@ -101,6 +104,7 @@ class PlatformClient
      * @param bool $reset
      *
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getAccountInfo($reset = false)
     {
@@ -109,8 +113,8 @@ class PlatformClient
             try {
                 $this->accountInfo = $this->simpleGet($url);
             }
-            catch (BadResponseException $e) {
-                throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
+            catch (GuzzleException $e) {
+                throw ApiResponseException::wrapGuzzleException($e);
             }
         }
 
@@ -124,6 +128,7 @@ class PlatformClient
      * @param array  $options
      *
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function simpleGet($url, array $options = [])
     {
@@ -165,6 +170,7 @@ class PlatformClient
      *
      * @return string
      *   The project's API endpoint.
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function locateProject($id)
     {
@@ -179,7 +185,7 @@ class PlatformClient
             if ($response && in_array($response->getStatusCode(), $ignoredErrorCodes)) {
                 return false;
             }
-            throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
+            throw ApiResponseException::wrapGuzzleException($e);
         }
 
         return isset($result['endpoint']) ? $result['endpoint'] : false;
@@ -191,6 +197,7 @@ class PlatformClient
      * @param bool $reset
      *
      * @return SshKey[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getSshKeys($reset = false)
     {
@@ -304,12 +311,14 @@ class PlatformClient
      * Estimate the cost of a subscription.
      *
      * @param string      $plan         The plan machine name.
-     * @param int         $storage      The allowed storage per environment (GiB).
+     * @param int         $storage      The allowed storage per environment
+     *                                  (GiB).
      * @param int         $environments The number of environments.
      * @param int         $users        The number of users.
      * @param string|null $countryCode  A two-letter country code.
      *
      * @return array An array containing at least 'total' (a formatted price).
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null)
     {

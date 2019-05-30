@@ -184,6 +184,9 @@ class Connector implements ConnectorInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
      */
     public function logIn($username, $password, $force = false, $totp = null)
     {

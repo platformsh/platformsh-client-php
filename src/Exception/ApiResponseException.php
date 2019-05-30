@@ -2,18 +2,36 @@
 
 namespace Platformsh\Client\Exception;
 
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class ApiResponseException extends BadResponseException
+/**
+ * Modifies Guzzle error messages to add more detail, if possible, based on the
+ * response body.
+ */
+class ApiResponseException extends RequestException
 {
 
     /**
-     * @inheritdoc
+     * Wraps a GuzzleException.
      *
-     * Modifies Guzzle error messages to add more detail, based on the response
-     * body.
+     * @param \GuzzleHttp\Exception\GuzzleException $e
+     *
+     * @return GuzzleException
+     */
+    public static function wrapGuzzleException(GuzzleException $e)
+    {
+        return $e instanceof RequestException ? static::create(
+            $e->getRequest(),
+            $e->getResponse(),
+            $e
+        ) : $e;
+    }
+
+    /**
+     * @inheritdoc
      */
     public static function create(
       RequestInterface $request,
