@@ -97,9 +97,16 @@ class Connector implements ConnectorInterface
         if (isset($session)) {
             $this->session = $session;
         } else {
-            // Assign file storage to the session by default.
-            $this->session = new Session();
-            $this->session->setStorage(new File());
+            if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
+                // If an access token is set directly, default to a session
+                // with no storage.
+                $this->session = new Session();
+            } else {
+                // Otherwise, assign file storage to the session by default.
+                // This reduces unnecessary access token refreshes.
+                $this->session = new Session();
+                $this->session->setStorage(new File());
+            }
         }
     }
 
