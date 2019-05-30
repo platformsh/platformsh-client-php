@@ -77,38 +77,6 @@ class ProjectAccess extends ApiResourceBase
     }
 
     /**
-     * Get the user's SSH keys.
-     *
-     * @param int $limit
-     *
-     * @deprecated Use PlatformClient::getSshKeys()
-     *
-     * @see \Platformsh\Client\PlatformClient::getSshKeys()
-     *
-     * @return SshKey_Platform[]
-     */
-    public function getSshKeys($limit = 0)
-    {
-        return SshKey_Platform::getCollection($this->getUri() . '/keys', $limit, [], $this->client);
-    }
-
-    /**
-     * Add an SSH key.
-     *
-     * @param string $key
-     *
-     * @deprecated Use PlatformClient::addSshKey()
-     *
-     * @see \Platformsh\Client\PlatformClient::addSshKey()
-     *
-     * @return Result
-     */
-    public function addSshKey($key)
-    {
-        return SshKey_Platform::create(['key' => $key], $this->getUri() . '/keys', $this->client);
-    }
-
-    /**
      * @inheritdoc
      */
     protected static function checkProperty($property, $value)
