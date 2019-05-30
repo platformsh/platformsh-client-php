@@ -32,13 +32,12 @@ class Session implements SessionInterface
         $this->id = $id;
         $this->data = $data;
         $this->storage = $storage;
-        $this->load();
     }
 
     /**
      * Load session data, if storage is defined.
      */
-    private function load()
+    private function lazyLoad()
     {
         if (!$this->loaded && isset($this->storage)) {
             $this->data = $this->storage->load($this->id);
@@ -53,7 +52,6 @@ class Session implements SessionInterface
     public function setStorage(SessionStorageInterface $storage)
     {
         $this->storage = $storage;
-        $this->load();
     }
 
     /**
@@ -64,6 +62,7 @@ class Session implements SessionInterface
         if (is_object($value) && !$value instanceof \JsonSerializable) {
             throw new \InvalidArgumentException('Invalid session data type: object');
         }
+        $this->lazyLoad();
         $this->data[$key] = $value;
     }
 
@@ -72,6 +71,8 @@ class Session implements SessionInterface
      */
     public function get($key)
     {
+        $this->lazyLoad();
+
         return isset($this->data[$key]) ? $this->data[$key] : null;
     }
 
@@ -80,6 +81,7 @@ class Session implements SessionInterface
      */
     public function clear()
     {
+        $this->lazyLoad();
         $this->data = [];
     }
 
@@ -88,7 +90,11 @@ class Session implements SessionInterface
      */
     public function save()
     {
-        if (!isset($this->storage) || $this->data === $this->original) {
+        if (!isset($this->storage)) {
+            return;
+        }
+        $this->lazyLoad();
+        if ($this->data === $this->original) {
             return;
         }
 
