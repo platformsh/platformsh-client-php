@@ -2,9 +2,10 @@
 
 namespace Platformsh\Client\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Platformsh\Client\PlatformClient;
 
-class PlatformClientTest extends \PHPUnit_Framework_TestCase
+class PlatformClientTest extends TestCase
 {
 
     /** @var MockConnector */
@@ -59,7 +60,7 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
 
     public function testAddSshKeyInvalid()
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
         $this->client->addSshKey('test invalid key');
     }
 }

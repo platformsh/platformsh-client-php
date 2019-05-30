@@ -2,7 +2,9 @@
 
 namespace Platformsh\Client\Tests;
 
-class ResourceTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class ResourceTest extends TestCase
 {
 
     /** @var array */
@@ -49,7 +51,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals('test-id', $this->resource['id']);
         $this->assertEquals('test name', $this->resource->getProperty('name'));
-        $this->setExpectedException('\InvalidArgumentException');
+        $this->expectException('\InvalidArgumentException');
         $this->resource->getProperty('nonexistent');
     }
 
@@ -69,7 +71,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertNotEmpty($this->resource->getLink('self'));
         $this->assertNotEmpty($this->resource->getLink('#operate'));
-        $this->setExpectedException('\InvalidArgumentException');
+        $this->expectException('\InvalidArgumentException');
         $this->resource->getLink('nonexistent');
     }
 
@@ -79,7 +81,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     public function testRequiredPropertiesBlockCreation()
     {
         $mockClient = new MockClient();
-        $this->setExpectedException('\InvalidArgumentException');
+        $this->expectException('\InvalidArgumentException');
         MockApiResource::create([], '', $mockClient);
     }
 
@@ -89,7 +91,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     public function testInvalidPropertiesBlockUpdate()
     {
         $resource = new MockApiResource([]);
-        $this->setExpectedException('\InvalidArgumentException');
+        $this->expectException('\InvalidArgumentException');
         $resource->update(['testProperty' => 2]);
     }
 }
