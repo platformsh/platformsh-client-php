@@ -11,6 +11,7 @@ use League\OAuth2\Client\Grant\ClientCredentials;
 use League\OAuth2\Client\Grant\Password;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
 use Platformsh\OAuth2\Client\Provider\Platformsh;
@@ -216,9 +217,9 @@ class Connector implements ConnectorInterface
     /**
      * Save an access token to the session.
      *
-     * @param AccessToken $token
+     * @param AccessTokenInterface $token
      */
-    protected function saveToken(AccessToken $token)
+    protected function saveToken(AccessTokenInterface $token)
     {
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
             return;
