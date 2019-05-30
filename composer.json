@@ -3,7 +3,7 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=7.1.0",
         "cocur/slugify": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
         "platformsh/oauth2": "0.0.1"
@@ -28,7 +28,7 @@
     ],
     "config": {
         "platform": {
-            "php": "5.6"
+            "php": "7.1"
         }
     }
 }
