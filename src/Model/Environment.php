@@ -638,4 +638,23 @@ class Environment extends Resource
 
         return $this->update(['backups' => $backups]);
     }
+
+    /**
+     * Runs a source operation.
+     *
+     * @param string $name
+     *   The operation name.
+     * @param array  $variables
+     *   Variables to define during the operation, as a nested associative
+     *   array, e.g. ['env'=>['foo'=>'bar']]
+     *
+     * @return \Platformsh\Client\Model\Result
+     */
+    public function runSourceOperation($name, array $variables = [])
+    {
+        return $this->runOperation('source-operation', 'post', [
+            'operation' => $name,
+            'variables' => (object) $variables,
+        ]);
+    }
 }
