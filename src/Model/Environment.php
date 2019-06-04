@@ -634,4 +634,23 @@ class Environment extends ApiResourceBase
 
         return $this->update(['backups' => $backups]);
     }
+
+    /**
+     * Runs a source operation.
+     *
+     * @param string $name
+     *   The operation name.
+     * @param array  $variables
+     *   Variables to define during the operation, as a nested associative
+     *   array, e.g. ['env'=>['foo'=>'bar']]
+     *
+     * @return \Platformsh\Client\Model\Result
+     */
+    public function runSourceOperation(string $name, array $variables = []): Result
+    {
+        return $this->runOperation('source-operation', 'post', [
+            'operation' => $name,
+            'variables' => (object) $variables,
+        ]);
+    }
 }
