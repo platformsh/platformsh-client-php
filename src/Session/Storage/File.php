@@ -29,9 +29,12 @@ class File implements SessionStorageInterface
     {
         // Default to ~/.platformsh/.session, but if it's not writable, fall
         // back to the temporary directory.
-        $default = $this->getHomeDirectory() . '/.platformsh/.session';
-        if ($this->canWrite($default)) {
-            return $default;
+        $home = $this->getHomeDirectory();
+        if ($home !== null) {
+            $default = rtrim($home, '/') . '/.platformsh/.session';
+            if ($this->canWrite($default)) {
+                return $default;
+            }
         }
         $temp = sys_get_temp_dir() . '/.platformsh-client/.session';
         if ($this->canWrite($temp)) {
@@ -68,7 +71,7 @@ class File implements SessionStorageInterface
     /**
      * Finds the user's home directory.
      *
-     * @return string
+     * @return string|null
      */
     protected function getHomeDirectory()
     {
@@ -77,7 +80,7 @@ class File implements SessionStorageInterface
             $home = $userProfile;
         }
         if (!$home || !is_dir($home)) {
-            throw new \RuntimeException('Could not determine home directory');
+            return null;
         }
 
         return $home;
