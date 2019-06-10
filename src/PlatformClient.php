@@ -1,4 +1,7 @@
 <?php
+/** @noinspection PhpDocMissingThrowsInspection */
+/** @noinspection PhpUnhandledExceptionInspection */
+declare(strict_types=1);
 
 namespace Platformsh\Client;
 
@@ -53,7 +56,6 @@ class PlatformClient
      * @param bool   $https
      *
      * @return Project|false
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getProject($id, $hostname = null, $https = true)
     {
@@ -83,7 +85,6 @@ class PlatformClient
      * @param bool $reset
      *
      * @return Project[]
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getProjects($reset = false)
     {
@@ -104,7 +105,6 @@ class PlatformClient
      * @param bool $reset
      *
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getAccountInfo($reset = false)
     {
@@ -170,7 +170,6 @@ class PlatformClient
      *
      * @return string
      *   The project's API endpoint.
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function locateProject($id)
     {
@@ -180,8 +179,7 @@ class PlatformClient
         }
         catch (BadResponseException $e) {
             $response = $e->getResponse();
-            // @todo Remove 400 from this array when the API is more liberal in validating project IDs.
-            $ignoredErrorCodes = [400, 403, 404];
+            $ignoredErrorCodes = [403, 404];
             if ($response && in_array($response->getStatusCode(), $ignoredErrorCodes)) {
                 return false;
             }
@@ -197,7 +195,6 @@ class PlatformClient
      * @param bool $reset
      *
      * @return SshKey[]
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getSshKeys($reset = false)
     {
@@ -318,7 +315,6 @@ class PlatformClient
      * @param string|null $countryCode  A two-letter country code.
      *
      * @return array An array containing at least 'total' (a formatted price).
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null)
     {
