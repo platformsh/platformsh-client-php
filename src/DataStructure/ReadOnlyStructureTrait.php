@@ -37,6 +37,17 @@ trait ReadOnlyStructureTrait
     }
 
     /**
+     * Magic isset() support.
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function __isset($name) {
+        return isset($this->data[$name]);
+    }
+
+    /**
      * Magic setter.
      *
      * @param string $name
