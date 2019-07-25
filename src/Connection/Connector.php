@@ -345,7 +345,10 @@ class Connector implements ConnectorInterface
 
             $this->client = new Client([
               'handler' => $stack,
-              'headers' => ['User-Agent' => $this->config['user_agent']],
+              'headers' => [
+                  'User-Agent' => $this->config['user_agent'],
+                  'Accept-Encoding' => 'gzip, deflate',
+              ],
               'debug' => $this->config['debug'],
               'verify' => $this->config['verify'],
               'proxy' => $this->config['proxy'],
