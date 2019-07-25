@@ -65,6 +65,7 @@ class Connector implements ConnectorInterface
           'proxy' => null,
           'api_token' => null,
           'api_token_type' => 'access',
+          'gzip' => true,
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -385,6 +386,12 @@ class Connector implements ConnectorInterface
                 'auth' => 'oauth2',
               ],
             ];
+
+            if ($this->config['gzip']) {
+                $options['defaults']['decode_content'] = true;
+                $options['defaults']['Accept-Encoding'] = 'gzip';
+            }
+
             $client = $this->getGuzzleClient($options);
 
             $this->setUpCache($client);
