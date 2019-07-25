@@ -389,7 +389,7 @@ class Connector implements ConnectorInterface
 
             if ($this->config['gzip']) {
                 $options['defaults']['decode_content'] = true;
-                $options['defaults']['Accept-Encoding'] = 'gzip';
+                $options['defaults']['headers']['Accept-Encoding'] = 'gzip';
             }
 
             $client = $this->getGuzzleClient($options);
