@@ -87,6 +87,7 @@ class Connector implements ConnectorInterface
           'proxy' => null,
           'api_token' => null,
           'api_token_type' => 'exchange',
+          'gzip' => true,
         ];
         $this->config = $config + $defaults;
 
@@ -343,14 +344,21 @@ class Connector implements ConnectorInterface
             $stack = HandlerStack::create();
             $stack->push($this->getOauthMiddleware());
 
-            $this->client = new Client([
-              'handler' => $stack,
-              'headers' => ['User-Agent' => $this->config['user_agent']],
-              'debug' => $this->config['debug'],
-              'verify' => $this->config['verify'],
-              'proxy' => $this->config['proxy'],
-              'auth' => 'oauth2',
-            ]);
+            $config = [
+                'handler' => $stack,
+                'headers' => ['User-Agent' => $this->config['user_agent']],
+                'debug' => $this->config['debug'],
+                'verify' => $this->config['verify'],
+                'proxy' => $this->config['proxy'],
+                'auth' => 'oauth2',
+            ];
+
+            if ($this->config['gzip']) {
+                $config['decode_content'] = true;
+                $config['headers']['Accept-Encoding'] = 'gzip';
+            }
+
+            $this->client = new Client($config);
         }
 
         return $this->client;
