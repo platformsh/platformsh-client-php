@@ -87,7 +87,7 @@ class Connector implements ConnectorInterface
           'proxy' => null,
           'api_token' => null,
           'api_token_type' => 'exchange',
-          'gzip' => true,
+          'gzip' => extension_loaded('zlib'),
         ];
         $this->config = $config + $defaults;
 
