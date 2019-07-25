@@ -65,7 +65,7 @@ class Connector implements ConnectorInterface
           'proxy' => null,
           'api_token' => null,
           'api_token_type' => 'access',
-          'gzip' => true,
+          'gzip' => extension_loaded('zlib'),
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
