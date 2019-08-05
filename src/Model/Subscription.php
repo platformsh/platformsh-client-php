@@ -16,6 +16,7 @@ use GuzzleHttp\ClientInterface;
  * @property-read int    $user_licenses Number of users.
  * @property-read string $project_id
  * @property-read string $project_title
+ * @property-read string $project_options
  * @property-read string $project_region
  * @property-read string $project_region_label
  * @property-read string $project_ui
