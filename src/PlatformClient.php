@@ -9,6 +9,7 @@ use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Region;
+use Platformsh\Client\Model\Catalog;
 use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
@@ -226,6 +227,7 @@ class PlatformClient
     /**
      * Create a new Platform.sh subscription.
      *
+     * @param string $catalog            The catalog item url. See getCatalog().
      * @param string $region             The region ID. See getRegions().
      * @param string $plan               The plan. See Subscription::$availablePlans.
      * @param string $title              The project title.
@@ -233,6 +235,7 @@ class PlatformClient
      * @param int    $environments       The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
      *
+     * @see PlatformClient::getCatalog()
      * @see PlatformClient::getRegions()
      * @see Subscription::wait()
      *
@@ -241,8 +244,9 @@ class PlatformClient
      *   similar code to wait for the subscription's project to be provisioned
      *   and activated.
      */
-    public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
+    public function createSubscription($catalog, $region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
     {
+
         $url = $this->accountsEndpoint . 'subscriptions';
         $values = $this->cleanRequest([
           'project_region' => $region,
@@ -250,9 +254,10 @@ class PlatformClient
           'project_title' => $title,
           'storage' => $storage,
           'environments' => $environments,
+          'options_url' => $catalog,
           'activation_callback' => $activationCallback,
         ]);
-
+        
         return Subscription::create($values, $url, $this->connector->getClient());
     }
 
@@ -332,5 +337,15 @@ class PlatformClient
     public function getRegions()
     {
         return Region::getCollection($this->accountsEndpoint . 'regions', 0, [], $this->getConnector()->getClient());
+    }
+    
+    /**
+     * Get the project options catalog.
+     *
+     * @return Catalog[]
+     */
+    public function getCatalog()
+    {
+        return Catalog::create([], $this->accountsEndpoint . 'setup/catalog', $this->getConnector()->getClient());
     }
 }
