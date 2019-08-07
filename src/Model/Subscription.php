@@ -23,8 +23,24 @@ use GuzzleHttp\ClientInterface;
 class Subscription extends ApiResourceBase
 {
 
+    /**
+     * List of available plans.
+     *
+     * @deprecated instead, use \Platformsh\Client\PlatformClient->getPlans()
+     *
+     * @var array
+     */
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
-    public static $availableRegions = ['eu.platform.sh', 'us.platform.sh'];
+
+    /**
+     * List of available regions.
+     *
+     * @deprecated instead, use \Platformsh\Client\PlatformClient->getRegions()
+     *
+     * @var array
+     */
+    public static $availableRegions = ['eu-3.platform.sh', 'us-2.platform.sh'];
+
     protected static $required = ['project_region'];
 
     const STATUS_ACTIVE = 'active';
