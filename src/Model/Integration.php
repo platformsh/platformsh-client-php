@@ -19,6 +19,7 @@ class Integration extends ApiResourceBase
     /** @var array */
     protected static $types = [
       'bitbucket',
+      'bitbucket_server',
       'hipchat',
       'github',
       'gitlab',
