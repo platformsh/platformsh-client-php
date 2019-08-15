@@ -54,9 +54,9 @@ class PlatformClient
     public function getProject($id, $hostname = null, $https = true)
     {
         // Search for a project in the user's project list.
-        foreach ($this->getProjects() as $project) {
-            if ($project->id === $id) {
-                return $project;
+        foreach ($this->getAccountInfo()['projects'] as $project) {
+            if ($project['id'] === $id) {
+                return new Project($project, $project['endpoint'], $this->connector->getClient());
             }
         }
 
