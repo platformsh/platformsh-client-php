@@ -227,13 +227,13 @@ class PlatformClient
     /**
      * Create a new Platform.sh subscription.
      *
-     * @param string $catalog            The catalog item url. See getCatalog().
      * @param string $region             The region ID. See getRegions().
      * @param string $plan               The plan. See Subscription::$availablePlans.
      * @param string $title              The project title.
      * @param int    $storage            The storage of each environment, in MiB.
      * @param int    $environments       The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
+     * @param string $catalog            The catalog item url. See getCatalog().
      *
      * @see PlatformClient::getCatalog()
      * @see PlatformClient::getRegions()
@@ -244,7 +244,7 @@ class PlatformClient
      *   similar code to wait for the subscription's project to be provisioned
      *   and activated.
      */
-    public function createSubscription($catalog, $region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
+    public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null, $catalog = null)
     {
 
         $url = $this->accountsEndpoint . 'subscriptions';
@@ -254,8 +254,8 @@ class PlatformClient
           'project_title' => $title,
           'storage' => $storage,
           'environments' => $environments,
-          'options_url' => $catalog,
           'activation_callback' => $activationCallback,
+          'options_url' => $catalog,
         ]);
         
         return Subscription::create($values, $url, $this->connector->getClient());
