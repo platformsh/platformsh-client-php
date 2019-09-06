@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
+use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
