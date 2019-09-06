@@ -10,7 +10,9 @@ use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Region;
+use Platformsh\Client\Model\Catalog;
 use Platformsh\Client\Model\Result;
+use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
 
@@ -233,7 +235,9 @@ class PlatformClient
      * @param int    $storage            The storage of each environment, in MiB.
      * @param int    $environments       The number of available environments.
      * @param array  $activationCallback An activation callback for the subscription.
+     * @param string $catalog            The catalog item url. See getCatalog().
      *
+     * @see PlatformClient::getCatalog()
      * @see PlatformClient::getRegions()
      * @see Subscription::wait()
      *
@@ -242,8 +246,9 @@ class PlatformClient
      *   similar code to wait for the subscription's project to be provisioned
      *   and activated.
      */
-    public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null)
+    public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null, $catalog = null)
     {
+
         $url = $this->accountsEndpoint . 'subscriptions';
         $values = $this->cleanRequest([
           'project_region' => $region,
@@ -252,6 +257,7 @@ class PlatformClient
           'storage' => $storage,
           'environments' => $environments,
           'activation_callback' => $activationCallback,
+          'options_url' => $catalog,
         ]);
 
         return Subscription::create($values, $url, $this->connector->getClient());
@@ -357,5 +363,40 @@ class PlatformClient
         );
 
         return $response->json()['certificate'];
+    }
+
+    /**
+     * Get the project options catalog.
+     *
+     * @return \Platformsh\Client\Model\CatalogItem[]
+     */
+    public function getCatalog()
+    {
+        return Catalog::create([], $this->accountsEndpoint . 'setup/catalog', $this->getConnector()->getClient());
+    }
+
+    /**
+     * Get the setup options file for a user.
+     *
+     * @param string $vendor             The query string containing the vendor machine name.
+     * @param string $plan               The machine name of the plan which has been selected during the project setup process.
+     * @param string $options_url        The URL of a project options file which has been selected as a setup template.
+     * @param string $username           The name of the account for which the project is to be created.
+     * @param string $organization       The name of the organization for which the project is to be created.
+     *
+     * @return SetupOptions
+     */
+    public function getSetupOptions($vendor = NULL, $plan = NULL, $options_url = NULL, $username = NULL, $organization = NULL)
+    {
+        $url = $this->accountsEndpoint . 'setup/options';
+        $options = $this->cleanRequest([
+          'vendor' => $vendor,
+          'plan' => $plan,
+          'options_url' => $options_url,
+          'username' => $username,
+          'organization' => $organization
+        ]);
+
+        return SetupOptions::create($options, $url, $this->connector->getClient());
     }
 }

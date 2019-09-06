@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
+use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
@@ -370,6 +371,21 @@ class Environment extends Resource implements HasActivitiesInterface
         }
 
         return $this->runLongOperation('synchronize', 'post', $body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+    {
+        // The environments collection contains full information about each
+        // environment, so set $full to true when initializing.
+        $resources = [];
+        foreach ($data as $item) {
+            $resources[] = new static($item, $baseUrl, $client, true);
+        }
+
+        return $resources;
     }
 
     /**
