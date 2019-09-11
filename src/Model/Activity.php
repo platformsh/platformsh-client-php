@@ -54,10 +54,10 @@ class Activity extends ApiResourceBase
     public function wait(callable $onPoll = null, callable $onLog = null, $pollInterval = 1)
     {
         $log = $this->getProperty('log');
-        if ($onLog !== null && strlen(trim($log))) {
-            $onLog(trim($log) . "\n");
-        }
         $length = strlen($log);
+        if ($onLog !== null && $length > 0) {
+            $onLog($log);
+        }
         $retries = 0;
         while (!$this->isComplete()) {
             usleep($pollInterval * 1000000);
@@ -67,7 +67,7 @@ class Activity extends ApiResourceBase
                     $onPoll($this);
                 }
                 if ($onLog !== null && ($new = substr($this->getProperty('log'), $length))) {
-                    $onLog(trim($new) . "\n");
+                    $onLog($new);
                     $length += strlen($new);
                 }
             } catch (ConnectException $e) {
