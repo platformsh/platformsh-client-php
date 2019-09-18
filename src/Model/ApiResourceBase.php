@@ -47,7 +47,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      * @param bool            $full    Whether the data is a complete
      *                                 representation of the resource.
      */
-    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = false)
+    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = true)
     {
         $this->setData($data);
         $this->client = $client ?: new Client();
