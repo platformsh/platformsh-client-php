@@ -2,6 +2,7 @@
 
 namespace Platformsh\Client\Model;
 
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Url;
 
 /**
@@ -15,6 +16,18 @@ use GuzzleHttp\Url;
  */
 class Project extends Resource
 {
+    /**
+     * {@inheritDoc}
+     *
+     * Project information can come from a number of different places, which
+     * do not always contain full information about each project. So this
+     * overrides the Resource constructor to default $full to false.
+     */
+    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = false)
+    {
+        parent::__construct($data, $baseUrl, $client, $full);
+    }
+
     /**
      * Prevent deletion.
      *
