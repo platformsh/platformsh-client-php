@@ -3,6 +3,9 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\Stream\StreamInterface;
+use Platformsh\Client\Model\ActivityLog\LogItem;
 
 /**
  * An activity on a Platform.sh environment.
@@ -12,7 +15,7 @@ use GuzzleHttp\Exception\ConnectException;
  *
  * @property-read string   $id
  * @property-read int      $completion_percent
- * @property-read string   $log
+ * @property-read string   $log Deprecated: use readLog() instead.
  * @property-read string   $created_at
  * @property-read string   $updated_at
  * @property-read string[] $environments
@@ -24,6 +27,7 @@ use GuzzleHttp\Exception\ConnectException;
  * @property-read string   $started_at
  * @property-read string   $type
  * @property-read string   $description The HTML description of the activity.
+ * @property-read string   $text The plain-text description of the activity.
  * @property-read array    $payload
  */
 class Activity extends Resource
@@ -39,8 +43,6 @@ class Activity extends Resource
     /**
      * Wait for the activity to complete.
      *
-     * @todo use the FutureInterface
-     *
      * @param callable  $onPoll       A function that will be called every time
      *                                the activity is polled for updates. It
      *                                will be passed one argument: the
@@ -48,15 +50,18 @@ class Activity extends Resource
      * @param callable  $onLog        A function that will print new activity log
      *                                messages as they are received. It will be
      *                                passed one argument: the message as a
-     *                                string.
+     *                                string. Deprecated: use readLog() instead.
      * @param int|float $pollInterval The polling interval, in seconds.
      */
     public function wait(callable $onPoll = null, callable $onLog = null, $pollInterval = 1)
     {
         $log = $this->getProperty('log');
         $length = strlen($log);
-        if ($onLog !== null && $length > 0) {
-            $onLog($log);
+        if ($onLog !== null) {
+            @trigger_error('The $onLog parameter is deprecated. Use the readLog() method instead.', E_USER_DEPRECATED);
+            if ($length > 0) {
+                $onLog($log);
+            }
         }
         $retries = 0;
         while (!$this->isComplete()) {
@@ -79,6 +84,56 @@ class Activity extends Resource
                 throw $e;
             }
         }
+    }
+
+    /**
+     * Allows reading the streaming activity log.
+     *
+     * @param callable|NULL $onUpdate
+     *   A callback that receives an array of LogItem objects when there are
+     *   new ones available. Usually this will be 0 items or 1 item.
+     *
+     * @see LogItem
+     *
+     * @return LogItem[]
+     */
+    public function readLog(callable $onUpdate = null)
+    {
+        $response = $this->fetchLog($onUpdate !== null);
+        $body = $response->getBody();
+        if ($body === null) {
+            throw new \RuntimeException('No response body found');
+        }
+        if ($onUpdate !== null) {
+            while ($line = $this->readline($body)) {
+                $onUpdate(LogItem::multipleFromJsonStream($line));
+            }
+        }
+
+        return LogItem::multipleFromJsonStream($body->__toString());
+    }
+
+    /**
+     * Reads the next line of a stream.
+     *
+     * @param StreamInterface $stream
+     * @param string $newline
+     *
+     * @return string
+     */
+    private function readline(StreamInterface $stream, $newline = "\n") {
+        $buffer = '';
+        while (!$stream->eof()) {
+            if (false === ($byte = $stream->read(1))) {
+                return $buffer;
+            }
+            $buffer .= $byte;
+            if ($byte === $newline) {
+                break;
+            }
+        }
+
+        return $buffer;
     }
 
     /**
@@ -139,9 +194,8 @@ class Activity extends Resource
     /**
      * Get a human-readable description of the activity.
      *
-     * The "description" property contains the HTML-formatted description. This
-     * method just provides another way to access it, and a way to remove HTML
-     * easily.
+     * The "description" property contains the HTML-formatted description.
+     * The "text" property contains the plain-text description.
      *
      * @param bool $html Whether to return HTML.
      *
@@ -149,12 +203,7 @@ class Activity extends Resource
      */
     public function getDescription($html = false)
     {
-        $description = $this->getProperty('description');
-        if ($html) {
-            return $description;
-        }
-
-        return html_entity_decode(strip_tags($description), ENT_QUOTES, 'utf-8');
+        return $this->getProperty($html ? 'description' : 'text');
     }
 
     /**
@@ -173,5 +222,31 @@ class Activity extends Resource
         }
 
         return $date;
+    }
+
+    /**
+     * Fetches the activity log as a Guzzle streaming response.
+     *
+     * @param bool $stream
+     *   Whether to stream the response rather than download it all.
+     * @param int $startAt
+     *   The item to start with.
+     * @param int $maxItems
+     *   How many items to retrieve. Leave at 0 to fetch all items.
+     * @param int $maxDelay
+     *   How long to wait for new messages (on the server side). Use -1 to wait forever.
+     *
+     * @return ResponseInterface
+     */
+    private function fetchLog($stream = true, $startAt = 0, $maxItems = 0, $maxDelay = -1)
+    {
+        return $this->client->get($this->getLink('log'), [
+            'query' => [
+                'start_at' => $startAt,
+                'max_items' => $maxItems,
+                'max_delay' => $maxDelay,
+            ],
+            'stream' => $stream,
+        ]);
     }
 }
