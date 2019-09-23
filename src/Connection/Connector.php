@@ -158,17 +158,6 @@ class Connector implements ConnectorInterface
         }
     }
 
-    public function __destruct()
-    {
-        if ($this->oauth2Plugin) {
-            // Save the access token for future requests.
-            $token = $this->getOauth2Plugin()->getAccessToken(false);
-            if ($token !== null) {
-                $this->saveToken($token);
-            }
-        }
-    }
-
     /**
      * @inheritdoc
      */
