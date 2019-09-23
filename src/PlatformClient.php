@@ -349,7 +349,7 @@ class PlatformClient
     {
         return Catalog::create([], $this->accountsEndpoint . 'setup/catalog', $this->getConnector()->getClient());
     }
-    
+
     /**
      * Get the setup options file for a user.
      * 
@@ -373,6 +373,6 @@ class PlatformClient
           'organization' => $organization
         ]);
 
-        return SetupOptions::post($options, $url, $this->connector->getClient()); 
+        return SetupOptions::getList($options, $url, $this->connector->getClient()); 
     }
 }

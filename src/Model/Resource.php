@@ -181,33 +181,6 @@ abstract class Resource implements \ArrayAccess
     }
 
     /**
-     * Post request for returned data.
-     *
-     * @param string          $body          array of the data to send in the post.
-     * @param string          $collectionUrl The URL of the collection.
-     * @param ClientInterface $client        A suitably configured Guzzle
-     *                                       client.
-     *
-     * @return array The resource object, or false if the resource is
-     *                      not found.
-     */
-    public static function post(array $body, $collectionUrl = null, ClientInterface $client)
-    {
-        try {
-            $request = $client->createRequest('post', $collectionUrl, ['json' => $body]);
-            $data = self::send($request, $client);
-            return $data;
-        } catch (BadResponseException $e) {
-            $response = $e->getResponse();
-            if ($response && $response->getStatusCode() === 404) {
-                return false;
-            }
-            throw $e;
-        }
-    }
-
-
-    /**
      * Create a resource.
      *
      * @param array           $body
