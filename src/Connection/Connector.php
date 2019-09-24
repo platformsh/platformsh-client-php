@@ -205,7 +205,7 @@ class Connector implements ConnectorInterface
      *
      * @param AccessToken $token
      */
-    protected function saveToken(AccessToken $token)
+    public function saveToken(AccessToken $token)
     {
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
             return;
