@@ -151,6 +151,8 @@ class Connector implements ConnectorInterface
         foreach ($revocations as $type => $token) {
             $this->getClient()->post($url, [
                 'body' => [
+                    'client_id' => $this->config['client_id'],
+                    'client_secret' => $this->config['client_secret'],
                     'token' => $token,
                     'token_type_hint' => $type,
                 ],
