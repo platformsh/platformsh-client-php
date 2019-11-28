@@ -65,13 +65,6 @@ class Project extends ApiResourceBase
      */
     public function getGitUrl()
     {
-        // The collection doesn't provide a Git URL, but it does provide the
-        // right host, so the URL can be calculated.
-        if (!$this->hasProperty('repository', false)) {
-            $host = parse_url($this->getUri(), PHP_URL_HOST);
-
-            return "{$this->id}@git.{$host}:{$this->id}.git";
-        }
         $repository = $this->getProperty('repository');
 
         return $repository['url'];
