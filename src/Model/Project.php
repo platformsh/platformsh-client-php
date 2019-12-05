@@ -4,6 +4,8 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use function GuzzleHttp\Psr7\uri_for;
+use Platformsh\Client\Model\Activities\HasActivitiesInterface;
+use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 
 /**
  * A Platform.sh project.
@@ -14,8 +16,10 @@ use function GuzzleHttp\Psr7\uri_for;
  * @property-read string $updated_at
  * @property-read string $owner
  */
-class Project extends ApiResourceBase
+class Project extends ApiResourceBase implements HasActivitiesInterface
 {
+    use HasActivitiesTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -231,52 +235,6 @@ class Project extends ApiResourceBase
         $body = ['type' => $type] + $data;
 
         return Integration::create($body, $this->getLink('integrations'), $this->client);
-    }
-
-    /**
-     * Get a single project activity.
-     *
-     * @param string $id
-     *
-     * @return Activity|false
-     */
-    public function getActivity($id)
-    {
-        return Activity::get($id, $this->getUri() . '/activities', $this->client);
-    }
-
-    /**
-     * Get a list of project activities.
-     *
-     * @param int $limit
-     *   Limit the number of activities to return.
-     * @param string $type
-     *   Filter activities by type.
-     * @param int $startsAt
-     *   A UNIX timestamp for the maximum created date of activities to return.
-     *
-     * @return Activity[]
-     */
-    public function getActivities($limit = 0, $type = null, $startsAt = null)
-    {
-        $options = [];
-        if ($type !== null) {
-            $options['query']['type'] = $type;
-        }
-        if ($startsAt !== null) {
-            $options['query']['starts_at'] = Activity::formatStartsAt($startsAt);
-        }
-
-        $activities = Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
-
-        // Guarantee the type filter (works around a temporary bug).
-        if ($type !== null) {
-            $activities = array_filter($activities, function (Activity $activity) use ($type) {
-                return $activity->type === $type;
-            });
-        }
-
-        return $activities;
     }
 
     /**

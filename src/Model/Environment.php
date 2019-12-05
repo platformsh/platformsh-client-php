@@ -5,6 +5,8 @@ namespace Platformsh\Client\Model;
 use Cocur\Slugify\Slugify;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
+use Platformsh\Client\Model\Activities\HasActivitiesInterface;
+use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 use Platformsh\Client\Model\Backups\BackupConfig;
 use Platformsh\Client\Model\Backups\Policy;
 use Platformsh\Client\Model\Deployment\EnvironmentDeployment;
@@ -55,8 +57,10 @@ use Platformsh\Client\Model\Git\Commit;
  *   The backup configuration. It's recommended to use getBackupConfig() instead
  *   of using this array directly.
  */
-class Environment extends ApiResourceBase
+class Environment extends ApiResourceBase implements HasActivitiesInterface
 {
+    use HasActivitiesTrait;
+
     /**
      * Get the current deployment of this environment.
      *
@@ -375,52 +379,6 @@ class Environment extends ApiResourceBase
     public function backup()
     {
         return $this->runLongOperation('backup');
-    }
-
-    /**
-     * Get a single environment activity.
-     *
-     * @param string $id
-     *
-     * @return Activity|false
-     */
-    public function getActivity($id)
-    {
-        return Activity::get($id, $this->getUri() . '/activities', $this->client);
-    }
-
-    /**
-     * Get a list of environment activities.
-     *
-     * @param int    $limit
-     *   Limit the number of activities to return.
-     * @param string $type
-     *   Filter activities by type.
-     * @param int    $startsAt
-     *   A UNIX timestamp for the maximum created date of activities to return.
-     *
-     * @return Activity[]
-     */
-    public function getActivities($limit = 0, $type = null, $startsAt = null)
-    {
-        $options = [];
-        if ($type !== null) {
-            $options['query']['type'] = $type;
-        }
-        if ($startsAt !== null) {
-            $options['query']['starts_at'] = Activity::formatStartsAt($startsAt);
-        }
-
-        $activities = Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
-
-        // Guarantee the type filter (works around a temporary bug).
-        if ($type !== null) {
-            $activities = array_filter($activities, function (Activity $activity) use ($type) {
-                return $activity->type === $type;
-            });
-        }
-
-        return $activities;
     }
 
     /**
