@@ -3,6 +3,8 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Exception\BadResponseException;
+use Platformsh\Client\Model\Activities\HasActivitiesInterface;
+use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 
 /**
  * A project integration.
@@ -10,8 +12,9 @@ use GuzzleHttp\Exception\BadResponseException;
  * @property-read string $id
  * @property-read string $type
  */
-class Integration extends Resource
+class Integration extends Resource implements HasActivitiesInterface
 {
+    use HasActivitiesTrait;
 
     /** @var array */
     protected static $required = ['type'];
