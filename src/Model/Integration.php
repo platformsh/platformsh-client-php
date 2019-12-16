@@ -30,6 +30,7 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
       'health.email',
       'health.pagerduty',
       'health.slack',
+      'health.webhook',
     ];
 
     /**
