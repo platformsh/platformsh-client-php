@@ -12,7 +12,7 @@ class ProjectAccess extends Resource
 {
 
     /** @var array */
-    protected static $required = ['email'];
+    protected static $required = ['role'];
 
     const ROLE_ADMIN = 'admin';
     const ROLE_VIEWER = 'viewer';

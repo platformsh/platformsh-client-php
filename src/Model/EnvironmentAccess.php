@@ -14,7 +14,7 @@ class EnvironmentAccess extends Resource
 {
 
     /** @var array */
-    protected static $required = ['user', 'role'];
+    protected static $required = ['role'];
 
     const ROLE_ADMIN = 'admin';
     const ROLE_VIEWER = 'viewer';
