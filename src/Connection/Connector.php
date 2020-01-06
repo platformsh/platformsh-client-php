@@ -8,7 +8,7 @@ use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use GuzzleHttp\Url;
 use Platformsh\Client\OAuth2\ApiToken;
@@ -125,11 +125,13 @@ class Connector implements ConnectorInterface
 
         try {
             $this->revokeTokens();
-        } catch (BadResponseException $e) {
+        } catch (RequestException $e) {
             // Retry the request once, if we received a retry status.
             $retryStatuses = [408, 429, 502, 503, 504];
             if ($e->getResponse() && in_array($e->getResponse()->getStatusCode(), $retryStatuses)) {
                 $this->revokeTokens();
+            } else {
+                trigger_error($e->getMessage());
             }
         } finally {
             $this->session->clear();
