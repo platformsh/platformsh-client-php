@@ -126,8 +126,9 @@ class Connector implements ConnectorInterface
         try {
             $this->revokeTokens();
         } catch (BadResponseException $e) {
-            // Retry the request once.
-            if ($e->getResponse() && $e->getResponse()->getStatusCode() < 500) {
+            // Retry the request once, if we received a retry status.
+            $retryStatuses = [408, 429, 502, 503, 504];
+            if ($e->getResponse() && in_array($e->getResponse()->getStatusCode(), $retryStatuses)) {
                 $this->revokeTokens();
             }
         } finally {
