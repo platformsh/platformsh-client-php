@@ -4,7 +4,7 @@ namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use function GuzzleHttp\Psr7\uri_for;
 use League\OAuth2\Client\Grant\ClientCredentials;
@@ -137,11 +137,13 @@ class Connector implements ConnectorInterface
     {
         try {
             $this->revokeTokens();
-        } catch (BadResponseException $e) {
+        } catch (RequestException $e) {
             // Retry the request once, if we received a retry status.
             $retryStatuses = [408, 429, 502, 503, 504];
             if ($e->getResponse() && in_array($e->getResponse()->getStatusCode(), $retryStatuses)) {
                 $this->revokeTokens();
+            } else {
+                trigger_error($e->getMessage());
             }
         } finally {
             $this->session->clear();
