@@ -4,6 +4,7 @@ namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use function GuzzleHttp\Psr7\uri_for;
@@ -168,14 +169,23 @@ class Connector implements ConnectorInterface
             ->withPath($this->config['revoke_url'])
             ->__toString();
         foreach ($revocations as $type => $token) {
-            $this->getClient()->request('post', $url, [
-                'form_params' => [
-                    'client_id' => $this->config['client_id'],
-                    'client_secret' => $this->config['client_secret'],
-                    'token' => $token,
-                    'token_type_hint' => $type,
-                ],
-            ]);
+            $options = ['form_params' => [
+                'client_id' => $this->config['client_id'],
+                'client_secret' => $this->config['client_secret'],
+                'token' => $token,
+                'token_type_hint' => $type,
+            ]];
+            try {
+                $this->getClient()->request('post', $url, $options);
+            }  catch (ClientException $e) {
+                // Ignore unsupported token type errors.
+                if ($e->getResponse()) {
+                    $data = \GuzzleHttp\json_decode($e->getResponse()->getBody(), true);
+                    if ($data['error'] !== 'unsupported_token_type') {
+                        throw $e;
+                    }
+                }
+            }
         }
     }
 
