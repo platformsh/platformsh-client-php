@@ -8,6 +8,7 @@ use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use GuzzleHttp\Url;
@@ -152,14 +153,23 @@ class Connector implements ConnectorInterface
             ->combine($this->config['revoke_url'])
             ->__toString();
         foreach ($revocations as $type => $token) {
-            $this->getClient()->post($url, [
-                'body' => [
-                    'client_id' => $this->config['client_id'],
-                    'client_secret' => $this->config['client_secret'],
-                    'token' => $token,
-                    'token_type_hint' => $type,
-                ],
-            ]);
+            $options = ['body' => [
+                'client_id' => $this->config['client_id'],
+                'client_secret' => $this->config['client_secret'],
+                'token' => $token,
+                'token_type_hint' => $type,
+            ]];
+            try {
+                $this->getClient()->post($url, $options);
+            }  catch (ClientException $e) {
+                // Ignore unsupported token type errors.
+                if ($e->getResponse()) {
+                    $data = $e->getResponse()->json();
+                    if ($data['error'] !== 'unsupported_token_type') {
+                        throw $e;
+                    }
+                }
+            }
         }
     }
 
