@@ -49,6 +49,9 @@ class Connector implements ConnectorInterface
      *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
      *       Use a string to specify an HTTP proxy, or an array to specify
      *       different proxies for different protocols.
+     *     - invalid_refresh_token_callback: A callback to run when an invalid
+     *       refresh token error is received. It will be passed a Guzzle
+     *       BadResponseException, and should return an AccessToken or null.
      * @param SessionInterface $session
      */
     public function __construct(array $config = [], SessionInterface $session = null)
@@ -67,6 +70,7 @@ class Connector implements ConnectorInterface
           'api_token' => null,
           'api_token_type' => 'access',
           'gzip' => extension_loaded('zlib'),
+          'invalid_refresh_token_callback' => null,
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -337,6 +341,10 @@ class Connector implements ConnectorInterface
             $this->oauth2Plugin->setTokenSaveCallback(function (AccessToken $token) {
                 $this->saveToken($token);
             });
+
+            if ($this->config['invalid_refresh_token_callback'] !== null) {
+                $this->oauth2Plugin->setInvalidRefreshTokenCallback($this->config['invalid_refresh_token_callback']);
+            }
         }
 
         return $this->oauth2Plugin;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "03fe0925dc2cbf2ec401e9f21bba515b",
+    "content-hash": "452f3b84c951e30ae5e19857e7056a3e",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -338,6 +338,7 @@
                 }
             ],
             "description": "Provides a simple API and specification that abstracts away the details of HTTP into a single PHP function.",
+            "abandoned": true,
             "time": "2018-07-31T13:22:33+00:00"
         },
         {
@@ -388,20 +389,21 @@
                 "Guzzle",
                 "stream"
             ],
+            "abandoned": true,
             "time": "2014-10-12T19:18:40+00:00"
         },
         {
             "name": "pjcdawkins/guzzle-oauth2-plugin",
-            "version": "v2.2.0",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
-                "reference": "4bbb1261a18f419f5fe1f15cdf47d384cc94cfe0"
+                "reference": "45bc3209692bb02374621ce51840ea012e26629b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/4bbb1261a18f419f5fe1f15cdf47d384cc94cfe0",
-                "reference": "4bbb1261a18f419f5fe1f15cdf47d384cc94cfe0",
+                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/45bc3209692bb02374621ce51840ea012e26629b",
+                "reference": "45bc3209692bb02374621ce51840ea012e26629b",
                 "shasum": ""
             },
             "require": {
@@ -433,7 +435,7 @@
                 }
             ],
             "description": "An OAuth2 plugin (subscriber) for Guzzle (forked from commerceguys/guzzle-oauth2-plugin)",
-            "time": "2019-05-29T20:51:02+00:00"
+            "time": "2020-04-15T05:58:03+00:00"
         },
         {
             "name": "react/promise",
