@@ -157,12 +157,15 @@ class Connector implements ConnectorInterface
             ->combine($this->config['revoke_url'])
             ->__toString();
         foreach ($revocations as $type => $token) {
-            $options = ['body' => [
-                'client_id' => $this->config['client_id'],
-                'client_secret' => $this->config['client_secret'],
-                'token' => $token,
-                'token_type_hint' => $type,
-            ]];
+            $options = [
+                'body' => [
+                    'client_id' => $this->config['client_id'],
+                    'client_secret' => $this->config['client_secret'],
+                    'token' => $token,
+                    'token_type_hint' => $type,
+                ],
+                'auth' => false,
+            ];
             try {
                 $this->getClient()->post($url, $options);
             }  catch (ClientException $e) {
