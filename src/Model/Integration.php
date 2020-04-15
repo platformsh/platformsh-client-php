@@ -31,6 +31,7 @@ class Integration extends Resource implements HasActivitiesInterface
       'health.pagerduty',
       'health.slack',
       'health.webhook',
+      'script',
     ];
 
     /**
