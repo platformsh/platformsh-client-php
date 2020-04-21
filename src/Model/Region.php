@@ -7,7 +7,7 @@ use GuzzleHttp\ClientInterface;
 /**
  * Represents a Platform.sh region.
  *
- * @property-read int    $id
+ * @property-read string $id
  * @property-read string $label
  * @property-read bool   $available
  * @property-read bool   $private
