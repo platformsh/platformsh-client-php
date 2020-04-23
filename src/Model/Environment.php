@@ -481,14 +481,26 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   A repository URL, optionally followed by an '@' sign and a branch name,
      *   e.g. 'git://github.com/platformsh/platformsh-examples.git@drupal/7.x'.
      *   The default branch is 'master'.
+     * @param array $files
+     *   A list of base64 encode file strings to create as files
+     *   e.g.
+     *   $files = [
+     *     [
+     *       "contents" => "base64 encoded contents of the file go here",
+     *       "mode" => 493, // I.e. this is 0755 as a decimal integer
+     *       "path" => "composer.json",
+     *     ]
+     *   ]
+     *
      *
      * @return Activity
      */
-    public function initialize($profile, $repository)
+    public function initialize($profile, $repository, $files)
     {
         $values = [
             'profile' => $profile,
             'repository' => $repository,
+            'files' => $files,
         ];
 
         return $this->runLongOperation('initialize', 'post', $values);
