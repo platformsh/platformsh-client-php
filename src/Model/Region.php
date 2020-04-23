@@ -12,6 +12,7 @@ use GuzzleHttp\ClientInterface;
  * @property-read bool   $available
  * @property-read bool   $private
  * @property-read string $zone
+ * @property-read string $provider
  * @property-read string $endpoint
  */
 class Region extends ApiResourceBase
