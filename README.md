@@ -31,8 +31,8 @@ $client = new PlatformClient();
 // N.B. you must keep your API token(s) safe!
 //
 // The second parameter is the token type:
-//   - 'exchange' for all newer API tokens (created after April 2016)
-//   - 'access' for older 'personal access tokens'.
+//   - 'exchange' for an API token
+//   - 'access' for using an OAuth 2.0 access token directly.
 $client->getConnector()->setApiToken($myToken, 'exchange');
 
 // Get the user's first project.

@@ -62,8 +62,8 @@ interface ConnectorInterface
      * @param string $token
      *   The token value.
      * @param string|null $type
-     *   The token type ('access' for personal access tokens, or 'exchange'
-     *   for exchangeable tokens).
+     *   The token type ('access' for OAuth 2.0 access tokens, or 'exchange'
+     *   for API tokens).
      */
     public function setApiToken($token, $type = 'access');
 }
