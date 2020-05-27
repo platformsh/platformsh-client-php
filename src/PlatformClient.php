@@ -3,6 +3,7 @@
 namespace Platformsh\Client;
 
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Url;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
@@ -332,5 +333,29 @@ class PlatformClient
     public function getRegions()
     {
         return Region::getCollection($this->accountsEndpoint . 'regions', 0, [], $this->getConnector()->getClient());
+    }
+
+    /**
+     * Request an SSH certificate.
+     *
+     * @param string $publicKey
+     *   The contents of an SSH public key. Do not reuse a key that had other
+     *   purposes: generate a dedicated key pair for the current user.
+     *
+     * @return string
+     *   An SSH certificate, which should be saved alongside the SSH key pair,
+     *   e.g. as "id_rsa-cert.pub", alongside "id_rsa" and "id_rsa.pub".
+     */
+    public function getSshCertificate($publicKey)
+    {
+        $url = Url::fromString($this->connector->getConfig()['certifier_url'])
+            ->combine('/ssh')
+            ->__toString();
+        $response = $this->connector->getClient()->post(
+            $url,
+            ['json' => ['key' => $publicKey]]
+        );
+
+        return $response->json()['certificate'];
     }
 }

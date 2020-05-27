@@ -66,6 +66,7 @@ class Connector implements ConnectorInterface
           'cache' => false,
           'revoke_url' => 'https://auth.api.platform.sh/oauth2/revoke',
           'token_url' => 'https://auth.api.platform.sh/oauth2/token',
+          'certifier_url' => 'https://ssh.api.platform.sh',
           'proxy' => null,
           'api_token' => null,
           'api_token_type' => 'access',
@@ -92,6 +93,14 @@ class Connector implements ConnectorInterface
                 $this->session->setStorage(new File());
             }
         }
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     /**
