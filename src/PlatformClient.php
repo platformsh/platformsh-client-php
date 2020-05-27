@@ -18,6 +18,7 @@ use Platformsh\Client\Model\Region;
 use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
+use function GuzzleHttp\Psr7\uri_for;
 
 class PlatformClient
 {
@@ -369,5 +370,26 @@ class PlatformClient
         }
 
         return PlanRecord::getCollection($url, 0, $options, $this->connector->getClient());
+    }
+
+    /**
+     * Request an SSH certificate.
+     *
+     * @param string $publicKey
+     *   The contents of an SSH public key. Do not reuse a key that had other
+     *   purposes: generate a dedicated key pair for the current user.
+     *
+     * @return string
+     *   An SSH certificate, which should be saved alongside the SSH key pair,
+     *   e.g. as "id_rsa-cert.pub", alongside "id_rsa" and "id_rsa.pub".
+     */
+    public function getSshCertificate(string $publicKey): string
+    {
+        $response = $this->connector->getClient()->post(
+            uri_for($this->connector->getConfig()['certifier_url'])->withPath('/ssh'),
+            ['json' => ['key' => $publicKey]]
+        );
+
+        return \GuzzleHttp\json_decode($response->getBody(), true)['certificate'];
     }
 }
