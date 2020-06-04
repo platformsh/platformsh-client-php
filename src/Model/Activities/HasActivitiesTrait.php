@@ -22,7 +22,7 @@ trait HasActivitiesTrait {
     /**
      * {@inheritDoc}
      */
-    public function getActivities($limit = 0, $type = null, $startsAt = null)
+    public function getActivities($limit = 0, $type = null, $startsAt = null, $state = null, $result = null)
     {
         $options = [];
         if ($type !== null) {
@@ -31,16 +31,16 @@ trait HasActivitiesTrait {
         if ($startsAt !== null) {
             $options['query']['starts_at'] = Activity::formatStartsAt($startsAt);
         }
-
-        $activities = Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
-
-        // Guarantee the type filter (works around a temporary bug).
-        if ($type !== null) {
-            $activities = array_filter($activities, function (Activity $activity) use ($type) {
-                return $activity->type === $type;
-            });
+        if (!empty($limit)) {
+            $options['query']['count'] = $limit;
+        }
+        if ($state !== null) {
+            $options['query']['state'] = $state;
+        }
+        if ($result !== null) {
+            $options['query']['result'] = $result;
         }
 
-        return $activities;
+        return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
     }
 }
