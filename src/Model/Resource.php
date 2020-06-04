@@ -298,7 +298,7 @@ abstract class Resource implements \ArrayAccess
      *
      * @param string          $url     The collection URL.
      * @param int             $limit   A limit on the number of resources to
-     *                                 return.
+     *                                 return. Deprecated.
      * @param array           $options An array of additional Guzzle request
      *                                 options.
      * @param ClientInterface $client  A suitably configured Guzzle client.
@@ -307,15 +307,11 @@ abstract class Resource implements \ArrayAccess
      */
     public static function getCollection($url, $limit, array $options, ClientInterface $client)
     {
-        if ($limit) {
-            // @todo uncomment this when the API implements a 'count' parameter
-            // $options['query']['count'] = $limit;
-        }
         $request = $client->createRequest('get', $url, $options);
         $data = self::send($request, $client);
 
         // @todo remove this when the API implements a 'count' parameter
-        if ($limit) {
+        if (!empty($limit) && count($data) > $limit) {
             $data = array_slice($data, 0, $limit);
         }
 
