@@ -80,9 +80,13 @@ class Metadata {
      * @return int
      */
     private function readUint64(&$bytes) {
-        $ret = \unpack('J', \substr($bytes, 0, 8));
+        $packed = \substr($bytes, 0, 8);
         $bytes = \substr($bytes, 8);
-        return (int) $ret[1];
+        if (\version_compare(PHP_VERSION, '5.6.3', '<')) {
+            list(, $most, $least) = \unpack('N2', $packed);
+            return (int) (($most << 32) | $least);
+        }
+        return (int) \unpack('J', $packed)[1];
     }
 
     /**
