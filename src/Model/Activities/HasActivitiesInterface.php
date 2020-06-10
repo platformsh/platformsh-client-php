@@ -30,9 +30,9 @@ interface HasActivitiesInterface {
      *   Filter activities by type.
      * @param int|null    $startsAt
      *   A UNIX timestamp for the maximum created date of activities to return.
-     * @param string|null $state
+     * @param string|string[]|null $state
      *   Filter activities by state ("pending", "in_progress", "complete").
-     * @param string $result
+     * @param string|string[]|null $result
      *   Filter activities by result ("success" or "failure").
      *
      * @return Activity[]

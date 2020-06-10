@@ -24,23 +24,30 @@ trait HasActivitiesTrait {
      */
     public function getActivities($limit = 0, $type = null, $startsAt = null, $state = null, $result = null)
     {
-        $options = [];
+        $query = '';
         if ($type !== null) {
-            $options['query']['type'] = $type;
+            $query .= '&type=' . \rawurlencode($type);
         }
         if ($startsAt !== null) {
-            $options['query']['starts_at'] = Activity::formatStartsAt($startsAt);
+            $query .= '&starts_at=' . Activity::formatStartsAt($startsAt);
         }
         if (!empty($limit)) {
-            $options['query']['count'] = $limit;
-        }
-        if ($state !== null) {
-            $options['query']['state'] = $state;
+            $query .= '&count=' . $limit;
         }
         if ($result !== null) {
-            $options['query']['result'] = $result;
+            foreach ((array) $result as $resultItem) {
+                $query .= '&result=' . \rawurlencode($resultItem);
+            }
+        }
+        if ($state !== null) {
+            foreach ((array) $state as $stateItem) {
+                $query .= '&state=' . \rawurlencode($stateItem);
+            }
+        }
+        if ($query !== '') {
+            $query = '?' . \substr($query, 1);
         }
 
-        return Activity::getCollection($this->getUri() . '/activities', $limit, $options, $this->client);
+        return Activity::getCollection($this->getUri() . '/activities' . $query, $limit, [], $this->client);
     }
 }
