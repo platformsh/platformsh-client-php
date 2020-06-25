@@ -47,7 +47,7 @@ class Metadata {
         $this->serial = $this->readUint64($bytes);
         $this->type = $this->readUint32($bytes);
         $this->keyId = $this->readString($bytes);
-        $this->validPrincipals = $this->readPrincipals($this->readString($bytes));
+        $this->validPrincipals = $this->readArray($bytes);
         $this->validAfter = $this->readUint64($bytes);
         $this->validBefore = $this->readUint64($bytes);
         $this->criticalOptions = $this->readTuples($bytes);
@@ -82,6 +82,7 @@ class Metadata {
     private function readUint64(&$bytes) {
         $packed = \substr($bytes, 0, 8);
         $bytes = \substr($bytes, 8);
+        // The 'J' format for pack/unpack was added in PHP 5.6.3.
         if (\version_compare(PHP_VERSION, '5.6.3', '<')) {
             list(, $most, $least) = \unpack('N2', $packed);
             return (int) (($most << 32) | $least);
@@ -123,18 +124,19 @@ class Metadata {
     }
 
     /**
-     * Reads principals from a packed string.
+     * Reads the next array of strings, and removes it from the remaining bytes.
      *
-     * @param string $str
+     * @param string &$bytes
      *
      * @return string[]
      */
-    private function readPrincipals($str) {
-        $principals = [];
-        while (strlen($str) > 0) {
-            $principals[] = $this->readString($str);
+    private function readArray(&$bytes) {
+        $str = $this->readString($bytes);
+        $items = [];
+        while (\strlen($str) > 0) {
+            $items[] = $this->readString($str);
         }
-        return $principals;
+        return $items;
     }
 
     /**
