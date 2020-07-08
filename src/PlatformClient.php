@@ -50,7 +50,11 @@ class PlatformClient
      *
      * @param string $id
      * @param string $hostname
+     *   The project's API hostname. Ignored if the project endpoint is already known, or if there is an API gateway URL
+     *   configured.
      * @param bool   $https
+     *   Whether the project endpoint uses HTTPS. Ignored if the project endpoint is already known, or if there is an
+     *   API gateway URL configured.
      *
      * @return Project|false
      */
@@ -61,6 +65,12 @@ class PlatformClient
             if ($project->id === $id) {
                 return $project;
             }
+        }
+
+        // Use the API gateway if available.
+        $apiUrl = $this->connector->getApiUrl();
+        if ($apiUrl !== '') {
+            return Project::get($id, $this->connector->getApiUrl() . '/projects', $this->connector->getClient());
         }
 
         // Look for a project directly if the hostname is known.
@@ -87,9 +97,12 @@ class PlatformClient
     {
         $data = $this->getAccountInfo($reset);
         $client = $this->connector->getClient();
+        $apiUrl = $this->connector->getApiUrl();
         $projects = [];
         foreach ($data['projects'] as $project) {
-            // Each project has its own endpoint on a Platform.sh region.
+            if ($apiUrl !== '') {
+                $project['endpoint'] = $apiUrl . '/projects/' . \urlencode($project['id']);
+            }
             $projects[] = new Project($project, $project['endpoint'], $client);
         }
 
@@ -127,8 +140,7 @@ class PlatformClient
      *                         e.g. 'eu.platform.sh' or 'us.platform.sh'.
      * @param bool   $https    Whether to use HTTPS (default: true).
      *
-     * @internal It's now better to use getProject(). This method will be made
-     *           private in a future release.
+     * @deprecated It's now better to use getProject(). This method will be removed in a future release.
      *
      * @return Project|false
      */

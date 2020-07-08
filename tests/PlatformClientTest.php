@@ -13,20 +13,24 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
     /** @var PlatformClient */
     protected $client;
 
+    protected $apiUrl;
+
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->connector = new MockConnector();
+        $this->apiUrl = 'https://api.example.com';
+        $this->connector = new MockConnector(['api_url' => $this->apiUrl]);
         $this->client = new PlatformClient($this->connector);
     }
 
     public function testGetProjectsNone()
     {
         $this->connector->setMockResult(['projects' => []]);
-
         $this->assertEquals([], $this->client->getProjects());
+
+        $this->connector->setMockResult([], 404);
         $this->assertFalse($this->client->getProject('test'));
     }
 
@@ -35,14 +39,21 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
         $testProject = [
           'id' => 'test',
           'name' => 'Test project',
-          'endpoint' => 'https://example.com/api/projects/test',
+          'endpoint' => 'https://region-1.example.com/api/projects/test',
         ];
         $this->connector->setMockResult(['projects' => [$testProject]]);
         $projects = $this->client->getProjects();
         $this->assertEquals($testProject['name'], $projects[0]['name']);
-        $this->assertEquals($testProject['endpoint'], $projects[0]['endpoint']);
+        $this->assertEquals($this->apiUrl . '/projects/test', $projects[0]['endpoint']);
 
         $project = $this->client->getProject('test');
+        $this->assertEquals($testProject['name'], $project['name']);
+        $this->assertEquals($this->apiUrl . '/projects/test', $project['endpoint']);
+
+        // Test endpoint without an API gateway URL configured.
+        $connector = new MockConnector(['api_url' => '']);
+        $connector->setMockResult(['projects' => [$testProject]]);
+        $project = (new PlatformClient($connector))->getProject('test');
         $this->assertEquals($testProject['name'], $project['name']);
         $this->assertEquals($testProject['endpoint'], $project['endpoint']);
     }

@@ -3,9 +3,12 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Url;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
+use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
+use Platformsh\Client\Model\Invitation\ProjectInvitation;
 
 /**
  * A Platform.sh project.
@@ -92,8 +95,9 @@ class Project extends Resource implements HasActivitiesInterface
      * @param bool   $byUuid Set true if $user is a UUID, or false (default) if
      *                       $user is an email address.
      *
-     * Note that for legacy reasons, the default for $byUuid is false for
-     * Project::addUser(), but true for Environment::addUser().
+     * @deprecated Users should now be invited via Project::inviteUserByEmail()
+     *
+     * @see Project::inviteUserByEmail()
      *
      * @return Result
      */
@@ -103,6 +107,49 @@ class Project extends Resource implements HasActivitiesInterface
         $body = [$property => $user, 'role' => $role];
 
         return ProjectAccess::create($body, $this->getLink('access'), $this->client);
+    }
+
+    /**
+     * Invite a new user to a project using their email address.
+     *
+     * This is only possible if the project is addressed under an API gateway (if a non-empty 'api_url' was configured
+     * in the Connector).
+     *
+     * Normally either a list of $environments should be given, or the project-level $role should be 'admin'.
+     *
+     * @param string $email The user's email address.
+     * @param string $role  The user's role on the project.
+     * @param \Platformsh\Client\Model\Invitation\Environment[] $environments A list of environments for the invitation.
+     *
+     * @throws AlreadyInvitedException if there is a pending invitation open with the same details
+     *
+     * @return ProjectInvitation
+     */
+    public function inviteUserByEmail($email, $role = '', array $environments = [])
+    {
+        $data = [
+            'email' => $email,
+            'role' => $role,
+            'environments' => \Platformsh\Client\Model\Invitation\Environment::listForApi($environments),
+        ];
+
+        $request = $this->client->createRequest('post', $this->getLink('invitations'), ['json' => $data]);
+        try {
+            $data = self::send($request, $this->client);
+        } catch (BadResponseException $e) {
+            if ($e->getResponse() && $e->getResponse()->getStatusCode() === 409) {
+                throw new AlreadyInvitedException(
+                    'An invitation has already been created for this email address and role(s)',
+                    $email,
+                    $this,
+                    $role,
+                    $environments
+                );
+            }
+            throw $e;
+        }
+
+        return new ProjectInvitation($data, $this->getLink('invitations'), $this->client);
     }
 
     /**

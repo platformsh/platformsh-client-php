@@ -541,8 +541,9 @@ class Environment extends Resource implements HasActivitiesInterface
      * @param bool   $byUuid Set true (default) if $user is a UUID, or false if
      *                       $user is an email address.
      *
-     * Note that for legacy reasons, the default for $byUuid is false for
-     * Project::addUser(), but true for Environment::addUser().
+     * @deprecated Users should now be invited via Project::inviteUserByEmail()
+     *
+     * @see Project::inviteUserByEmail()
      *
      * @return Result
      */

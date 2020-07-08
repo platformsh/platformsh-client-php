@@ -58,6 +58,7 @@ class Connector implements ConnectorInterface
     {
         $defaults = [
           'accounts' => 'https://accounts.platform.sh/api/v1/',
+          'api_url' => 'https://api.platform.sh',
           'client_id' => 'platformsh-client-php',
           'client_secret' => '',
           'debug' => false,
@@ -128,6 +129,16 @@ class Connector implements ConnectorInterface
     public function getAccountsEndpoint()
     {
         return $this->config['accounts'];
+    }
+
+    /**
+     * Get the configured API gateway URL.
+     *
+     * @return string
+     */
+    public function getApiUrl()
+    {
+        return rtrim($this->config['api_url'], '/');
     }
 
     /**
