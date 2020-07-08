@@ -76,7 +76,11 @@ class PlatformClient
 
         // Use the project locator.
         if ($url = $this->locateProject($id)) {
-            return Project::get($url, null, $this->connector->getClient());
+            $project = Project::get($url, null, $this->connector->getClient());
+            if ($project && ($apiUrl = $this->connector->getApiUrl())) {
+                $project->setApiUrl($apiUrl);
+            }
+            return $project;
         }
 
         return false;
@@ -93,10 +97,15 @@ class PlatformClient
     {
         $data = $this->getAccountInfo($reset);
         $client = $this->connector->getClient();
+        $apiUrl = $this->connector->getApiUrl();
         $projects = [];
-        foreach ($data['projects'] as $project) {
+        foreach ($data['projects'] as $data) {
             // Each project has its own endpoint on a Platform.sh region.
-            $projects[] = new Project($project, $project['endpoint'], $client);
+            $project = new Project($data, $data['endpoint'], $client);
+            if ($apiUrl) {
+                $project->setApiUrl($apiUrl);
+            }
+            $projects[] = $project;
         }
 
         return $projects;
@@ -162,7 +171,11 @@ class PlatformClient
     {
         $scheme = $https ? 'https' : 'http';
         $collection = "$scheme://$hostname/api/projects";
-        return Project::get($id, $collection, $this->connector->getClient());
+        $project = Project::get($id, $collection, $this->connector->getClient());
+        if ($project && ($apiUrl = $this->connector->getApiUrl())) {
+            $project->setApiUrl($apiUrl);
+        }
+        return $project;
     }
 
     /**

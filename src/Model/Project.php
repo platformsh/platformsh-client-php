@@ -3,9 +3,14 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Psr7\Request;
 use function GuzzleHttp\Psr7\uri_for;
+use GuzzleHttp\Exception\BadResponseException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
+use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
+use Platformsh\Client\Model\Invitation\ProjectInvitation;
+use \Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 
 /**
  * A Platform.sh project.
@@ -19,6 +24,8 @@ use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 class Project extends ApiResourceBase implements HasActivitiesInterface
 {
     use HasActivitiesTrait;
+
+    private $urlViaGateway;
 
     /**
      * {@inheritDoc}
@@ -92,8 +99,9 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * @param bool   $byUuid Set true if $user is a UUID, or false (default) if
      *                       $user is an email address.
      *
-     * Note that for legacy reasons, the default for $byUuid is false for
-     * Project::addUser(), but true for Environment::addUser().
+     * @deprecated Users should now be invited via Project::inviteUserByEmail()
+     *
+     * @see Project::inviteUserByEmail()
      *
      * @return Result
      */
@@ -103,6 +111,68 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
         $body = [$property => $user, 'role' => $role];
 
         return ProjectAccess::create($body, $this->getLink('access'), $this->client);
+    }
+
+    /**
+     * Set the API gateway URL, e.g. 'https://api.platform.sh'.
+     *
+     * @param string $url
+     */
+    public function setApiUrl($url)
+    {
+        $projectUrl = uri_for($url)->withPath('/projects/' . \urlencode($this->id))->__toString();
+        $this->urlViaGateway = $projectUrl;
+    }
+
+    /**
+     * Invite a new user to a project using their email address.
+     *
+     * This is only possible after setting the API gateway URL. This will be
+     * the case already if the project was instantiated via a PlatformClient
+     * method such as PlatformClient::getProject(). Otherwise, use
+     * Project::setApiUrl() before calling this method.
+     *
+     * @see Project::setApiUrl()
+     * @see \Platformsh\Client\PlatformClient::getProject()
+     *
+     * Normally either a list of $environments should be given, or the project-level $role should be 'admin'.
+     *
+     * @param string $email
+     *   The user's email address.
+     * @param string $role
+     *   The user's role on the project ('viewer' or 'admin').
+     * @param InvitationEnvironment[] $environments
+     *   A list of environments for the invitation. Only used if the project role is not 'admin'.
+     *
+     * @throws AlreadyInvitedException if there is a pending invitation open with the same details
+     *
+     * @return ProjectInvitation
+     */
+    public function inviteUserByEmail($email, $role, array $environments = [])
+    {
+        $data = [
+            'email' => $email,
+            'role' => $role,
+            'environments' => InvitationEnvironment::listForApi($environments),
+        ];
+
+        $request = new Request('post', $this->getLink('invitations'), [], \GuzzleHttp\json_encode($data));
+        try {
+            $data = self::send($request, $this->client);
+        } catch (BadResponseException $e) {
+            if ($e->getResponse() && $e->getResponse()->getStatusCode() === 409) {
+                throw new AlreadyInvitedException(
+                    'An invitation has already been created for this email address and role(s)',
+                    $email,
+                    $this,
+                    $role,
+                    $environments
+                );
+            }
+            throw $e;
+        }
+
+        return new ProjectInvitation($data, $this->getLink('invitations'), $this->client);
     }
 
     /**
@@ -139,6 +209,13 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
 
         if ($rel === '#manage-variables') {
             return $this->getUri() . '/variables';
+        }
+
+        if ($rel === 'invitations') {
+            if (!isset($this->urlViaGateway)) {
+                throw new \RuntimeException('The API gateway URL must be set');
+            }
+            return rtrim($this->urlViaGateway, '/') . '/invitations';
         }
 
         return $this->getUri() . '/' . ltrim($rel, '#');
