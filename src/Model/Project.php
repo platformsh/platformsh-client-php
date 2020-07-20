@@ -188,7 +188,7 @@ class Project extends Resource implements HasActivitiesInterface
             return $this->getUri() . '/variables';
         }
 
-        return $this->getUri() . '/' . ltrim($rel, '#');
+        return rtrim($this->baseUrl, '/') . '/' . ltrim($rel, '#');
     }
 
     /**
