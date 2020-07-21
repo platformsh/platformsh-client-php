@@ -44,18 +44,13 @@ class PlatformClientTest extends \PHPUnit_Framework_TestCase
         $this->connector->setMockResult(['projects' => [$testProject]]);
         $projects = $this->client->getProjects();
         $this->assertEquals($testProject['name'], $projects[0]['name']);
-        $this->assertEquals($this->apiUrl . '/projects/test', $projects[0]['endpoint']);
+        $this->assertEquals($testProject['endpoint'], $projects[0]['endpoint']);
+        $this->assertEquals($this->apiUrl . '/projects/test/invitations', $projects[0]->getLink('invitations'));
 
         $project = $this->client->getProject('test');
         $this->assertEquals($testProject['name'], $project['name']);
-        $this->assertEquals($this->apiUrl . '/projects/test', $project['endpoint']);
-
-        // Test endpoint without an API gateway URL configured.
-        $connector = new MockConnector(['api_url' => '']);
-        $connector->setMockResult(['projects' => [$testProject]]);
-        $project = (new PlatformClient($connector))->getProject('test');
-        $this->assertEquals($testProject['name'], $project['name']);
         $this->assertEquals($testProject['endpoint'], $project['endpoint']);
+        $this->assertEquals($this->apiUrl . '/projects/test/invitations', $project->getLink('invitations'));
     }
 
     public function testGetProjectDirect()
