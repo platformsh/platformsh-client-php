@@ -50,11 +50,7 @@ class PlatformClient
      *
      * @param string $id
      * @param string $hostname
-     *   The project's API hostname. Ignored if the project endpoint is already known, or if there is an API gateway URL
-     *   configured.
      * @param bool   $https
-     *   Whether the project endpoint uses HTTPS. Ignored if the project endpoint is already known, or if there is an
-     *   API gateway URL configured.
      *
      * @return Project|false
      */
@@ -67,12 +63,6 @@ class PlatformClient
             }
         }
 
-        // Use the API gateway if available.
-        $apiUrl = $this->connector->getApiUrl();
-        if ($apiUrl !== '') {
-            return Project::get($id, $this->connector->getApiUrl() . '/projects', $this->connector->getClient());
-        }
-
         // Look for a project directly if the hostname is known.
         if ($hostname !== null) {
             return $this->getProjectDirect($id, $hostname, $https);
@@ -80,7 +70,11 @@ class PlatformClient
 
         // Use the project locator.
         if ($url = $this->locateProject($id)) {
-            return Project::get($url, null, $this->connector->getClient());
+            $project = Project::get($url, null, $this->connector->getClient());
+            if ($project && ($apiUrl = $this->connector->getApiUrl())) {
+                $project->setApiUrl($apiUrl);
+            }
+            return $project;
         }
 
         return false;
@@ -99,11 +93,13 @@ class PlatformClient
         $client = $this->connector->getClient();
         $apiUrl = $this->connector->getApiUrl();
         $projects = [];
-        foreach ($data['projects'] as $project) {
-            if ($apiUrl !== '') {
-                $project['endpoint'] = $apiUrl . '/projects/' . \urlencode($project['id']);
+        foreach ($data['projects'] as $data) {
+            // Each project has its own endpoint on a Platform.sh region.
+            $project = new Project($data, $data['endpoint'], $client);
+            if ($apiUrl) {
+                $project->setApiUrl($apiUrl);
             }
-            $projects[] = new Project($project, $project['endpoint'], $client);
+            $projects[] = $project;
         }
 
         return $projects;
@@ -140,7 +136,8 @@ class PlatformClient
      *                         e.g. 'eu.platform.sh' or 'us.platform.sh'.
      * @param bool   $https    Whether to use HTTPS (default: true).
      *
-     * @deprecated It's now better to use getProject(). This method will be removed in a future release.
+     * @internal It's now better to use getProject(). This method will be made
+     *           private in a future release.
      *
      * @return Project|false
      */
@@ -148,7 +145,11 @@ class PlatformClient
     {
         $scheme = $https ? 'https' : 'http';
         $collection = "$scheme://$hostname/api/projects";
-        return Project::get($id, $collection, $this->connector->getClient());
+        $project = Project::get($id, $collection, $this->connector->getClient());
+        if ($project && ($apiUrl = $this->connector->getApiUrl())) {
+            $project->setApiUrl($apiUrl);
+        }
+        return $project;
     }
 
     /**

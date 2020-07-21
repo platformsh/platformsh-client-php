@@ -9,6 +9,7 @@ use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Invitation\ProjectInvitation;
+use \Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 
 /**
  * A Platform.sh project.
@@ -22,6 +23,8 @@ use Platformsh\Client\Model\Invitation\ProjectInvitation;
 class Project extends Resource implements HasActivitiesInterface
 {
     use HasActivitiesTrait;
+
+    private $urlViaGateway;
 
     /**
      * {@inheritDoc}
@@ -110,27 +113,46 @@ class Project extends Resource implements HasActivitiesInterface
     }
 
     /**
+     * Set the API gateway URL, e.g. 'https://api.platform.sh'.
+     *
+     * @param string $url
+     */
+    public function setApiUrl($url)
+    {
+        $projectUrl = Url::fromString($url)->combine('/projects/' . \urlencode($this->id))->__toString();
+        $this->urlViaGateway = $projectUrl;
+    }
+
+    /**
      * Invite a new user to a project using their email address.
      *
-     * This is only possible if the project is addressed under an API gateway (if a non-empty 'api_url' was configured
-     * in the Connector).
+     * This is only possible after setting the API gateway URL. This will be
+     * the case already if the project was instantiated via a PlatformClient
+     * method such as PlatformClient::getProject(). Otherwise, use
+     * Project::setApiUrl() before calling this method.
+     *
+     * @see Project::setApiUrl()
+     * @see \Platformsh\Client\PlatformClient::getProject()
      *
      * Normally either a list of $environments should be given, or the project-level $role should be 'admin'.
      *
-     * @param string $email The user's email address.
-     * @param string $role  The user's role on the project.
-     * @param \Platformsh\Client\Model\Invitation\Environment[] $environments A list of environments for the invitation.
+     * @param string $email
+     *   The user's email address.
+     * @param string $role
+     *   The user's role on the project ('viewer' or 'admin').
+     * @param InvitationEnvironment[] $environments
+     *   A list of environments for the invitation. Only used if the project role is not 'admin'.
      *
      * @throws AlreadyInvitedException if there is a pending invitation open with the same details
      *
      * @return ProjectInvitation
      */
-    public function inviteUserByEmail($email, $role = '', array $environments = [])
+    public function inviteUserByEmail($email, $role, array $environments = [])
     {
         $data = [
             'email' => $email,
             'role' => $role,
-            'environments' => \Platformsh\Client\Model\Invitation\Environment::listForApi($environments),
+            'environments' => InvitationEnvironment::listForApi($environments),
         ];
 
         $request = $this->client->createRequest('post', $this->getLink('invitations'), ['json' => $data]);
@@ -188,7 +210,14 @@ class Project extends Resource implements HasActivitiesInterface
             return $this->getUri() . '/variables';
         }
 
-        return rtrim($this->baseUrl, '/') . '/' . ltrim($rel, '#');
+        if ($rel === 'invitations') {
+            if (!isset($this->urlViaGateway)) {
+                throw new \RuntimeException('The API gateway URL must be set');
+            }
+            return rtrim($this->urlViaGateway, '/') . '/invitations';
+        }
+
+        return $this->getUri() . '/' . ltrim($rel, '#');
     }
 
     /**
