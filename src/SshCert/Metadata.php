@@ -3,27 +3,16 @@
 namespace Platformsh\Client\SshCert;
 
 /**
- * Parses an OpenSSH RSA certificate.
+ * Parses an OpenSSH certificate (RSA or ED25519).
  *
  * @see https://cvsweb.openbsd.org/src/usr.bin/ssh/PROTOCOL.certkeys?annotate=HEAD
  */
 class Metadata {
 
-    private $keyType;
-    private $nonce;
-    private $rsaExponent;
-    private $publicModulus;
-    private $serial;
-    private $type;
     private $keyId;
-    private $validPrincipals;
     private $validAfter;
     private $validBefore;
-    private $criticalOptions;
     private $extensions;
-    private $reserved;
-    private $signatureKey;
-    private $signature;
 
     /**
      * Constructor
@@ -33,28 +22,31 @@ class Metadata {
     public function __construct($string)
     {
         list($type, $cert) = \explode(' ', $string);
-        if ($type !== 'ssh-rsa-cert-v01@openssh.com') {
+        if (!\in_array($type, ['ssh-rsa-cert-v01@openssh.com', 'ssh-ed25519-cert-v01@openssh.com'], true)) {
             throw new \InvalidArgumentException('Unsupported key type: ' . $type);
         }
         $bytes = \base64_decode($cert, true);
         if (!$bytes) {
             throw new \InvalidArgumentException('Unable to decode SSH certificate');
         }
-        $this->keyType = $this->readString($bytes);
-        $this->nonce = $this->readString($bytes);
-        $this->rsaExponent = $this->readString($bytes);
-        $this->publicModulus = $this->readString($bytes);
-        $this->serial = $this->readUint64($bytes);
-        $this->type = $this->readUint32($bytes);
+        $this->readString($bytes); // ignore key type
+        $this->readString($bytes); // ignore nonce
+        // @todo refactor this?
+        if ($type === 'ssh-ed25519-cert-v01@openssh.com') {
+            $this->readString($bytes); // ignore ED25519 public key
+        } else {
+            $this->readString($bytes); // ignore RSA exponent
+            $this->readString($bytes); // ignore RSA modulus
+        }
+        $this->readUint64($bytes); // ignore serial number
+        $this->readUint32($bytes); // ignore certificate type
         $this->keyId = $this->readString($bytes);
-        $this->validPrincipals = $this->readArray($bytes);
+        $this->readArray($bytes); // ignore valid principals
         $this->validAfter = $this->readUint64($bytes);
         $this->validBefore = $this->readUint64($bytes);
-        $this->criticalOptions = $this->readTuples($bytes);
+        $this->readTuples($bytes); // ignore critical options
         $this->extensions = $this->readTuples($bytes);
-        $this->reserved = $this->readString($bytes);
-        $this->signatureKey = $this->readString($bytes);
-        $this->signature = $this->readString($bytes);
+        // ignore the reserved, signature and signature key fields
     }
 
     /**
