@@ -28,7 +28,7 @@ class SetupOptions
      */
     public static function create(array $body, $url, ClientInterface $client)
     {
-        $request = new Request('post', $url, [], \GuzzleHttp\json_encode($body));
+        $request = new Request('post', $url, ['Content-Type' => 'applicaion/json'], \GuzzleHttp\json_encode($body));
         $response = $client->send($request);
         $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
         return new self($data);

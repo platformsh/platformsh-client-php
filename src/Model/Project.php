@@ -156,7 +156,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
             'environments' => InvitationEnvironment::listForApi($environments),
         ];
 
-        $request = new Request('post', $this->getLink('invitations'), [], \GuzzleHttp\json_encode($data));
+        $request = new Request('post', $this->getLink('invitations'), ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($data));
         try {
             $data = self::send($request, $this->client);
         } catch (BadResponseException $e) {
