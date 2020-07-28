@@ -4,7 +4,6 @@ namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use function GuzzleHttp\Psr7\uri_for;
@@ -61,7 +60,7 @@ class Connector implements ConnectorInterface
     /**
      * @param array            $config
      *     Possible configuration keys are:
-     *     - accounts (string): The endpoint URL for the accounts API.
+     *     - api_url (string): The API base URL.
      *     - client_id (string): The OAuth2 client ID for this client.
      *     - debug (bool): Whether or not Guzzle debugging should be enabled
      *       (default: false).
@@ -75,9 +74,13 @@ class Connector implements ConnectorInterface
      */
     public function __construct(array $config = [], SessionInterface $session = null)
     {
+        if (isset($config['accounts'])) {
+            \trigger_error('The "accounts" URL option is deprecated. APIs are accessed based on the "api_url" and OAuth 2.0 URL options instead.', E_USER_DEPRECATED);
+        }
+
         $defaults = [
-          'accounts' => 'https://accounts.platform.sh/api/v1/',
           'api_url' => 'https://api.platform.sh',
+          'accounts' => 'https://api.platform.sh/',
           'client_id' => 'platformsh-client-php',
           'client_secret' => '',
           'debug' => false,
@@ -140,7 +143,9 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Get the configured accounts endpoint URL.
+     *
+     * @deprecated Use Connector::getApiUrl() instead
      */
     public function getAccountsEndpoint()
     {
@@ -148,7 +153,7 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * Get the configured API gateway URL.
+     * Get the configured API gateway URL (without trailing slash).
      *
      * @return string
      */
@@ -181,6 +186,27 @@ class Connector implements ConnectorInterface
     }
 
     /**
+     * Get a configured OAuth 2.0 URL.
+     *
+     * @param string $key Either 'token_url' or 'revoke_url'
+     *
+     * @return string
+     */
+    private function getOAuthUrl($key)
+    {
+        $url = $this->config[$key];
+
+        // Backwards compatibility.
+        if (strpos($url, '//') === false) {
+            $url = uri_for($this->config['accounts'])
+                ->withPath($this->config[$key])
+                ->__toString();
+        }
+
+        return $url;
+    }
+
+    /**
      * Revokes the access and refresh tokens saved in the session.
      *
      * @see Connector::logOut()
@@ -193,27 +219,17 @@ class Connector implements ConnectorInterface
             'refresh_token' => $this->session->get('refreshToken'),
             'access_token' => $this->session->get('accessToken'),
         ]);
-        $url = uri_for($this->config['accounts'])
-            ->withPath($this->config['revoke_url'])
-            ->__toString();
+        $url = $this->getOAuthUrl('revoke_url');
         foreach ($revocations as $type => $token) {
-            $options = ['form_params' => [
-                'client_id' => $this->config['client_id'],
-                'client_secret' => $this->config['client_secret'],
-                'token' => $token,
-                'token_type_hint' => $type,
-            ]];
-            try {
-                $this->getClient()->request('post', $url, $options);
-            }  catch (ClientException $e) {
-                // Ignore unsupported token type errors.
-                if ($e->getResponse()) {
-                    $data = \GuzzleHttp\json_decode($e->getResponse()->getBody(), true);
-                    if ($data['error'] !== 'unsupported_token_type') {
-                        throw $e;
-                    }
-                }
-            }
+            $options = [
+                'form_params' => [
+                    'client_id' => $this->config['client_id'],
+                    'client_secret' => $this->config['client_secret'],
+                    'token' => $token,
+                    'token_type_hint' => $type,
+                ],
+            ];
+            $this->getClient()->request('post', $url, $options);
         }
     }
 
