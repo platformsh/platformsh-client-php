@@ -22,9 +22,6 @@ class PlatformClient
     /** @var ConnectorInterface */
     protected $connector;
 
-    /** @var string */
-    protected $accountsEndpoint;
-
     /** @var array */
     protected $accountInfo;
 
@@ -34,7 +31,6 @@ class PlatformClient
     public function __construct(ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
-        $this->accountsEndpoint = $this->connector->getAccountsEndpoint();
     }
 
     /**
@@ -43,6 +39,14 @@ class PlatformClient
     public function getConnector()
     {
         return $this->connector;
+    }
+
+    /**
+     * Returns the base URL of the API, without trailing slash.
+     */
+    private function apiUrl()
+    {
+        return $this->connector->getApiUrl() ?: rtrim($this->connector->getAccountsEndpoint(), '/');
     }
 
     /**
@@ -116,7 +120,7 @@ class PlatformClient
     {
         if (!isset($this->accountInfo) || $reset) {
             $client = $this->connector->getClient();
-            $url = $this->accountsEndpoint . 'me';
+            $url = $this->apiUrl() . '/me';
             try {
                 $this->accountInfo = (array) $client->get($url)->json();
             }
@@ -164,7 +168,7 @@ class PlatformClient
     protected function locateProject($id)
     {
         $client = $this->connector->getClient();
-        $url = $this->accountsEndpoint . 'projects/' . rawurlencode($id);
+        $url = $this->apiUrl() . '/projects/' . rawurlencode($id);
         try {
             $result = (array) $client->get($url)->json();
         }
@@ -192,7 +196,7 @@ class PlatformClient
     {
         $data = $this->getAccountInfo($reset);
 
-        return SshKey::wrapCollection($data['ssh_keys'], $this->accountsEndpoint, $this->connector->getClient());
+        return SshKey::wrapCollection($data['ssh_keys'], $this->apiUrl() . '/ssh_keys', $this->connector->getClient());
     }
 
     /**
@@ -204,7 +208,7 @@ class PlatformClient
      */
     public function getSshKey($id)
     {
-        $url = $this->accountsEndpoint . 'ssh_keys';
+        $url = $this->apiUrl() . '/ssh_keys';
 
         return SshKey::get($id, $url, $this->connector->getClient());
     }
@@ -220,7 +224,7 @@ class PlatformClient
     public function addSshKey($value, $title = null)
     {
         $values = $this->cleanRequest(['value' => $value, 'title' => $title]);
-        $url = $this->accountsEndpoint . 'ssh_keys';
+        $url = $this->apiUrl() . '/ssh_keys';
 
         return SshKey::create($values, $url, $this->connector->getClient());
     }
@@ -262,7 +266,7 @@ class PlatformClient
     public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null, $catalog = null)
     {
 
-        $url = $this->accountsEndpoint . 'subscriptions';
+        $url = $this->apiUrl() . '/subscriptions';
         $values = $this->cleanRequest([
           'project_region' => $region,
           'plan' => $plan,
@@ -283,7 +287,7 @@ class PlatformClient
      */
     public function getSubscriptions()
     {
-        $url = $this->accountsEndpoint . 'subscriptions';
+        $url = $this->apiUrl() . '/subscriptions';
         return Subscription::getCollection($url, 0, [], $this->connector->getClient());
     }
 
@@ -296,7 +300,7 @@ class PlatformClient
      */
     public function getSubscription($id)
     {
-        $url = $this->accountsEndpoint . 'subscriptions';
+        $url = $this->apiUrl() . '/subscriptions';
         return Subscription::get($id, $url, $this->connector->getClient());
     }
 
@@ -326,7 +330,7 @@ class PlatformClient
         try {
             $response = $this->connector
                 ->getClient()
-                ->get($this->accountsEndpoint . 'subscriptions/estimate', $options);
+                ->get($this->apiUrl() . '/subscriptions/estimate', $options);
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
@@ -341,7 +345,7 @@ class PlatformClient
      */
     public function getPlans()
     {
-        return Plan::getCollection($this->accountsEndpoint . 'plans', 0, [], $this->getConnector()->getClient());
+        return Plan::getCollection($this->apiUrl() . '/plans', 0, [], $this->getConnector()->getClient());
     }
 
     /**
@@ -351,7 +355,7 @@ class PlatformClient
      */
     public function getRegions()
     {
-        return Region::getCollection($this->accountsEndpoint . 'regions', 0, [], $this->getConnector()->getClient());
+        return Region::getCollection($this->apiUrl() . '/regions', 0, [], $this->getConnector()->getClient());
     }
 
     /**
@@ -385,7 +389,7 @@ class PlatformClient
      */
     public function getCatalog()
     {
-        return Catalog::create([], $this->accountsEndpoint . 'setup/catalog', $this->getConnector()->getClient());
+        return Catalog::create([], $this->apiUrl() . '/setup/catalog', $this->getConnector()->getClient());
     }
 
     /**
@@ -401,7 +405,7 @@ class PlatformClient
      */
     public function getSetupOptions($vendor = NULL, $plan = NULL, $options_url = NULL, $username = NULL, $organization = NULL)
     {
-        $url = $this->accountsEndpoint . 'setup/options';
+        $url = $this->apiUrl() . '/setup/options';
         $options = $this->cleanRequest([
           'vendor' => $vendor,
           'plan' => $plan,
