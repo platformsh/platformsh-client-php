@@ -36,6 +36,9 @@ class Connector implements ConnectorInterface
      * @param array            $config
      *     Possible configuration keys are:
      *     - api_url (string): The API base URL.
+     *     - token_url (string): The OAuth 2.0 token URL.
+     *     - revoke_url (string): The OAuth 2.0 revocation URL.
+     *     - certifier_url (string): The SSH certificate issuer URL.
      *     - client_id (string): The OAuth2 client ID for this client.
      *     - debug (bool): Whether or not Guzzle debugging should be enabled
      *       (default: false).
@@ -56,7 +59,7 @@ class Connector implements ConnectorInterface
     public function __construct(array $config = [], SessionInterface $session = null)
     {
         if (isset($config['accounts'])) {
-            \trigger_error('The "accounts" URL option is deprecated. APIs are accessed based on the "api_url" instead.', E_USER_DEPRECATED);
+            \trigger_error('The "accounts" URL option is deprecated. APIs are accessed based on the "api_url" and OAuth 2.0 URL options instead.', E_USER_DEPRECATED);
         }
 
         $defaults = [
