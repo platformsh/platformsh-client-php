@@ -200,7 +200,7 @@ abstract class ApiResourceBase implements \ArrayAccess
             throw new \InvalidArgumentException($message);
         }
 
-        $request = new Request('post', $collectionUrl, ['Content-Type' => 'applicaion/json'], \GuzzleHttp\json_encode($body));
+        $request = new Request('post', $collectionUrl, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($body));
         $data = self::send($request, $client);
 
         return new Result($data, $collectionUrl, $client, get_called_class());

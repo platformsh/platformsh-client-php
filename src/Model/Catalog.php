@@ -21,7 +21,7 @@ class Catalog
      */
     public static function create(array $data, $url, ClientInterface $client)
     {
-        $request = new Request('post', $url, ['Content-Type' => 'applicaion/json'], \GuzzleHttp\json_encode($data));
+        $request = new Request('post', $url, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($data));
         $response = $client->send($request);
         $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
         $items = [];
