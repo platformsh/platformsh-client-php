@@ -8,7 +8,6 @@ use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use GuzzleHttp\Url;
@@ -128,7 +127,9 @@ class Connector implements ConnectorInterface
     /**
      * Get the configured accounts endpoint URL.
      *
-     * @deprecated Use Connector::getApiUrl() instead
+     * @deprecated Use ConnectorInterface::getApiUrl() instead
+     *
+     * @see ConnectorInterface::getApiUrl()
      *
      * @return string
      */
@@ -138,9 +139,7 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * Get the configured API gateway URL (without trailing slash).
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getApiUrl()
     {
