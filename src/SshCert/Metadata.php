@@ -10,6 +10,7 @@ namespace Platformsh\Client\SshCert;
 class Metadata {
 
     private $keyId;
+    private $keyType;
     private $validAfter;
     private $validBefore;
     private $extensions;
@@ -29,7 +30,7 @@ class Metadata {
         if (!$bytes) {
             throw new \InvalidArgumentException('Unable to decode SSH certificate');
         }
-        $this->readString($bytes); // ignore key type
+        $this->keyType = $this->readString($bytes);
         $this->readString($bytes); // ignore nonce
         // @todo refactor this?
         if ($type === 'ssh-ed25519-cert-v01@openssh.com') {
@@ -39,7 +40,7 @@ class Metadata {
             $this->readString($bytes); // ignore RSA modulus
         }
         $this->readUint64($bytes); // ignore serial number
-        $this->readUint32($bytes); // ignore certificate type
+        $this->readUint32($bytes); // ignore certificate type (1 for user, 2 for host)
         $this->keyId = $this->readString($bytes);
         $this->readArray($bytes); // ignore valid principals
         $this->validAfter = $this->readUint64($bytes);
@@ -170,5 +171,16 @@ class Metadata {
      */
     public function getKeyId() {
         return $this->keyId;
+    }
+
+    /**
+     * Return's the certificate key type.
+     *
+     * This will be an identifier such as ssh-rsa-cert-v01@openssh.com or ssh-ed25519-cert-v01@openssh.com.
+     *
+     * @return string
+     */
+    public function getKeyType() {
+        return $this->keyType;
     }
 }
