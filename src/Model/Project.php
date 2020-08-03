@@ -142,17 +142,20 @@ class Project extends Resource implements HasActivitiesInterface
      *   The user's role on the project ('viewer' or 'admin').
      * @param InvitationEnvironment[] $environments
      *   A list of environments for the invitation. Only used if the project role is not 'admin'.
+     * @param bool $force
+     *   Whether to re-send the invitation, if an invitation has already been sent to the same email address.
      *
-     * @throws AlreadyInvitedException if there is a pending invitation open with the same details
+     * @throws AlreadyInvitedException if there is a pending invitation for the same email address
      *
      * @return ProjectInvitation
      */
-    public function inviteUserByEmail($email, $role, array $environments = [])
+    public function inviteUserByEmail($email, $role, array $environments = [], $force = false)
     {
         $data = [
             'email' => $email,
             'role' => $role,
             'environments' => InvitationEnvironment::listForApi($environments),
+            'force' => $force,
         ];
 
         $request = $this->client->createRequest('post', $this->getLink('invitations'), ['json' => $data]);
