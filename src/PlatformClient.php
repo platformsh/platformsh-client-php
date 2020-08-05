@@ -206,7 +206,13 @@ class PlatformClient
             throw ApiResponseException::wrapGuzzleException($e);
         }
 
-        return isset($result['endpoint']) ? $result['endpoint'] : false;
+        if (isset($result['endpoint'])) {
+            return $result['endpoint'];
+        }
+        if (isset($result['_links']['self']['href'])) {
+            return $result['_links']['self']['href'];
+        }
+        return false;
     }
 
     /**
