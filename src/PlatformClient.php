@@ -182,7 +182,13 @@ class PlatformClient
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
 
-        return isset($result['endpoint']) ? $result['endpoint'] : false;
+        if (isset($result['endpoint'])) {
+            return $result['endpoint'];
+        }
+        if (isset($result['_links']['self']['href'])) {
+            return $result['_links']['self']['href'];
+        }
+        return false;
     }
 
     /**
