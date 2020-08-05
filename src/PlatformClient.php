@@ -72,6 +72,16 @@ class PlatformClient
             return $this->getProjectDirect($id, $hostname, $https);
         }
 
+        // Use the API gateway.
+        $apiUrl = $this->connector->getApiUrl();
+        if ($apiUrl) {
+            $project = Project::get($id, $apiUrl . '/projects', $this->connector->getClient());
+            if ($project) {
+                $project->setApiUrl($apiUrl);
+            }
+            return $project;
+        }
+
         // Use the project locator.
         if ($url = $this->locateProject($id)) {
             $project = Project::get($url, null, $this->connector->getClient());
@@ -168,7 +178,7 @@ class PlatformClient
     protected function locateProject($id)
     {
         $client = $this->connector->getClient();
-        $url = $this->apiUrl() . '/projects/' . rawurlencode($id);
+        $url = rtrim($this->connector->getAccountsEndpoint(), '/') . '/projects/' . rawurlencode($id);
         try {
             $result = (array) $client->get($url)->json();
         }
