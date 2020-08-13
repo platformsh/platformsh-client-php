@@ -15,6 +15,7 @@ use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
+use Platformsh\Client\Model\User;
 
 class PlatformClient
 {
@@ -121,6 +122,14 @@ class PlatformClient
 
     /**
      * Get account information for the logged-in user.
+     *
+     * This information includes various integrated details such as the
+     * projects the user can access, their registered SSH keys, and legacy
+     * information.
+     *
+     * For purely user profile related information, getUser() is recommended.
+     *
+     * @see PlatformClient::getUser()
      *
      * @param bool $reset
      *
@@ -431,5 +440,24 @@ class PlatformClient
         ]);
 
         return SetupOptions::create($options, $url, $this->connector->getClient());
+    }
+
+    /**
+     * Get a user account.
+     *
+     * @param string|null $id
+     *   The user ID. Defaults to the current user's ID.
+     *
+     * @return User|false
+     */
+    public function getUser($id = null)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        if ($id === null) {
+            $id = $this->getAccountInfo()['id'];
+        }
+        return User::get($id, $this->connector->getApiUrl() . '/users', $this->connector->getClient());
     }
 }
