@@ -42,6 +42,6 @@ if ($projects) {
     $activity->wait();
 
     // Get the new branch.
-    $sprint1 = $project->getEnvironment('sprint-1');
+    $sprint1 = $firstProject->getEnvironment('sprint-1');
 }
 ```
