@@ -163,7 +163,7 @@ abstract class Resource implements \ArrayAccess
      * @return static|false The resource object, or false if the resource is
      *                      not found.
      */
-    public static function get($id, $collectionUrl = null, ClientInterface $client)
+    public static function get($id, $collectionUrl, ClientInterface $client)
     {
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . urlencode($id) : $id;
@@ -305,7 +305,7 @@ abstract class Resource implements \ArrayAccess
      *
      * @return static[]
      */
-    public static function getCollection($url, $limit = 0, array $options = [], ClientInterface $client)
+    public static function getCollection($url, $limit, array $options, ClientInterface $client)
     {
         if ($limit) {
             // @todo uncomment this when the API implements a 'count' parameter
