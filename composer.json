@@ -5,7 +5,7 @@
     "require": {
         "php": ">=7.1.0",
         "cocur/slugify": "^3.0",
-        "guzzlehttp/guzzle": "^6.3",
+        "guzzlehttp/guzzle": "^6.3 || ^7.0",
         "platformsh/oauth2": "0.0.1",
         "ext-json": "*"
     },
