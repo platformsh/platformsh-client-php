@@ -269,7 +269,8 @@ class Connector implements ConnectorInterface
         return $this->provider ? $this->provider : new Platformsh([
           'clientId' => $this->config['client_id'],
           'clientSecret' => $this->config['client_secret'],
-          'base_uri' => $this->config['accounts'],
+          'token_url' => $this->config['token_url'],
+          'api_url' => $this->config['api_url'],
           'debug' => $this->config['debug'],
           'verify' => $this->config['verify'],
           'proxy' => $this->config['proxy'],

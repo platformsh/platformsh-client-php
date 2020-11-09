@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0ec3e064bd5e8ebbedefd8502b78d439",
+    "content-hash": "42a3daaf218cb6555edfd0bc2b70c3da",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -399,16 +399,16 @@
         },
         {
             "name": "platformsh/oauth2",
-            "version": "0.0.1",
+            "version": "0.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/platformsh/platformsh-oauth2-php.git",
-                "reference": "c8be1ee40f718390eafdca8b15d45efe67188e06"
+                "reference": "399068e875567e8073dca7ea1669bbdb8a37a5f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/c8be1ee40f718390eafdca8b15d45efe67188e06",
-                "reference": "c8be1ee40f718390eafdca8b15d45efe67188e06",
+                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/399068e875567e8073dca7ea1669bbdb8a37a5f1",
+                "reference": "399068e875567e8073dca7ea1669bbdb8a37a5f1",
                 "shasum": ""
             },
             "require": {
@@ -436,9 +436,9 @@
             "description": "Platform.sh OAuth2 client",
             "support": {
                 "issues": "https://github.com/platformsh/platformsh-oauth2-php/issues",
-                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/0.0.1"
+                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/0.0.2"
             },
-            "time": "2017-11-13T09:10:25+00:00"
+            "time": "2020-11-09T13:00:32+00:00"
         },
         {
             "name": "psr/http-message",
