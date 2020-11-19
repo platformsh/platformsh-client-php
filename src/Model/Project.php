@@ -19,6 +19,7 @@ use \Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
  * @property-read string $created_at
  * @property-read string $updated_at
  * @property-read string $owner
+ * @property-read string $default_branch
  */
 class Project extends Resource implements HasActivitiesInterface
 {
@@ -180,7 +181,12 @@ class Project extends Resource implements HasActivitiesInterface
     /**
      * Get a single environment of the project.
      *
-     * @param string $id
+     * To get the project's default environment, use:
+     * <code>
+     * $defaultEnv = $project->getEnvironment($project->default_branch);
+     * </code>
+     *
+     * @param string $id The environment ID.
      *
      * @return Environment|false
      */

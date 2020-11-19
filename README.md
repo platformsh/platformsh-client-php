@@ -37,14 +37,13 @@ $client->getConnector()->setApiToken($myToken, 'exchange');
 
 // Get the user's first project.
 $projects = $client->getProjects();
-if ($projects) {
-    $firstProject = reset($projects);
+$project = reset($projects);
+if ($project) {
+    // Get the default (production) environment.
+    $environment = $project->getEnvironment($project->default_branch);
 
-    // Get the master environment.
-    $master = $firstProject->getEnvironment('master');
-
-    // Branch the master environment.
-    $activity = $master->branch('Sprint 1', 'sprint-1');
+    // Create a new branch.
+    $activity = $environment->branch('Sprint 1', 'sprint-1');
 
     // Wait for the activity to complete.
     $activity->wait();
