@@ -39,6 +39,7 @@ class Activity extends Resource
     const STATE_COMPLETE = 'complete';
     const STATE_IN_PROGRESS = 'in_progress';
     const STATE_PENDING = 'pending';
+    const STATE_CANCELLED = 'cancelled';
 
     /**
      * Wait for the activity to complete.
