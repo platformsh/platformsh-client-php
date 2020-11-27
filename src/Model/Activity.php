@@ -137,6 +137,14 @@ class Activity extends ApiResourceBase
     }
 
     /**
+     * Cancel this activity.
+     */
+    public function cancel()
+    {
+        $this->runOperation('cancel');
+    }
+
+    /**
      * Get a human-readable description of the activity.
      *
      * The "description" property contains the HTML-formatted description. This
