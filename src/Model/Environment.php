@@ -391,11 +391,21 @@ class Environment extends Resource implements HasActivitiesInterface
     /**
      * Create a backup of the environment.
      *
+     * @param bool $unsafeAllowInconsistent
+     *   Whether to allow performing an inconsistent backup (default: false).
+     *   If true, this leaves the environment running and open to connections
+     *   during the backup. So it reduces downtime, at the risk of backing up
+     *   data in an inconsistent state.
+     *
      * @return Activity
      */
-    public function backup()
+    public function backup($unsafeAllowInconsistent = false)
     {
-        return $this->runLongOperation('backup');
+        $params = [];
+        if ($unsafeAllowInconsistent) {
+            $params['safe'] = false;
+        }
+        return $this->runLongOperation('backup', 'post', $params);
     }
 
     /**
