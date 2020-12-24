@@ -139,8 +139,12 @@ class Project extends Resource implements HasActivitiesInterface
      *
      * @param string $email
      *   The user's email address.
-     * @param string $role
+     * @param string|null $role
      *   The user's role on the project ('viewer' or 'admin').
+     *   Leave null if you provided $environments and you do not need to manage
+     *   project-level access. Setting the $role would prevent invitations from
+     *   those who have admin access at the environment level, but not at the
+     *   project level.
      * @param InvitationEnvironment[] $environments
      *   A list of environments for the invitation. Only used if the project role is not 'admin'.
      * @param bool $force
@@ -150,14 +154,18 @@ class Project extends Resource implements HasActivitiesInterface
      *
      * @return ProjectInvitation
      */
-    public function inviteUserByEmail($email, $role, array $environments = [], $force = false)
+    public function inviteUserByEmail($email, $role = null, array $environments = [], $force = false)
     {
         $data = [
             'email' => $email,
-            'role' => $role,
-            'environments' => InvitationEnvironment::listForApi($environments),
             'force' => $force,
         ];
+        if ($role !== null) {
+            $data['role'] = $role;
+        }
+        if (\count($environments)) {
+            $data['environments'] = InvitationEnvironment::listForApi($environments);
+        }
 
         $request = $this->client->createRequest('post', $this->getLink('invitations'), ['json' => $data]);
         try {
