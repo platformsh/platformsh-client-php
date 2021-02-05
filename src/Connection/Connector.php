@@ -51,6 +51,10 @@ class Connector implements ConnectorInterface
      *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
      *       Use a string to specify an HTTP proxy, or an array to specify
      *       different proxies for different protocols.
+     *     - timeout (float): The default request timeout for any request, in
+     *       seconds (default: 60).
+     *     - connect_timeout (float): The default connection timeout for any
+     *       request, in seconds (default: 60).
      *     - on_refresh_error: A callback to run when a refresh token error is
      *       received. It will be passed a Guzzle BadResponseException, and
      *       should return an AccessToken or null.
@@ -75,6 +79,8 @@ class Connector implements ConnectorInterface
           'token_url' => 'https://auth.api.platform.sh/oauth2/token',
           'certifier_url' => 'https://ssh.api.platform.sh',
           'proxy' => null,
+          'timeout' => 60.0,
+          'connect_timeout' => 60.0,
           'api_token' => null,
           'api_token_type' => 'access',
           'gzip' => extension_loaded('zlib'),
@@ -335,6 +341,8 @@ class Connector implements ConnectorInterface
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
                 'proxy' => $this->config['proxy'],
+                'timeout' => $this->config['timeout'],
+                'connect_timeout' => $this->config['connect_timeout'],
               ],
             ];
             $oauth2Client = $this->getOauth2Client($options);
@@ -432,6 +440,8 @@ class Connector implements ConnectorInterface
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
                 'proxy' => $this->config['proxy'],
+                'timeout' => $this->config['timeout'],
+                'connect_timeout' => $this->config['connect_timeout'],
                 'subscribers' => [$oauth2],
                 'auth' => 'oauth2',
               ],
