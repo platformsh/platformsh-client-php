@@ -110,6 +110,14 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
             return $urls[$app];
         }
 
+        // Look for the first URL whose key starts with "$app:".
+        \ksort($urls, SORT_NATURAL);
+        foreach ($urls as $key => $url) {
+            if (\strpos($key, $app . ':') === 0) {
+                return $url;
+            }
+        }
+
         // Fall back to the legacy SSH URL.
         return $this->constructLegacySshUrl();
     }
