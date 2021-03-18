@@ -24,8 +24,22 @@ use GuzzleHttp\ClientInterface;
 class Subscription extends Resource
 {
 
+    /**
+     * @deprecated
+     * @see \Platformsh\Client\PlatformClient::getPlans()
+     *
+     * @var string[]
+     */
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
+
+    /**
+     * @deprecated
+     * @see \Platformsh\Client\PlatformClient::getRegions()
+     *
+     * @var string[]
+     */
     public static $availableRegions = ['eu.platform.sh', 'us.platform.sh'];
+
     protected static $required = ['project_region'];
 
     const STATUS_ACTIVE = 'active';
