@@ -21,6 +21,7 @@ use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
 use function GuzzleHttp\Psr7\uri_for;
+use Platformsh\Client\Model\Subscription\SubscriptionOptions;
 
 class PlatformClient
 {
@@ -286,36 +287,50 @@ class PlatformClient
     /**
      * Create a new Platform.sh subscription.
      *
-     * @param string $region             The region ID. See getRegions().
-     * @param string $plan               The plan. See Subscription::$availablePlans.
-     * @param string $title              The project title.
-     * @param int    $storage            The storage of each environment, in MiB.
-     * @param int    $environments       The number of available environments.
-     * @param array  $activationCallback An activation callback for the subscription.
-     * @param string $catalog            The catalog item url. See getCatalog().
-     *
-     * @see PlatformClient::getCatalog()
-     * @see PlatformClient::getRegions()
-     * @see Subscription::wait()
+     * @param SubscriptionOptions|string $options
+     *   Subscription request options, which override the other arguments.
+     *   If a string is passed, it will be used as the region ID (deprecated). See getRegions().
+     * @param string $plan                The plan. See getPlans(). @deprecated
+     * @param string $title               The project title. @deprecated
+     * @param int    $storage             The storage of each environment, in MiB. @deprecated
+     * @param int    $environments        The number of available environments. @deprecated
+     * @param array  $activation_callback An activation callback for the subscription. @deprecated
+     * @param string $options_url         The catalog options URL. See getCatalog(). @deprecated
      *
      * @return Subscription
      *   A subscription, representing a project. Use Subscription::wait() or
      *   similar code to wait for the subscription's project to be provisioned
      *   and activated.
+     *
+     * @see PlatformClient::getCatalog()
+     * @see PlatformClient::getRegions()
+     * @see Subscription::wait()
+     *
+     * @noinspection PhpTooManyParametersInspection
      */
-    public function createSubscription($region, $plan = 'development', $title = null, $storage = null, $environments = null, array $activationCallback = null, $catalog = null)
+    public function createSubscription($options, $plan = null, $title = null, $storage = null, $environments = null, array $activation_callback = null, $options_url = null)
     {
-
         $url = $this->apiUrl() . '/subscriptions';
-        $values = $this->cleanRequest([
-          'project_region' => $region,
-          'plan' => $plan,
-          'project_title' => $title,
-          'storage' => $storage,
-          'environments' => $environments,
-          'activation_callback' => $activationCallback,
-          'options_url' => $catalog,
-        ]);
+        if ($options instanceof SubscriptionOptions) {
+            $values = $options->toArray();
+        } elseif (\is_string($options)) {
+            \trigger_error('The previous arguments list has been replaced by a single SubscriptionOptions argument', E_USER_DEPRECATED);
+            if ($plan === null) {
+                // Backwards-compatible default.
+                $plan = 'development';
+            }
+            $values = $this->cleanRequest([
+                'project_region' => $options,
+                'plan' => $plan,
+                'project_title' => $title,
+                'storage' => $storage,
+                'environments' => $environments,
+                'activation_callback' => $activation_callback,
+                'options_url' => $options_url,
+            ]);
+        } else {
+            throw new \InvalidArgumentException('The first argument must be a SubscriptionOptions object or a string');
+        }
 
         return Subscription::create($values, $url, $this->connector->getClient());
     }
