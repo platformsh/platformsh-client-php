@@ -39,7 +39,7 @@ class ApiResponseException extends RequestException
       ResponseInterface $response = null,
       \Throwable $previous = null,
       array $ctx = [],
-      ?BodySummarizerInterface $bodySummarizer = null
+      BodySummarizerInterface $bodySummarizer = null
     ) : RequestException {
         $e = parent::create($request, $response, $previous);
         if ($response === null) {
