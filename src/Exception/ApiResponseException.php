@@ -36,9 +36,9 @@ class ApiResponseException extends RequestException
     public static function create(
       RequestInterface $request,
       ResponseInterface $response = null,
-      \Exception $previous = null,
+      \Throwable $previous = null,
       array $ctx = []
-    ) {
+    ) : RequestException {
         $e = parent::create($request, $response, $previous);
         if ($response === null) {
             return $e;
