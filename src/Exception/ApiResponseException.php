@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Exception;
 
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\BodySummarizerInterface;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -37,7 +38,8 @@ class ApiResponseException extends RequestException
       RequestInterface $request,
       ResponseInterface $response = null,
       \Throwable $previous = null,
-      array $ctx = []
+      array $ctx = [],
+      ?BodySummarizerInterface $bodySummarizer = null
     ) : RequestException {
         $e = parent::create($request, $response, $previous);
         if ($response === null) {
