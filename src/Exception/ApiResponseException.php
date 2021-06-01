@@ -4,7 +4,6 @@ namespace Platformsh\Client\Exception;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -23,32 +22,23 @@ class ApiResponseException extends RequestException
      */
     public static function wrapGuzzleException(GuzzleException $e)
     {
-        return $e instanceof RequestException ? static::create(
-            $e->getRequest(),
-            $e->getResponse(),
-            $e
-        ) : $e;
+        return $e instanceof RequestException ? static::alterMessage($e) : $e;
     }
 
     /**
-     * @inheritdoc
+     * Recreates the exception if necessary to alter the message.
+     *
+     * @param RequestException $e
+     *
+     * @return RequestException
      */
-    public static function create(
-      RequestInterface $request,
-      ResponseInterface $response = null,
-      \Exception $previous = null,
-      array $ctx = []
-    ) {
-        $e = parent::create($request, $response, $previous);
-        if ($response === null) {
-            return $e;
-        }
-
-        // Re-create the exception to alter the message.
-        $details = self::getErrorDetails($response);
-        if (!empty($details)) {
-            $className = get_class($e);
-            $e = new $className($e->getMessage() . $details, $e->getRequest(), $e->getResponse());
+    private static function alterMessage(RequestException $e)
+    {
+        if ($e->getResponse() !== null) {
+            $details = static::getErrorDetails($e->getResponse());
+            if (!empty($details)) {
+                return new static($e->getMessage() . $details, $e->getRequest(), $e->getResponse());
+            }
         }
 
         return $e;
