@@ -22,7 +22,7 @@ class ApiResponseException extends RequestException
      */
     public static function wrapGuzzleException(GuzzleException $e)
     {
-        return $e instanceof RequestException ? static::alterMessage($e) : $e;
+        return $e instanceof RequestException ? self::alterMessage($e) : $e;
     }
 
     /**
