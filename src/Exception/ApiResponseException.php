@@ -35,9 +35,10 @@ class ApiResponseException extends RequestException
     private static function alterMessage(RequestException $e)
     {
         if ($e->getResponse() !== null) {
-            $details = static::getErrorDetails($e->getResponse());
+            $details = self::getErrorDetails($e->getResponse());
             if (!empty($details)) {
-                return new static($e->getMessage() . $details, $e->getRequest(), $e->getResponse());
+                $class = \get_class($e);
+                return new $class($e->getMessage() . $details, $e->getRequest(), $e->getResponse());
             }
         }
 
