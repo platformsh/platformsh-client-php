@@ -6,6 +6,13 @@ We recommend you use the [Platform.sh CLI](https://github.com/platformsh/platfor
 
 [![Build Status](https://travis-ci.org/platformsh/platformsh-client-php.svg?branch=master)](https://travis-ci.org/platformsh/platformsh-client-php)
 
+### Versions
+
+- The `2.x` branch (major version 2) requires PHP 7.1.0 and above.
+- The `1.x` branch (any version &lt; 2) supports PHP 5.5.9 and above, and uses Guzzle 5.
+  Old PHP versions are supported by the [Platform.sh CLI](https://github.com/platformsh/platformsh-cli), which
+  is why this branch is still maintained.
+
 ## Install
 
 ```sh
