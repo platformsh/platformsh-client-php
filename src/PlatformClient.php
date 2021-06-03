@@ -471,7 +471,7 @@ class PlatformClient
             throw new \RuntimeException('No API URL configured');
         }
         if ($id === null) {
-            $id = $this->getAccountInfo()['id'];
+            $id = 'me';
         }
         return User::get($id, $this->connector->getApiUrl() . '/users', $this->connector->getClient());
     }
