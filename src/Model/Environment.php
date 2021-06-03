@@ -12,6 +12,7 @@ use Platformsh\Client\Model\Backups\BackupConfig;
 use Platformsh\Client\Model\Backups\Policy;
 use Platformsh\Client\Model\Deployment\EnvironmentDeployment;
 use Platformsh\Client\Model\Deployment\Worker;
+use Platformsh\Client\Model\Environment\BranchOptions;
 use Platformsh\Client\Model\Git\Commit;
 
 /**
@@ -23,6 +24,8 @@ use Platformsh\Client\Model\Git\Commit;
  *   The primary ID of the environment. This is the same as the 'name' property.
  * @property-read string      $status
  *   The status of the environment: active, inactive, or dirty.
+ * @property-read string      $type
+ *   The type of the environment, for example: production, staging, or development.
  * @property-read string      $head_commit
  *   The SHA-1 hash identifying the Git commit at the branch's HEAD.
  * @property-read string      $name
@@ -233,21 +236,31 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Branch (create a new environment).
      *
-     * @param string $title       The title of the new environment.
-     * @param string $id          The ID of the new environment. This will be the Git
-     *                            branch name. Leave blank to generate automatically
-     *                            from the title.
-     * @param bool   $cloneParent Whether to clone data from the parent
-     *                            environment while branching.
+     * @param BranchOptions|string $options
+     *   If a BranchOptions object is provided, this is the only argument and the others will be ignored.
+     *   If a string is provided, this is the title of the new environment.
+     * @param string|null $id   The ID of the new environment. This will be the Git
+     *                          branch name. Leave blank to generate automatically
+     *                          from the title. @deprecated use BranchOptions
+     * @param bool $cloneParent Whether to clone data from the parent
+     *                          environment while branching. @deprecated use BranchOptions
      *
      * @return Activity
      */
-    public function branch($title, $id = null, $cloneParent = true)
+    public function branch($options, string $id = null, bool $cloneParent = true): Activity
     {
-        $id = $id ?: $this->sanitizeId($title);
-        $body = ['name' => $id, 'title' => $title];
-        if (!$cloneParent) {
-            $body['clone_parent'] = false;
+        if ($options instanceof BranchOptions) {
+            $body = $options->toArray();
+        } elseif (is_string($options)) {
+            \trigger_error('The previous arguments list has been replaced by a single BranchOptions argument', E_USER_DEPRECATED);
+            $title = $options;
+            $id = $id ?: $this->sanitizeId($title);
+            $body = ['name' => $id, 'title' => $title];
+            if (!$cloneParent) {
+                $body['clone_parent'] = false;
+            }
+        } else {
+            throw new \InvalidArgumentException('The first argument must be a BranchOptions object or a string');
         }
 
         return $this->runLongOperation('branch', 'post', $body);
