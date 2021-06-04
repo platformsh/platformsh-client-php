@@ -231,23 +231,34 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
-     * Branch (create a new environment).
+     * Branches an environment (creates a new environment as a child of the current one).
+     *
+     * The new environment's code will be the same as the parent environment.
+     * Some other settings are typically inherited, such as variables.
+     * Data is cloned from the parent environment (if $cloneParent is left as
+     * true), including all data from services and file mounts.
      *
      * @param string $title       The title of the new environment.
-     * @param string $id          The ID of the new environment. This will be the Git
-     *                            branch name. Leave blank to generate automatically
-     *                            from the title.
+     * @param string|null $id     The ID of the new environment. This will be the Git
+     *                            branch name. Leave empty to generate automatically
+     *                            from the title (not recommended).
      * @param bool   $cloneParent Whether to clone data from the parent
      *                            environment while branching.
+     * @param string|null $type   The environment type, e.g. 'staging' or 'development'.
+     *                            Leave this empty to use the default type for new
+     *                            environments ('development' at the time of writing).
      *
      * @return Activity
      */
-    public function branch($title, $id = null, $cloneParent = true)
+    public function branch($title, $id = null, $cloneParent = true, $type = null)
     {
         $id = $id ?: $this->sanitizeId($title);
         $body = ['name' => $id, 'title' => $title];
         if (!$cloneParent) {
             $body['clone_parent'] = false;
+        }
+        if ($type !== null) {
+            $body['type'] = $type;
         }
 
         return $this->runLongOperation('branch', 'post', $body);
