@@ -242,6 +242,16 @@ class Project extends Resource implements HasActivitiesInterface
     }
 
     /**
+     * Get a list of environment types for the project.
+     *
+     * @return EnvironmentType[]
+     */
+    public function getEnvironmentTypes()
+    {
+        return EnvironmentType::getCollection($this->getLink('environment-types'), 0, [], $this->client);
+    }
+
+    /**
      * Get a list of domains for the project.
      *
      * @param int $limit
