@@ -51,3 +51,25 @@ if ($project) {
     $sprint1 = $project->getEnvironment('sprint-1');
 }
 ```
+
+Creating a project:
+
+```php
+use \Platformsh\Client\Model\Subscription\SubscriptionOptions;
+
+$subscription = $client->createSubscription(SubscriptionOptions::fromArray([
+    'project_region' => 'uk-1.platform.sh',
+    'project_title' => 'My project',
+    'plan' => 'development',
+    'default_branch' => 'main',
+]));
+
+echo "Created subscription $subscription->id, waiting for it to activate...\n";
+
+$subscription->wait();
+
+$project = $subscription->getProject();
+
+echo "The project is now active: $project->id\n";
+echo "Git URI: " . $project->getGitUrl() . "\n";
+```
