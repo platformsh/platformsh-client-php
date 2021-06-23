@@ -522,8 +522,11 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         $values = [
             'profile' => $profile,
             'repository' => $repository,
-            'files' => $files,
         ];
+
+        if (!empty($files)) {
+            $values['files'] = $files;
+        }
     
         return $this->runLongOperation('initialize', 'post', $values);
     }
