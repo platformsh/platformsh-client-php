@@ -517,7 +517,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return Activity
      */
-    public function initialize($profile, $repository, $files)
+    public function initialize($profile, $repository, $files=[])
     {
         $values = [
             'profile' => $profile,
