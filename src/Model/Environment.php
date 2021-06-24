@@ -511,16 +511,23 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   A repository URL, optionally followed by an '@' sign and a branch name,
      *   e.g. 'git://github.com/platformsh/platformsh-examples.git@drupal/7.x'.
      *   The default branch is 'master'.
+     * @param array $files
+     *   An array of files that may be used in conjunction or in place of the
+     *   repository parameter info.
      *
      * @return Activity
      */
-    public function initialize($profile, $repository)
+    public function initialize($profile, $repository, $files=[])
     {
         $values = [
             'profile' => $profile,
             'repository' => $repository,
         ];
 
+        if (!empty($files)) {
+            $values['files'] = $files;
+        }
+    
         return $this->runLongOperation('initialize', 'post', $values);
     }
 
