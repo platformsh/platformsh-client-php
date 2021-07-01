@@ -45,10 +45,10 @@ abstract class Resource implements \ArrayAccess
      */
     public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = true)
     {
-        $this->setData($data);
         $this->client = $client ?: new Client();
         $this->baseUrl = (string) $baseUrl;
         $this->isFull = $full;
+        $this->setData($data);
     }
 
     /**

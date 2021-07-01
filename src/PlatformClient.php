@@ -7,6 +7,8 @@ use GuzzleHttp\Url;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
+use Platformsh\Client\Model\Filter\Filter;
+use Platformsh\Client\Model\Organization\Organization;
 use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Region;
@@ -474,5 +476,74 @@ class PlatformClient
             $id = 'me';
         }
         return User::get($id, $this->connector->getApiUrl() . '/users', $this->connector->getClient());
+    }
+
+    /**
+     * Lists all available organizations.
+     *
+     * @param \Platformsh\Client\Model\Filter\FilterInterface[] $filters
+     *
+     * @return Organization[]
+     */
+    public function listOrganizations(array $filters = [])
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $path = '/organizations';
+        $options = [];
+        if (!empty($filters)) {
+            $options['query'] = [];
+            foreach ($filters as $filter) {
+                $options['query'] += $filter->params();
+            }
+        }
+        return Organization::getCollection($this->connector->getApiUrl() . $path, 0, $options, $this->connector->getClient());
+    }
+
+    /**
+     * Lists organizations of which the given user is a member.
+     *
+     * @param string $userId
+     *
+     * @return Organization[]
+     */
+    public function listOrganizationsWithMember($userId)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $path = '/users/' . \rawurlencode($userId) . '/organizations';
+        return Organization::getCollection($this->connector->getApiUrl() . $path, 0, [], $this->connector->getClient());
+    }
+
+    /**
+     * Lists organizations owned by the given user ID.
+     *
+     * @param string $ownerId
+     *
+     * @return Organization[]
+     */
+    public function listOrganizationsByOwner($ownerId)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        return $this->listOrganizations([new Filter('owner_id', $ownerId)]);
+    }
+
+    /**
+     * Gets a single organization by name.
+     *
+     * @param string $name
+     *
+     * @return Organization|FALSE
+     */
+    public function getOrganizationByName($name)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        return Organization::get('name=' . $name, $this->connector->getApiUrl() . '/organizations', $this->connector->getClient());
     }
 }
