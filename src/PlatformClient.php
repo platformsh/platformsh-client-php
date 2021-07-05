@@ -350,7 +350,7 @@ class PlatformClient
      * Estimate the cost of a subscription.
      *
      * @param string      $plan         The plan machine name.
-     * @param int         $storage      The allowed storage per environment (GiB).
+     * @param int         $storage      The allowed storage per environment (MiB).
      * @param int         $environments The number of environments.
      * @param int         $users        The number of users.
      * @param string|null $countryCode  A two-letter country code.
