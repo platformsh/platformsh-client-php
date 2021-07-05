@@ -546,4 +546,28 @@ class PlatformClient
         }
         return Organization::get('name=' . $name, $this->connector->getApiUrl() . '/organizations', $this->connector->getClient());
     }
+
+    /**
+     * Creates a new organization.
+     *
+     * Warning: owning more than 1 organization will cause certain deprecated
+     * APIs to stop working. The /subscriptions API now must be accessed under
+     * /organizations/{id}/subscriptions, and the same applies to similar APIs
+     * that are concerned with subscriptions or billing. The old API path will
+     * only continue to work for users who own just 1 organization (or 0).
+     *
+     * @param string $name
+     * @param string $label
+     *
+     * @return Organization
+     */
+    public function createOrganization($name, $label = '')
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $url = $this->connector->getApiUrl() . '/organizations';
+        $values = ['name' => $name, 'label' => $label];
+        return Organization::create($values, $url, $this->connector->getClient());
+    }
 }

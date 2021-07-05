@@ -86,4 +86,19 @@ class Organization extends Resource
         }
         return null;
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @internal Use PlatformClient::createOrganization() to create an organization.
+     *
+     * @see \Platformsh\Client\PlatformClient::createOrganization()
+     *
+     * @return static
+     */
+    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    {
+        $result = parent::create($body, $collectionUrl, $client);
+        return new static($result->getData(), $collectionUrl, $client);
+    }
 }
