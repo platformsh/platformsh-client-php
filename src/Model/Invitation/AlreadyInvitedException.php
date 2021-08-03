@@ -4,6 +4,9 @@ namespace Platformsh\Client\Model\Invitation;
 
 use Platformsh\Client\Model\Project;
 
+/**
+ * The exception thrown when a user has already been invited to a project with the same role and environment(s).
+ */
 class AlreadyInvitedException extends \RuntimeException{
     private $email;
     private $project;
