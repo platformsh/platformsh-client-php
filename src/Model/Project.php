@@ -495,4 +495,14 @@ class Project extends Resource implements HasActivitiesInterface
     {
         return $this->runOperation('clear-build-cache');
     }
+
+    /**
+     * Returns system information about the project, e.g. the API version.
+     *
+     * @return System
+     */
+    public function systemInformation()
+    {
+        return System::get($this->getLink('#system'), '', $this->client);
+    }
 }
