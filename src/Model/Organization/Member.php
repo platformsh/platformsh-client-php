@@ -3,7 +3,9 @@
 namespace Platformsh\Client\Model\Organization;
 
 use GuzzleHttp\ClientInterface;
+use Platformsh\Client\Model\Ref\UserRef;
 use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ResourceWithReferences;
 
 /**
  * @property-read string $id
@@ -14,11 +16,15 @@ use Platformsh\Client\Model\Resource;
  * @property-read string $created_at
  * @property-read string $updated_at
  */
-class Member extends Resource
-{
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+class Member extends ResourceWithReferences {
+
+    /** @return UserRef|null */
+    public function getUserInfo()
     {
-        $data = isset($data['items']) ? $data['items'] : [];
-        return parent::wrapCollection($data, $baseUrl, $client);
+        if (isset($this->data['ref:users'][$this->data['user_id']])) {
+            return $this->data['ref:users'][$this->data['user_id']];
+        }
+        return null;
     }
+
 }

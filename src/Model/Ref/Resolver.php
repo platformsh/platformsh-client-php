@@ -45,8 +45,8 @@ class Resolver
                     $data['ref:' . $set] = [];
                 }
                 $data['ref:' . $set] += $this->client->get($absoluteUrl)->json();
+                unset($data['_links'][$key]);
             }
-            unset($data['_links'][$key]);
         }
         // Transform arrays into objects.
         if (isset($data['ref:users'])) {
