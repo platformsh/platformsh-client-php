@@ -27,4 +27,22 @@ class Member extends ResourceWithReferences {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    protected function isOperationAvailable($op)
+    {
+        if ($op === 'edit') {
+            return true;
+        }
+        return parent::isOperationAvailable($op);
+    }
+
+    public function getLink($rel, $absolute = true)
+    {
+        if ($rel === '#edit') {
+            return $this->getLink('self');
+        }
+        return parent::getLink($rel, $absolute);
+    }
 }
