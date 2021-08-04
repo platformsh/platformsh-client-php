@@ -56,6 +56,13 @@ class Resolver
                 }
             }
         }
+        if (isset($data['ref:organizations'])) {
+            foreach ($data['ref:organizations'] as &$item) {
+                if (!$item instanceof OrganizationRef) {
+                    $item = OrganizationRef::fromData($item);
+                }
+            }
+        }
         return $data;
     }
 }
