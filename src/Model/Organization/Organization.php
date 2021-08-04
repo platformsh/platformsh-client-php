@@ -8,6 +8,7 @@ use Platformsh\Client\Model\Organization\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Organization\Invitation\OrganizationInvitation;
 use Platformsh\Client\Model\Ref\UserRef;
 use Platformsh\Client\Model\ResourceWithReferences;
+use Platformsh\Client\Model\Subscription;
 
 /**
  * @property-read string $id
@@ -36,6 +37,16 @@ class Organization extends ResourceWithReferences
     public function getMembers()
     {
         return Member::getCollection($this->getLink('members'), 0, [], $this->client);
+    }
+
+    /**
+     * Returns a list of organization subscriptions.
+     *
+     * @return Subscription[]
+     */
+    public function getSubscriptions()
+    {
+        return Subscription::getCollection($this->getUri() . '/subscriptions', 0, [], $this->client);
     }
 
     /**
