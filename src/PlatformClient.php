@@ -297,7 +297,6 @@ class PlatformClient
      */
     public function createSubscription($options, $plan = null, $title = null, $storage = null, $environments = null, array $activation_callback = null, $options_url = null)
     {
-        $url = $this->apiUrl() . '/subscriptions';
         if ($options instanceof SubscriptionOptions) {
             $values = $options->toArray();
         } elseif (\is_string($options)) {
@@ -317,6 +316,12 @@ class PlatformClient
             ]);
         } else {
             throw new \InvalidArgumentException('The first argument must be a SubscriptionOptions object or a string');
+        }
+
+        if ($id = $options->organizationId()) {
+            $url = $this->apiUrl() . '/organizations/' . \rawurlencode($id) . '/subscriptions';
+        } else {
+            $url = $this->apiUrl() . '/subscriptions';
         }
 
         return Subscription::create($values, $url, $this->connector->getClient());
@@ -354,10 +359,11 @@ class PlatformClient
      * @param int         $environments The number of environments.
      * @param int         $users        The number of users.
      * @param string|null $countryCode  A two-letter country code.
+     * @param string|null $organizationId An organization ID.
      *
      * @return array An array containing at least 'total' (a formatted price).
      */
-    public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null)
+    public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null, $organizationId = null)
     {
         $options = [];
         $options['query'] = [
@@ -369,10 +375,17 @@ class PlatformClient
         if ($countryCode !== null) {
             $options['query']['country_code'] = $countryCode;
         }
+
+        if ($organizationId) {
+            $url = $this->apiUrl() . '/organizations/' . \rawurlencode($organizationId) . '/subscriptions/estimate';
+        } else {
+            $url = $this->apiUrl() . '/subscriptions/estimate';
+        }
+
         try {
             $response = $this->connector
                 ->getClient()
-                ->get($this->apiUrl() . '/subscriptions/estimate', $options);
+                ->get($url, $options);
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
