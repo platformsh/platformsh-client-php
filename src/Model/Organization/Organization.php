@@ -68,11 +68,22 @@ class Organization extends ResourceWithReferences
     /**
      * Returns a list of organization subscriptions.
      *
+     * @param array $query
+     *   Query parameters to use. The default query is a filter that returns only active and suspended subscriptions.
+     *
      * @return Subscription[]
      */
-    public function getSubscriptions()
+    public function getSubscriptions(array $query = [])
     {
-        return Subscription::getCollection($this->getUri() . '/subscriptions', 0, [], $this->client);
+        $options = [];
+        if (!empty($query)) {
+            $options['query'] = $query;
+        } else {
+            $options['query']['filter']['status']['value'][] = 'active';
+            $options['query']['filter']['status']['value'][] = 'suspended';
+            $options['query']['filter']['status']['operator'] = 'IN';
+        }
+        return Subscription::getCollection($this->getUri() . '/subscriptions', 0, $options, $this->client);
     }
 
     /**
