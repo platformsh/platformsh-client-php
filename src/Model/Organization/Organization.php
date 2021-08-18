@@ -24,8 +24,9 @@ class Organization extends ResourceWithReferences
 {
     public function getLink($rel, $absolute = true)
     {
-        if ($rel === 'invitations') {
-            return $this->getUri($absolute) . '/invitations';
+        // @todo remove this when HAL links are provided in the API
+        if (\in_array($rel, ['invitations', 'address', 'profile'])) {
+            return $this->getUri($absolute) . '/' . $rel;
         }
         return parent::getLink($rel, $absolute);
     }
@@ -148,5 +149,29 @@ class Organization extends ResourceWithReferences
     {
         $result = parent::create($body, $collectionUrl, $client);
         return new static($result->getData(), $collectionUrl, $client);
+    }
+
+    /**
+     * Returns the organization address.
+     *
+     * @return Address
+     */
+    public function getAddress()
+    {
+        $url = $this->getLink('address');
+        $response = $this->client->get($url);
+        return new Address($response->json(), $url, $this->client);
+    }
+
+    /**
+     * Returns the organization profile.
+     *
+     * @return Profile
+     */
+    public function getProfile()
+    {
+        $url = $this->getLink('profile');
+        $response = $this->client->get($url);
+        return new Profile($response->json(), $url, $this->client);
     }
 }
