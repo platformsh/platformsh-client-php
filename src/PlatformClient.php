@@ -550,14 +550,26 @@ class PlatformClient
      *
      * @param string $name
      *
-     * @return Organization|FALSE
+     * @return Organization|false
      */
     public function getOrganizationByName($name)
+    {
+        return $this->getOrganizationById('name=' . $name);
+    }
+
+    /**
+     * Gets a single organization.
+     *
+     * @param string $id
+     *
+     * @return Organization|false
+     */
+    public function getOrganizationById($id)
     {
         if (!$this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
-        return Organization::get('name=' . $name, $this->connector->getApiUrl() . '/organizations', $this->connector->getClient());
+        return Organization::get($id, $this->connector->getApiUrl() . '/organizations', $this->connector->getClient());
     }
 
     /**
