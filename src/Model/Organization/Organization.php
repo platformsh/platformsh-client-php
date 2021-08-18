@@ -66,6 +66,18 @@ class Organization extends ResourceWithReferences
     }
 
     /**
+     * Returns a single organization subscription.
+     *
+     * @param string $id
+     *
+     * @return Subscription|false
+     */
+    public function getSubscription($id)
+    {
+        return Subscription::get($id, $this->getUri() . '/subscriptions', $this->client);
+    }
+
+    /**
      * Returns a list of organization subscriptions.
      *
      * @param array $query
