@@ -55,6 +55,7 @@ class Project extends Resource implements HasActivitiesInterface
      * @todo when APIs are unified, this can be a property
      *
      * @return string|int
+     *   The ID is a numeric string. Legacy APIs may return an integer.
      */
     public function getSubscriptionId()
     {
