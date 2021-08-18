@@ -452,6 +452,10 @@ class Connector implements ConnectorInterface
                 $options['defaults']['headers']['Accept-Encoding'] = 'gzip';
             }
 
+            if ($url = $this->getApiUrl()) {
+                $options['base_url'] = $url;
+            }
+
             $client = $this->getGuzzleClient($options);
 
             $this->setUpCache($client);

@@ -488,7 +488,7 @@ class PlatformClient
         if ($id === null) {
             $id = 'me';
         }
-        return User::get($id, $this->connector->getApiUrl() . '/users', $this->connector->getClient());
+        return User::get($id, '/users', $this->connector->getClient());
     }
 
     /**
@@ -527,7 +527,7 @@ class PlatformClient
             throw new \RuntimeException('No API URL configured');
         }
         $path = '/users/' . \rawurlencode($userId) . '/organizations';
-        return Organization::getCollection($this->connector->getApiUrl() . $path, 0, [], $this->connector->getClient());
+        return Organization::getCollection($path, 0, [], $this->connector->getClient());
     }
 
     /**
@@ -569,7 +569,7 @@ class PlatformClient
         if (!$this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
-        return Organization::get($id, $this->connector->getApiUrl() . '/organizations', $this->connector->getClient());
+        return Organization::get($id, '/organizations', $this->connector->getClient());
     }
 
     /**
@@ -591,7 +591,7 @@ class PlatformClient
         if (!$this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
-        $url = $this->connector->getApiUrl() . '/organizations';
+        $url = '/organizations';
         $values = ['name' => $name, 'label' => $label];
         return Organization::create($values, $url, $this->connector->getClient());
     }
