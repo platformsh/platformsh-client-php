@@ -180,8 +180,13 @@ class Subscription extends Resource
      */
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
-        $data = isset($data['subscriptions']) ? $data['subscriptions'] : [];
-        return parent::wrapCollection($data, $baseUrl, $client);
+        $items = [];
+        if (isset($data['items'])) {
+            $items = $data['items'];
+        } elseif (isset($data['subscriptions'])) {
+            $items = $data['subscriptions'];
+        }
+        return parent::wrapCollection($items, $baseUrl, $client);
     }
 
     /**
