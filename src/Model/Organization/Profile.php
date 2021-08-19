@@ -7,7 +7,7 @@ use Platformsh\Client\Model\Resource;
 use Platformsh\Client\Model\Result;
 
 /**
- * @property-read string $campany_name
+ * @property-read string $company_name
  * @property-read string $billing_contact
  * @property-read string $security_contact
  * @property-read string $vat_number
