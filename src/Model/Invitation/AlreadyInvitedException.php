@@ -12,6 +12,7 @@ class AlreadyInvitedException extends \RuntimeException{
     private $project;
     private $role;
     private $environments;
+    private $permissions;
 
     /**
      * @param string $message
@@ -19,14 +20,16 @@ class AlreadyInvitedException extends \RuntimeException{
      * @param Project $project
      * @param string $role
      * @param Environment[] $environments
+     * @param Permission[] $permissions
      */
-    public function __construct($message, $email, Project $project, $role, array $environments)
+    public function __construct($message, $email, Project $project, $role, array $environments, array $permissions)
     {
         parent::__construct($message);
         $this->email = $email;
         $this->project = $project;
         $this->role = $role;
         $this->environments = $environments;
+        $this->permissions = $permissions;
     }
 
     /**
@@ -59,5 +62,13 @@ class AlreadyInvitedException extends \RuntimeException{
     public function getEnvironments()
     {
         return $this->environments;
+    }
+
+    /**
+     * @return Permission[]
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
     }
 }

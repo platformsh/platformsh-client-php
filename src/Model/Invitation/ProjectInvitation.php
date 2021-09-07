@@ -9,6 +9,7 @@ use Platformsh\Client\Model\Resource;
  * @property-read string $state
  * @property-read string $role
  * @property-read Environment[] $environments
+ * @property-read Permission[] $permissions
  * @property-read string $created_at
  * @property-read string $updated_at
  * @property-read string|null $finished_at
@@ -28,6 +29,13 @@ class ProjectInvitation extends Resource {
                 $environments[] = new Environment($item['id'], $item['role']);
             }
             return $environments;
+        }
+        if ($property === 'permissions') {
+            $permissions = [];
+            foreach ($value as $item) {
+                $permissions[] = new Permission($item['type'], $item['role']);
+            }
+            return $permissions;
         }
         return $value;
     }

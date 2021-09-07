@@ -9,7 +9,8 @@ use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Invitation\ProjectInvitation;
-use \Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
+use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
+use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
 
 /**
  * A Platform.sh project.
@@ -143,22 +144,29 @@ class Project extends Resource implements HasActivitiesInterface
      * @param string $role
      *   The user's role on the project ('viewer' or 'admin').
      * @param InvitationEnvironment[] $environments
-     *   A list of environments for the invitation. Only used if the project role is not 'admin'.
+     *   Deprecated. A list of environments for the invitation. Replaced by $permissions.
      * @param bool $force
      *   Whether to re-send the invitation, if an invitation has already been sent to the same email address.
+     * @param InvitationPermission[] $permissions
+     *   A list of permissions for the invitation. Only used if the project role is not 'admin'.
      *
      * @throws AlreadyInvitedException if there is a pending invitation for the same email address
      *
      * @return ProjectInvitation
      */
-    public function inviteUserByEmail($email, $role, array $environments = [], $force = false)
+    public function inviteUserByEmail($email, $role, array $environments = [], $force = false, array $permissions = [])
     {
         $data = [
             'email' => $email,
             'role' => $role,
-            'environments' => InvitationEnvironment::listForApi($environments),
             'force' => $force,
         ];
+        if (!empty($permissions)) {
+            $data['permissions'] = InvitationPermission::listForApi($permissions);
+        }
+        if (!empty($environments)) {
+            $data['environments'] = InvitationEnvironment::listForApi($environments);
+        }
 
         $request = $this->client->createRequest('post', $this->getLink('invitations'), ['json' => $data]);
         try {
