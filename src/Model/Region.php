@@ -16,6 +16,8 @@ use GuzzleHttp\ClientInterface;
  */
 class Region extends Resource
 {
+    protected static $collectionItemsKey = 'regions';
+
     /**
      * @inheritdoc
      */
@@ -25,16 +27,6 @@ class Region extends Resource
         $data['available'] = !empty($data['available']);
         $data['private'] = !empty($data['private']);
         $this->data = $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
-    {
-        $data = isset($data['regions']) ? $data['regions'] : [];
-
-        return parent::wrapCollection($data, $baseUrl, $client);
     }
 
     /**

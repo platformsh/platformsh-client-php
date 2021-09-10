@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
+use Platformsh\Client\Model\Ref\OrganizationRef;
 
 /**
  * Represents a Platform.sh subscription.
@@ -21,7 +22,7 @@ use GuzzleHttp\ClientInterface;
  * @property-read string $project_region_label
  * @property-read string $project_ui
  */
-class Subscription extends Resource
+class Subscription extends ResourceWithReferences
 {
 
     /**
@@ -180,13 +181,12 @@ class Subscription extends Resource
      */
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
-        $items = [];
         if (isset($data['items'])) {
-            $items = $data['items'];
+            static::$collectionItemsKey = 'items';
         } elseif (isset($data['subscriptions'])) {
-            $items = $data['subscriptions'];
+            static::$collectionItemsKey = 'subscriptions';
         }
-        return parent::wrapCollection($items, $baseUrl, $client);
+        return parent::wrapCollection($data, $baseUrl, $client);
     }
 
     /**
@@ -210,5 +210,18 @@ class Subscription extends Resource
             return $this->getUri($absolute);
         }
         return parent::getLink($rel, $absolute);
+    }
+
+    /**
+     * Returns detailed information about the subscription's organization, if known.
+     *
+     * @return OrganizationRef|null
+     */
+    public function getOrganizationInfo()
+    {
+        if (isset($this->data['organization_id']) && isset($this->data['ref:organizations'][$this->data['organization_id']])) {
+            return $this->data['ref:organizations'][$this->data['organization_id']];
+        }
+        return null;
     }
 }

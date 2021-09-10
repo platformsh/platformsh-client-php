@@ -16,6 +16,8 @@ use Platformsh\Client\Exception\OperationUnavailableException;
  */
 abstract class Resource implements \ArrayAccess
 {
+    /** @var string|null */
+    protected static $collectionItemsKey;
 
     /** @var array */
     protected static $required = [];
@@ -332,7 +334,11 @@ abstract class Resource implements \ArrayAccess
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
         $resources = [];
-        foreach ($data as $item) {
+        $items = $data;
+        if (isset(static::$collectionItemsKey)) {
+            $items = $items[static::$collectionItemsKey];
+        }
+        foreach ($items as $item) {
             $resources[] = new static($item, $baseUrl, $client);
         }
 

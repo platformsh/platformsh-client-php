@@ -8,6 +8,8 @@ use Platformsh\Client\Model\Ref\Resolver;
 
 class ResourceWithReferences extends Resource
 {
+    protected static $collectionItemsKey = 'items';
+
     protected function setData(array $data)
     {
         // References are resolved upon initialization so that the links are less likely to have expired.
@@ -42,7 +44,7 @@ class ResourceWithReferences extends Resource
         $data = self::resolveReferences(new Resolver($client, $baseUrl), $data);
 
         $resources = [];
-        foreach ($data['items'] as $item) {
+        foreach ($data[static::$collectionItemsKey] as $item) {
             foreach ($item as $key => $value) {
                 // Add user-related references onto the individual item (the rest of $data is discarded).
                 if (\in_array($key, ['owner_id', 'user_id']) && isset($data['ref:users'][$value])) {

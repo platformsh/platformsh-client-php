@@ -13,6 +13,8 @@ use GuzzleHttp\ClientInterface;
  */
 class Plan extends Resource
 {
+    protected static $collectionItemsKey = 'plans';
+
     /**
      * {@inheritdoc}
      */
@@ -32,16 +34,6 @@ class Plan extends Resource
     {
         $data = isset($data['plans'][0]) ? $data['plans'][0] : $data;
         $this->data = $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
-    {
-        $data = isset($data['plans']) ? $data['plans'] : [];
-
-        return parent::wrapCollection($data, $baseUrl, $client);
     }
 
     /**

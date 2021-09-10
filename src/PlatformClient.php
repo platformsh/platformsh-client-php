@@ -330,11 +330,17 @@ class PlatformClient
     /**
      * Get a list of your Platform.sh subscriptions.
      *
+     * @param string|null $organizationId
+     *
      * @return Subscription[]
      */
-    public function getSubscriptions()
+    public function getSubscriptions($organizationId = null)
     {
-        $url = $this->apiUrl() . '/subscriptions';
+        if (isset($organizationId)) {
+            $url = $this->apiUrl() . '/' . $organizationId . '/subscriptions';
+        } else {
+            $url = $this->apiUrl() . '/subscriptions';
+        }
         return Subscription::getCollection($url, 0, [], $this->connector->getClient());
     }
 
