@@ -34,11 +34,11 @@ class ApiResponseException extends RequestException
      * @inheritdoc
      */
     public static function create(
-      RequestInterface $request,
-      ResponseInterface $response = null,
-      \Exception $previous = null,
-      array $ctx = []
-    ) {
+        RequestInterface $request,
+        ResponseInterface $response = null,
+        \Throwable $previous = null,
+        array $ctx = []
+    ): parent {
         $e = parent::create($request, $response, $previous);
         if ($response === null) {
             return $e;
