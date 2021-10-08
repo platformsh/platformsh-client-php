@@ -48,4 +48,15 @@ class Address extends Resource
     {
         throw new \BadMethodCallException('An address cannot be explicitly created');
     }
+
+    public function getLink($rel, $absolute = true)
+    {
+        if (!$this->hasLink($rel)) {
+            // The address API does not expose HAL links yet.
+            if ($rel === 'self') {
+                return $this->baseUrl;
+            }
+        }
+        return parent::getLink($rel, $absolute);
+    }
 }
