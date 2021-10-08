@@ -4,7 +4,6 @@ namespace Platformsh\Client\Model\Ref;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Url;
-use Platformsh\Client\Model\User;
 
 class Resolver
 {
@@ -51,14 +50,14 @@ class Resolver
         // Transform arrays into objects.
         if (isset($data['ref:users'])) {
             foreach ($data['ref:users'] as &$item) {
-                if (!$item instanceof UserRef) {
+                if ($item !== null && !$item instanceof UserRef) {
                     $item = UserRef::fromData($item);
                 }
             }
         }
         if (isset($data['ref:organizations'])) {
             foreach ($data['ref:organizations'] as &$item) {
-                if (!$item instanceof OrganizationRef) {
+                if ($item !== null && !$item instanceof OrganizationRef) {
                     $item = OrganizationRef::fromData($item);
                 }
             }
