@@ -4,7 +4,7 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
-use function GuzzleHttp\Psr7\uri_for;
+use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\Exception\BadResponseException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
@@ -121,7 +121,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function setApiUrl($url)
     {
-        $projectUrl = uri_for($url)->withPath('/projects/' . \urlencode($this->id))->__toString();
+        $projectUrl = Utils::uriFor($url)->withPath('/projects/' . \urlencode($this->id))->__toString();
         $this->urlViaGateway = $projectUrl;
     }
 
@@ -456,7 +456,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     public static function getProjectBaseFromUrl($url)
     {
         if (preg_match('#/api/projects/([^/]+)#', $url, $matches)) {
-            return uri_for($url)->withPath('/api/projects/' . $matches[1])->__toString();
+            return Utils::uriFor($url)->withPath('/api/projects/' . $matches[1])->__toString();
         }
 
         throw new \RuntimeException('Failed to find project ID from URL: ' . $url);

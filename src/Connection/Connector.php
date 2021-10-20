@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
-use function GuzzleHttp\Psr7\uri_for;
+use GuzzleHttp\Psr7\Utils;
 use League\OAuth2\Client\Grant\ClientCredentials;
 use League\OAuth2\Client\Grant\Password;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -198,7 +198,7 @@ class Connector implements ConnectorInterface
 
         // Backwards compatibility.
         if (strpos($url, '//') === false) {
-            $url = uri_for($this->config['accounts'])
+            $url = Utils::uriFor($this->config['accounts'])
                 ->withPath($this->config[$key])
                 ->__toString();
         }

@@ -10,7 +10,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use function GuzzleHttp\Psr7\uri_for;
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Exception\OperationUnavailableException;
@@ -611,7 +611,7 @@ abstract class ApiResourceBase implements \ArrayAccess
         if (empty($baseUrl)) {
             throw new \RuntimeException('No base URL');
         }
-        $base = uri_for($baseUrl);
+        $base = Utils::uriFor($baseUrl);
 
         return $base->withPath($relativeUrl)->__toString();
     }

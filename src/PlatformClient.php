@@ -7,6 +7,7 @@ namespace Platformsh\Client;
 
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Utils;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
@@ -20,7 +21,6 @@ use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
-use function GuzzleHttp\Psr7\uri_for;
 use Platformsh\Client\Model\Subscription\SubscriptionOptions;
 use Platformsh\Client\Model\User;
 
@@ -449,7 +449,7 @@ class PlatformClient
     public function getSshCertificate(string $publicKey): string
     {
         $response = $this->connector->getClient()->post(
-            uri_for($this->connector->getConfig()['certifier_url'])->withPath('/ssh'),
+            Utils::uriFor($this->connector->getConfig()['certifier_url'])->withPath('/ssh'),
             ['json' => ['key' => $publicKey]]
         );
 
