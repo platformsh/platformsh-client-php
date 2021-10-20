@@ -6,7 +6,7 @@
         "php": ">=7.1.0",
         "cocur/slugify": "^3.0",
         "guzzlehttp/guzzle": "^6.3 || ^7.0",
-        "platformsh/oauth2": ">=0.0.2 <2",
+        "platformsh/oauth2": ">=0.0.3 <2",
         "ext-json": "*"
     },
     "require-dev": {
@@ -26,10 +26,5 @@
         {
             "name": "Patrick Dawkins"
         }
-    ],
-    "config": {
-        "platform": {
-            "php": "7.1"
-        }
-    }
+    ]
 }
