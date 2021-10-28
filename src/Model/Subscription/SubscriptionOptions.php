@@ -19,8 +19,13 @@ final class SubscriptionOptions {
     private $storage;
     /** @var string|NULL */
     private $owner;
-    /** @var array|NULL */
+
+    /**
+     * @var array|NULL
+     * @deprecated This is no longer supported. Poll the subscription instead of submitting a callback.
+     */
     private $activation_callback;
+
     /** @var string|NULL */
     private $organization_id;
 
