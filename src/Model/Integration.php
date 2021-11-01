@@ -19,34 +19,6 @@ class Integration extends Resource implements HasActivitiesInterface
     /** @var array */
     protected static $required = ['type'];
 
-    /** @var array */
-    protected static $types = [
-      'bitbucket',
-      'bitbucket_server',
-      'hipchat',
-      'github',
-      'gitlab',
-      'webhook',
-      'health.email',
-      'health.pagerduty',
-      'health.slack',
-      'health.webhook',
-      'script',
-    ];
-
-    /**
-     * @inheritdoc
-     */
-    protected static function checkProperty($property, $value)
-    {
-        $errors = [];
-        if ($property === 'type' && !in_array($value, self::$types)) {
-            $errors[] = "Invalid type: '$value'";
-        }
-
-        return $errors;
-    }
-
     /**
      * Trigger the integration's web hook.
      *
