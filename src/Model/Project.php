@@ -178,7 +178,8 @@ class Project extends Resource implements HasActivitiesInterface
                     $email,
                     $this,
                     $role,
-                    $environments
+                    $environments,
+                    $permissions
                 );
             }
             throw $e;
