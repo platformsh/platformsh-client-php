@@ -2,6 +2,8 @@
 
 namespace Platformsh\Client\Model;
 
+use Platformsh\Client\Model\Backups\RestoreOptions;
+
 /**
  * An environment backup.
  *
@@ -19,4 +21,16 @@ class Backup extends Resource
 {
     const STATUS_CREATED = 'CREATED';
     const STATUS_DELETED = 'DELETED';
+
+    /**
+     * Restores a backup.
+     *
+     * @param RestoreOptions|null $options
+     *
+     * @return Result
+     */
+    public function restore(RestoreOptions $options = null)
+    {
+        return $this->runOperation('restore', 'POST', $options ? $options->toArray() : []);
+    }
 }
