@@ -3,7 +3,7 @@
 namespace Platformsh\Client\Model;
 
 /**
- * Represents a Platform.sh organization.
+ * Represents a user with access to a Platform.sh organization.
  *
  * @property-read string $id
  * @property-read string $organization_id
