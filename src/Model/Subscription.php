@@ -173,7 +173,7 @@ class Subscription extends ApiResourceBase
      */
     protected function setData(array $data)
     {
-        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : $data;
+        $data = $data['subscriptions'][0] ?? $data['items'][0] ?? $data;
         $this->data = $data;
     }
 
@@ -182,9 +182,10 @@ class Subscription extends ApiResourceBase
      */
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
-        $data = isset($data['subscriptions']) ? $data['subscriptions'] : [];
+        $data = $data['subscriptions'] ?? $data['items'] ?? [];
         return parent::wrapCollection($data, $baseUrl, $client);
     }
+
 
     /**
      * @inheritdoc

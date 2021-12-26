@@ -13,6 +13,7 @@ use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Billing\PlanRecord;
 use Platformsh\Client\Model\Billing\PlanRecordQuery;
+use Platformsh\Client\Model\Organization;
 use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Region;
@@ -291,6 +292,29 @@ class PlatformClient
         return array_filter($request, function ($element) {
             return $element !== null;
         });
+    }
+
+    /**
+     * Get a list of your Platform.sh organizations.
+     *
+     * @return Organization[]
+     */
+    public function getOrganizations() {
+        $url = $this->apiUrl() . '/organizations';
+        return Organization::getCollection($url, 0, [], $this->connector->getClient());
+    }
+
+    /**
+     * Get an organization by its ID.
+     *
+     * @param string $id
+     *
+     * @return Organization|false
+     */
+    public function getOrganization($id)
+    {
+        $url = $this->apiUrl() . '/organizations';
+        return Organization::get($id, $url, $this->connector->getClient());
     }
 
     /**
