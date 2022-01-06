@@ -57,6 +57,8 @@ use Platformsh\Client\Model\Git\Commit;
  * @property-read array       $backups
  *   The backup configuration. It's recommended to use getBackupConfig() instead
  *   of using this array directly.
+ * @property-read string      $edge_hostname
+ *   The hostname for the edge router that serves the environment.
  */
 class Environment extends ApiResourceBase implements HasActivitiesInterface
 {
