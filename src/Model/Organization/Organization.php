@@ -8,15 +8,16 @@ use Platformsh\Client\Model\Organization\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Organization\Invitation\OrganizationInvitation;
 use Platformsh\Client\Model\Ref\UserRef;
 use Platformsh\Client\Model\ResourceWithReferences;
-use Platformsh\Client\Model\Subscription;
 use Platformsh\Client\Model\Result;
+use Platformsh\Client\Model\Subscription;
 
 /**
- * @property-read string $id
- * @property-read string $owner_id
+ * @property-read string $id The organization ID
+ * @property-read string $owner_id The user ID of the organization owner
+ * @property-read string $name The organization's machine name (used in URLs)
+ * @property-read string $label The organization's "human-readable" name
+ * @property-read string $country ISO 2-letter country code
  * @property-read string $namespace
- * @property-read string $name
- * @property-read string $label
  * @property-read string $created_at
  * @property-read string $updated_at
  */

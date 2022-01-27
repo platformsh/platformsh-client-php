@@ -589,16 +589,17 @@ class PlatformClient
      *
      * @param string $name
      * @param string $label
+     * @param string $country An ISO 2-letter country code.
      *
      * @return Organization
      */
-    public function createOrganization($name, $label = '')
+    public function createOrganization($name, $label = '', $country = '')
     {
         if (!$this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         $url = '/organizations';
-        $values = ['name' => $name, 'label' => $label];
+        $values = ['name' => $name, 'label' => $label, 'country' => $country];
         return Organization::create($values, $url, $this->connector->getClient());
     }
 }
