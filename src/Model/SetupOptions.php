@@ -17,7 +17,7 @@ class SetupOptions
     use ReadOnlyStructureTrait;
 
     /**
-     * Creates a setup options list.
+     * Creates a setup options list based on passed data.
      *
      * @param array           $body           array of the data to send in the post.
      * @param string          $url           The URL of the setup options api.
@@ -28,6 +28,20 @@ class SetupOptions
     public static function create(array $body, $url, ClientInterface $client)
     {
         $response = $client->post($url, ['json' => $body]);
+        return new self($response->json());
+    }
+
+    /**
+     * Fetches a setup options list from a known URL.
+     *
+     * @param string $url
+     * @param ClientInterface $client
+     *
+     * @return SetupOptions
+     */
+    public static function get($url, ClientInterface $client)
+    {
+        $response = $client->get($url);
         return new self($response->json());
     }
 }

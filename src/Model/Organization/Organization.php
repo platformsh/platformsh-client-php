@@ -9,6 +9,7 @@ use Platformsh\Client\Model\Organization\Invitation\OrganizationInvitation;
 use Platformsh\Client\Model\Ref\UserRef;
 use Platformsh\Client\Model\ResourceWithReferences;
 use Platformsh\Client\Model\Result;
+use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\Subscription;
 
 /**
@@ -76,6 +77,16 @@ class Organization extends ResourceWithReferences
     public function getSubscription($id)
     {
         return Subscription::get($id, $this->getUri() . '/subscriptions', $this->client);
+    }
+
+    /**
+     * Returns setup options for the organization.
+     *
+     * @return SetupOptions
+     */
+    public function getSetupOptions()
+    {
+        return SetupOptions::get($this->getUri() . '/setup/options', $this->client);
     }
 
     /**
