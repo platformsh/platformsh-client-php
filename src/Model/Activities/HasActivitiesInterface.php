@@ -2,6 +2,7 @@
 
 namespace Platformsh\Client\Model\Activities;
 
+use DateTime;
 use Platformsh\Client\Model\Activity;
 
 /**
@@ -28,8 +29,8 @@ interface HasActivitiesInterface {
      *   Limit the number of activities to return. Zero for no limit.
      * @param string|null $type
      *   Filter activities by type.
-     * @param int|null    $startsAt
-     *   A UNIX timestamp for the maximum created date of activities to return.
+     * @param int|DateTime|null    $startsAt
+     *   A UNIX timestamp or DateTime for the maximum created date of activities to return.
      * @param string|string[]|null $state
      *   Filter activities by state ("pending", "in_progress", "complete" or "cancelled").
      * @param string|string[]|null $result
