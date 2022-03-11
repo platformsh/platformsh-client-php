@@ -303,7 +303,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @param string          $url     The collection URL.
      * @param int             $limit   A limit on the number of resources to
-     *                                 return. Use 0 for no limit.
+     *                                 return. Use 0 for no limit. Deprecated.
      * @param array           $options An array of additional Guzzle request
      *                                 options.
      * @param ClientInterface $client  A suitably configured Guzzle client.
@@ -312,15 +312,11 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public static function getCollection($url, $limit, array $options, ClientInterface $client)
     {
-        // @todo uncomment this when the API implements a 'count' parameter
-        // if ($limit) {
-            // $options['query']['count'] = $limit;
-        // }
         $request = new Request('get', $url);
         $data = self::send($request, $client, $options);
 
         // @todo remove this when the API implements a 'count' parameter
-        if ($limit) {
+        if (!empty($limit) && count($data) > $limit) {
             $data = array_slice($data, 0, $limit);
         }
 
