@@ -2,6 +2,8 @@
 
 namespace Platformsh\Client\Model;
 
+use DateTime;
+use DateTimeZone;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Stream\StreamInterface;
@@ -216,21 +218,27 @@ class Activity extends Resource
     }
 
     /**
-     * @param int $timestamp
+     * @param int|DateTime $timestamp UNIX UTC timestamp (seconds) or DateTime
      *
-     * @return false|string
+     * @return false|string 2022-02-22T02:00:00.000000+00:00
      */
     public static function formatStartsAt($timestamp)
     {
-        $tz = date_default_timezone_get();
-        date_default_timezone_set('UTC');
-        $date = date('c', $timestamp);
-        date_default_timezone_set($tz);
+        if ($timestamp instanceof DateTime) {
+            // Override the timezone to produce a UTC ISO date
+            $date = clone $timestamp;
+            $date->setTimezone(new DateTimeZone("UTC"));
+        } else {
+            // Parse the UNIX UTC timestamp (seconds) into a DateTime
+            $date = DateTime::createFromFormat('U', $timestamp, new DateTimeZone("UTC"));
+        }
+        
         if (!$date) {
             throw new \RuntimeException(sprintf('Failed to format timestamp: %d', $timestamp));
         }
-
-        return $date;
+        
+        # Sample: 2022-02-22T02:00:00.000000+00:00
+        return $date = $date->format('Y-m-d\TH:i:s.uP');
     }
 
     /**
