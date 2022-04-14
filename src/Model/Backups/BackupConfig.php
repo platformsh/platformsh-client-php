@@ -4,10 +4,7 @@ namespace Platformsh\Client\Model\Backups;
 
 class BackupConfig
 {
-    /** @var \Platformsh\Client\Model\Backups\Policy */
-    private $policies = [];
-
-    /** @var int */
+    private $policies;
     private $manualCount;
 
     /**
@@ -52,7 +49,7 @@ class BackupConfig
     /**
      * Get a list of backup retention policies.
      *
-     * @return \Platformsh\Client\Model\Backups\Policy[]
+     * @return Policy[]
      */
     public function getPolicies()
     {

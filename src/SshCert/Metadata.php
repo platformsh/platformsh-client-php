@@ -78,7 +78,7 @@ class Metadata {
         // The 'J' format for pack/unpack was added in PHP 5.6.3.
         if (\version_compare(PHP_VERSION, '5.6.3', '<')) {
             list(, $most, $least) = \unpack('N2', $packed);
-            return (int) (($most << 32) | $least);
+            return ($most << 32) | $least;
         }
         return (int) \unpack('J', $packed)[1];
     }

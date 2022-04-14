@@ -389,7 +389,7 @@ class Project extends Resource implements HasActivitiesInterface
      * @param bool $json
      *   Whether this variable's value is JSON-encoded.
      * @param bool $visibleBuild
-     *   Whether this this variable should be exposed during the build phase.
+     *   Whether this variable should be exposed during the build phase.
      * @param bool $visibleRuntime
      *   Whether this variable should be exposed during deploy and runtime.
      * @param bool $sensitive

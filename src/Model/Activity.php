@@ -127,9 +127,7 @@ class Activity extends Resource
     private function readline(StreamInterface $stream, $newline = "\n") {
         $buffer = '';
         while (!$stream->eof()) {
-            if (false === ($byte = $stream->read(1))) {
-                return $buffer;
-            }
+            $byte = $stream->read(1);
             $buffer .= $byte;
             if ($byte === $newline) {
                 break;
@@ -218,9 +216,13 @@ class Activity extends Resource
     }
 
     /**
+     * Formats a timestamp as RFC3339, to be used in the API's starts_at parameter.
+     *
      * @param int|DateTime $timestamp UNIX UTC timestamp (seconds) or DateTime
      *
-     * @return false|string 2022-02-22T02:00:00.000000+00:00
+     * @throws \RuntimeException if the timestamp is invalid
+     *
+     * @return string 2022-02-22T02:00:00.000000+00:00
      */
     public static function formatStartsAt($timestamp)
     {
@@ -232,13 +234,13 @@ class Activity extends Resource
             // Parse the UNIX UTC timestamp (seconds) into a DateTime
             $date = DateTime::createFromFormat('U', $timestamp, new DateTimeZone("UTC"));
         }
-        
+
         if (!$date) {
             throw new \RuntimeException(sprintf('Failed to format timestamp: %d', $timestamp));
         }
-        
+
         # Sample: 2022-02-22T02:00:00.000000+00:00
-        return $date = $date->format('Y-m-d\TH:i:s.uP');
+        return $date->format('Y-m-d\TH:i:s.uP');
     }
 
     /**

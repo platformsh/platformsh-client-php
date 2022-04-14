@@ -2,8 +2,6 @@
 
 namespace Platformsh\Client\Model;
 
-use GuzzleHttp\ClientInterface;
-
 /**
  * Represents a Platform.sh region.
  *

@@ -134,7 +134,7 @@ abstract class Resource implements \ArrayAccess
     }
 
     /**
-     * Get all of the API data for this resource.
+     * Get all the API data for this resource.
      *
      * @return array
      */
@@ -620,8 +620,7 @@ abstract class Resource implements \ArrayAccess
      */
     public function getPropertyNames()
     {
-        $keys = array_filter(array_keys($this->data), [$this, 'isProperty']);
-        return $keys;
+        return array_filter(array_keys($this->data), [$this, 'isProperty']);
     }
 
     /**

@@ -2,9 +2,7 @@
 
 namespace Platformsh\Client\Model\Organization;
 
-use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Model\Ref\UserRef;
-use Platformsh\Client\Model\Resource;
 use Platformsh\Client\Model\ResourceWithReferences;
 
 /**

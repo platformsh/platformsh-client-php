@@ -51,7 +51,7 @@ class ResourceWithReferences extends Resource
                     $item['ref:users'][$value] = $data['ref:users'][$value];
                 }
                 // And organization-related references.
-                if (\in_array($key, ['organization_id']) && isset($data['ref:organizations'][$value])) {
+                if ($key === 'organization_id' && isset($data['ref:organizations'][$value])) {
                     $item['ref:organizations'][$value] = $data['ref:organizations'][$value];
                 }
             }
