@@ -26,7 +26,9 @@ trait HasActivitiesTrait {
     {
         $query = '';
         if ($type !== null) {
-            $query .= '&type=' . \rawurlencode($type);
+            foreach ((array) $type as $typeItem) {
+                $query .= '&type=' . \rawurlencode($typeItem);
+            }
         }
         if ($startsAt !== null) {
             $query .= '&starts_at=' . Activity::formatStartsAt($startsAt);
