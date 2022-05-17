@@ -612,7 +612,7 @@ abstract class Resource implements \ArrayAccess
         $base = Url::fromString($baseUrl);
         $target = Url::fromString($relativeUrl);
         // Ensure an absolute base URL overrides an absolute target URL.
-        if ($base->isAbsolute()) {
+        if ($base->isAbsolute() && \in_array($target->getScheme(), ['http', 'https'])) {
             return (string) $base->combine($target->getPath());
         }
         return (string) $base->combine($target);
