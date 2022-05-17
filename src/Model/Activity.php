@@ -67,7 +67,7 @@ class Activity extends Resource
             }
         }
         $retries = 0;
-        while (!$this->isComplete()) {
+        while (!$this->isComplete() && $this->state !== self::STATE_CANCELLED) {
             usleep($pollInterval * 1000000);
             try {
                 $this->refresh(['timeout' => $pollInterval + 5]);
