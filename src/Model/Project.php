@@ -123,7 +123,7 @@ class Project extends Resource implements HasActivitiesInterface
     public function setApiUrl($url)
     {
         $projectUrl = Url::fromString($url)->combine('/projects/' . \urlencode($this->id))->__toString();
-        $this->urlViaGateway = $projectUrl;
+        $this->baseUrl = $this->urlViaGateway = $projectUrl;
     }
 
     /**
@@ -213,27 +213,43 @@ class Project extends Resource implements HasActivitiesInterface
      */
     public function getLink($rel, $absolute = true)
     {
+        /**
+         * Require the API URL to be set for 'invitations' and 'access'.
+         *
+         * These endpoints require the external API proxy or gateway, or may
+         * require it in the future.
+         *
+         * The parent method, via self::makeAbsoluteUrl(), ensures an
+         * appropriate base URL is used otherwise.
+         *
+         * @see setApiUrl()
+         * @see makeAbsoluteUrl()
+         */
+        if ($rel === 'invitations' || $rel === 'access') {
+            if (!isset($this->urlViaGateway)) {
+                throw new \RuntimeException('The API gateway URL must be set');
+            }
+        }
+
+        // Use the HAL links available on the project.
         if ($this->hasLink($rel)) {
             return parent::getLink($rel, $absolute);
         }
 
+        // If the 'self' link is not present then this might be a project
+        // stub with an 'endpoint' property.
         if ($rel === 'self') {
-            return $this->getProperty('endpoint');
+            return $this->makeAbsoluteUrl($this->getProperty('endpoint'));
         }
 
+        // If the '#ui' link is not present then this might be a project
+        // stub with a 'uri' property.
         if ($rel === '#ui') {
             return $this->getProperty('uri');
         }
 
         if ($rel === '#manage-variables') {
             return $this->getUri() . '/variables';
-        }
-
-        if ($rel === 'invitations') {
-            if (!isset($this->urlViaGateway)) {
-                throw new \RuntimeException('The API gateway URL must be set');
-            }
-            return rtrim($this->urlViaGateway, '/') . '/invitations';
         }
 
         return $this->getUri() . '/' . ltrim($rel, '#');

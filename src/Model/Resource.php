@@ -589,7 +589,7 @@ abstract class Resource implements \ArrayAccess
             throw new \InvalidArgumentException("Link not found: $rel");
         }
         $url = $this->data['_links'][$rel]['href'];
-        if ($absolute && strpos($url, '//') === false) {
+        if ($absolute || strpos($url, '//') !== false) {
             $url = $this->makeAbsoluteUrl($url);
         }
         return $url;
@@ -610,7 +610,12 @@ abstract class Resource implements \ArrayAccess
             throw new \RuntimeException('No base URL');
         }
         $base = Url::fromString($baseUrl);
-        return (string) $base->combine($relativeUrl);
+        $target = Url::fromString($relativeUrl);
+        // Ensure an absolute base URL overrides an absolute target URL.
+        if ($base->isAbsolute()) {
+            return (string) $base->combine($target->getPath());
+        }
+        return (string) $base->combine($target);
     }
 
     /**
