@@ -32,7 +32,7 @@ class ResourceTest extends TestCase
               ],
             ],
           ];
-        $this->resource = new MockApiResource($data, null, null, true);
+        $this->resource = new MockApiResource($data, 'https://example.com', null, true);
     }
 
     /**

@@ -61,9 +61,9 @@ interface ConnectorInterface
     public function setApiToken($token, $type);
 
     /**
-     * Get the configured accounts endpoint URL.
+     * Get the configured API gateway URL (without trailing slash).
      *
      * @return string
      */
-    public function getAccountsEndpoint();
+    public function getApiUrl();
 }

@@ -13,6 +13,8 @@ use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Billing\PlanRecord;
 use Platformsh\Client\Model\Billing\PlanRecordQuery;
+use Platformsh\Client\Model\Filter\Filter;
+use Platformsh\Client\Model\Organization\Organization;
 use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\Region;
@@ -218,9 +220,8 @@ class PlatformClient
             $result = $this->simpleGet($url);
         }
         catch (BadResponseException $e) {
-            $response = $e->getResponse();
             $ignoredErrorCodes = [403, 404];
-            if ($response && in_array($response->getStatusCode(), $ignoredErrorCodes)) {
+            if (in_array($e->getResponse()->getStatusCode(), $ignoredErrorCodes)) {
                 return false;
             }
             throw ApiResponseException::wrapGuzzleException($e);
@@ -319,7 +320,6 @@ class PlatformClient
      */
     public function createSubscription($options, $plan = null, $title = null, $storage = null, $environments = null, array $activation_callback = null, $options_url = null)
     {
-        $url = $this->apiUrl() . '/subscriptions';
         if ($options instanceof SubscriptionOptions) {
             $values = $options->toArray();
         } elseif (\is_string($options)) {
@@ -341,17 +341,29 @@ class PlatformClient
             throw new \InvalidArgumentException('The first argument must be a SubscriptionOptions object or a string');
         }
 
+        if ($id = $options->organizationId()) {
+            $url = $this->apiUrl() . '/organizations/' . \rawurlencode($id) . '/subscriptions';
+        } else {
+            $url = $this->apiUrl() . '/subscriptions';
+        }
+
         return Subscription::create($values, $url, $this->connector->getClient());
     }
 
     /**
      * Get a list of your Platform.sh subscriptions.
      *
+     * @param string|null $organizationId
+     *
      * @return Subscription[]
      */
-    public function getSubscriptions()
+    public function getSubscriptions($organizationId = null)
     {
-        $url = $this->apiUrl() . '/subscriptions';
+        if (isset($organizationId)) {
+            $url = $this->apiUrl() . '/' . $organizationId . '/subscriptions';
+        } else {
+            $url = $this->apiUrl() . '/subscriptions';
+        }
         return Subscription::getCollection($url, 0, [], $this->connector->getClient());
     }
 
@@ -372,15 +384,16 @@ class PlatformClient
      * Estimate the cost of a subscription.
      *
      * @param string      $plan         The plan machine name.
-     * @param int         $storage      The allowed storage per environment
-     *                                  (MiB).
+
+     * @param int         $storage      The allowed storage per environment (MiB).
      * @param int         $environments The number of environments.
      * @param int         $users        The number of users.
      * @param string|null $countryCode  A two-letter country code.
+     * @param string|null $organizationId An organization ID.
      *
      * @return array An array containing at least 'total' (a formatted price).
      */
-    public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null)
+    public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null, $organizationId = null)
     {
         $options = [];
         $options['query'] = [
@@ -393,7 +406,13 @@ class PlatformClient
             $options['query']['country_code'] = $countryCode;
         }
 
-        return $this->simpleGet($this->apiUrl() . '/subscriptions/estimate', $options);
+        if ($organizationId) {
+            $url = $this->apiUrl() . '/organizations/' . \rawurlencode($organizationId) . '/subscriptions/estimate';
+        } else {
+            $url = $this->apiUrl() . '/subscriptions/estimate';
+        }
+
+        return $this->simpleGet($url, $options);
     }
 
     /**
@@ -453,7 +472,7 @@ class PlatformClient
             ['json' => ['key' => $publicKey]]
         );
 
-        return \GuzzleHttp\json_decode($response->getBody(), true)['certificate'];
+        return \GuzzleHttp\json_decode((string) $response->getBody(), true)['certificate'];
     }
 
     /**
@@ -508,5 +527,111 @@ class PlatformClient
             $id = 'me';
         }
         return User::get($id, $this->connector->getApiUrl() . '/users', $this->connector->getClient());
+    }
+
+    /**
+     * Lists all available organizations.
+     *
+     * @param \Platformsh\Client\Model\Filter\FilterInterface[] $filters
+     *
+     * @return Organization[]
+     */
+    public function listOrganizations(array $filters = [])
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $path = '/organizations';
+        $options = [];
+        if (!empty($filters)) {
+            $options['query'] = [];
+            foreach ($filters as $filter) {
+                $options['query'] += $filter->params();
+            }
+        }
+        return Organization::getCollection($this->connector->getApiUrl() . $path, 0, $options, $this->connector->getClient());
+    }
+
+    /**
+     * Lists organizations of which the given user is a member.
+     *
+     * @param string $userId
+     *
+     * @return Organization[]
+     */
+    public function listOrganizationsWithMember($userId)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $path = '/users/' . \rawurlencode($userId) . '/organizations';
+        return Organization::getCollection($path, 0, [], $this->connector->getClient());
+    }
+
+    /**
+     * Lists organizations owned by the given user ID.
+     *
+     * @param string $ownerId
+     *
+     * @return Organization[]
+     */
+    public function listOrganizationsByOwner($ownerId)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        return $this->listOrganizations([new Filter('owner_id', $ownerId)]);
+    }
+
+    /**
+     * Gets a single organization by name.
+     *
+     * @param string $name
+     *
+     * @return Organization|false
+     */
+    public function getOrganizationByName($name)
+    {
+        return $this->getOrganizationById('name=' . $name);
+    }
+
+    /**
+     * Gets a single organization.
+     *
+     * @param string $id
+     *
+     * @return Organization|false
+     */
+    public function getOrganizationById($id)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        return Organization::get($id, '/organizations', $this->connector->getClient());
+    }
+
+    /**
+     * Creates a new organization.
+     *
+     * Warning: owning more than 1 organization will cause certain deprecated
+     * APIs to stop working. The /subscriptions API now must be accessed under
+     * /organizations/{id}/subscriptions, and the same applies to similar APIs
+     * that are concerned with subscriptions or billing. The old API path will
+     * only continue to work for users who own just 1 organization (or 0).
+     *
+     * @param string $name
+     * @param string $label
+     * @param string $country An ISO 2-letter country code.
+     *
+     * @return Organization
+     */
+    public function createOrganization($name, $label = '', $country = '')
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $url = '/organizations';
+        $values = ['name' => $name, 'label' => $label, 'country' => $country];
+        return Organization::create($values, $url, $this->connector->getClient());
     }
 }

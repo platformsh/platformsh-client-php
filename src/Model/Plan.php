@@ -2,8 +2,6 @@
 
 namespace Platformsh\Client\Model;
 
-use GuzzleHttp\ClientInterface;
-
 /**
  * Represents a Platform.sh plan.
  *
@@ -13,6 +11,8 @@ use GuzzleHttp\ClientInterface;
  */
 class Plan extends ApiResourceBase
 {
+    protected static $collectionItemsKey = 'plans';
+
     /**
      * {@inheritdoc}
      */
@@ -23,25 +23,6 @@ class Plan extends ApiResourceBase
         }
 
         return parent::__get($name);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function setData(array $data)
-    {
-        $data = isset($data['plans'][0]) ? $data['plans'][0] : $data;
-        $this->data = $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
-    {
-        $data = isset($data['plans']) ? $data['plans'] : [];
-
-        return parent::wrapCollection($data, $baseUrl, $client);
     }
 
     /**

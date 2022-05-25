@@ -20,6 +20,8 @@ use Platformsh\Client\Exception\OperationUnavailableException;
  */
 abstract class ApiResourceBase implements \ArrayAccess
 {
+    /** @var string|null */
+    protected static $collectionItemsKey;
 
     /** @var array */
     protected static $required = [];
@@ -49,10 +51,10 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = true)
     {
-        $this->setData($data);
         $this->client = $client ?: new Client();
         $this->baseUrl = (string) $baseUrl;
         $this->isFull = $full;
+        $this->setData($data);
     }
 
     /**
@@ -136,7 +138,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * Get all of the API data for this resource.
+     * Get all the API data for this resource.
      *
      * @return array
      */
@@ -303,7 +305,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @param string          $url     The collection URL.
      * @param int             $limit   A limit on the number of resources to
-     *                                 return. Use 0 for no limit.
+     *                                 return. Deprecated.
      * @param array           $options An array of additional Guzzle request
      *                                 options.
      * @param ClientInterface $client  A suitably configured Guzzle client.
@@ -320,7 +322,7 @@ abstract class ApiResourceBase implements \ArrayAccess
         $data = self::send($request, $client, $options);
 
         // @todo remove this when the API implements a 'count' parameter
-        if ($limit) {
+        if (!empty($limit) && count($data) > $limit) {
             $data = array_slice($data, 0, $limit);
         }
 
@@ -341,7 +343,11 @@ abstract class ApiResourceBase implements \ArrayAccess
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
         $resources = [];
-        foreach ($data as $item) {
+        $items = $data;
+        if (isset(static::$collectionItemsKey)) {
+            $items = $items[static::$collectionItemsKey];
+        }
+        foreach ($items as $item) {
             $resources[] = new static($item, $baseUrl, $client);
         }
 
@@ -362,12 +368,8 @@ abstract class ApiResourceBase implements \ArrayAccess
         if (!$this->operationAvailable($op, true)) {
             throw new OperationUnavailableException("Operation not available: $op");
         }
-        $options = [];
-        if (!empty($body)) {
-            $options['json'] = $body;
-        }
-        $request= new Request($method, $this->getLink("#$op"));
-        $data = $this->send($request, $this->client, $options);
+        $request = new Request($method, $this->getLink("#$op"), ['Content-Type' => 'application/json'], $body ? \json_encode($body) : null);
+        $data = $this->send($request, $this->client);
 
         return new Result($data, $this->baseUrl, $this->client, get_called_class());
     }
@@ -560,7 +562,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @return bool
      */
-    private function isOperationAvailable($op)
+    protected function isOperationAvailable($op)
     {
         return isset($this->data['_links']["#$op"]['href']);
     }
@@ -591,7 +593,7 @@ abstract class ApiResourceBase implements \ArrayAccess
             throw new \InvalidArgumentException("Link not found: $rel");
         }
         $url = $this->data['_links'][$rel]['href'];
-        if ($absolute && strpos($url, '//') === false) {
+        if ($absolute || strpos($url, '//') !== false) {
             $url = $this->makeAbsoluteUrl($url);
         }
         return $url;
@@ -612,8 +614,12 @@ abstract class ApiResourceBase implements \ArrayAccess
             throw new \RuntimeException('No base URL');
         }
         $base = Utils::uriFor($baseUrl);
-
-        return $base->withPath($relativeUrl)->__toString();
+        $target = Utils::uriFor($relativeUrl);
+        // Ensure an absolute base URL overrides an absolute target URL.
+        if ($base->getScheme() != '' && \in_array($target->getScheme(), ['http', 'https'])) {
+            return (string) $base->withPath($target->getPath());
+        }
+        return (string) $base->withPath((string) $target);
     }
 
     /**
@@ -623,8 +629,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public function getPropertyNames()
     {
-        $keys = array_filter(array_keys($this->data), [$this, 'isProperty']);
-        return $keys;
+        return array_filter(array_keys($this->data), [$this, 'isProperty']);
     }
 
     /**

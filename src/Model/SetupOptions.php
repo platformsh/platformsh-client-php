@@ -33,4 +33,19 @@ class SetupOptions
         $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
         return new self($data);
     }
+
+    /**
+     * Fetches a setup options list from a known URL.
+     *
+     * @param string $url
+     * @param ClientInterface $client
+     *
+     * @return SetupOptions
+     */
+    public static function get($url, ClientInterface $client)
+    {
+        $response = $client->get($url);
+        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        return new self($data);
+    }
 }

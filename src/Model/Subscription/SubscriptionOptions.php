@@ -26,6 +26,9 @@ final class SubscriptionOptions {
      */
     private $activation_callback;
 
+    /** @var string|NULL */
+    private $organization_id;
+
     /**
      * @param array $options
      *
@@ -48,10 +51,15 @@ final class SubscriptionOptions {
     public function toArray() {
         $arr = [];
         foreach ($this as $key => $value) {
-            if ($value !== null) {
+            if ($value !== null && $value !== 'organization_id') {
                 $arr[$key] = $value;
             }
         }
         return $arr;
+    }
+
+    /** @return string|NULL */
+    public function organizationId() {
+        return $this->organization_id;
     }
 }

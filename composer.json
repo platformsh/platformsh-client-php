@@ -3,11 +3,12 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
-        "php": ">=7.1.0",
+        "php": ">=7.2.5",
         "cocur/slugify": "^3.0",
         "guzzlehttp/guzzle": "^6.3 || ^7.0",
         "platformsh/oauth2": ">=0.0.3 <2",
-        "ext-json": "*"
+        "ext-json": "*",
+        "khill/php-duration": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0"
@@ -26,5 +27,10 @@
         {
             "name": "Patrick Dawkins"
         }
-    ]
+    ],
+    "config": {
+        "platform": {
+            "php": "7.2.5"
+        }
+    }
 }

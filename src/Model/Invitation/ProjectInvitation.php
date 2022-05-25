@@ -9,11 +9,14 @@ use Platformsh\Client\Model\ApiResourceBase;
  * @property-read string $state
  * @property-read string $role
  * @property-read Environment[] $environments
+ * @property-read Permission[] $permissions
  * @property-read string $created_at
  * @property-read string $updated_at
  * @property-read string|null $finished_at
  */
-class ProjectInvitation extends ApiResourceBase {
+class ProjectInvitation extends ApiResourceBase
+{
+
     /**
      * {@inheritDoc}
      *
@@ -29,6 +32,15 @@ class ProjectInvitation extends ApiResourceBase {
             }
             return $environments;
         }
+
+        if ($property === 'permissions') {
+            $permissions = [];
+            foreach ($value as $item) {
+                $permissions[] = new Permission($item['type'], $item['role']);
+            }
+            return $permissions;
+        }
+
         return $value;
     }
 }

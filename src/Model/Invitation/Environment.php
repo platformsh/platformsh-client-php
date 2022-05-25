@@ -2,6 +2,9 @@
 
 namespace Platformsh\Client\Model\Invitation;
 
+/**
+ * Represents an item in the "environments" list for a project invitation.
+ */
 class Environment
 {
     private $id;

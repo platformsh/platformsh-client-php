@@ -36,9 +36,6 @@ class Connector implements ConnectorInterface
     /** @var SessionInterface */
     protected $session;
 
-    /** @var bool */
-    protected $loggedOut = false;
-
     /**
      * @var array $storageKeys
      *
@@ -61,6 +58,9 @@ class Connector implements ConnectorInterface
      * @param array            $config
      *     Possible configuration keys are:
      *     - api_url (string): The API base URL.
+     *     - token_url (string): The OAuth 2.0 token URL.
+     *     - revoke_url (string): The OAuth 2.0 revocation URL.
+     *     - certifier_url (string): The SSH certificate issuer URL.
      *     - client_id (string): The OAuth2 client ID for this client.
      *     - debug (bool): Whether or not Guzzle debugging should be enabled
      *       (default: false).
@@ -70,6 +70,13 @@ class Connector implements ConnectorInterface
      *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
      *       Use a string to specify an HTTP proxy, or an array to specify
      *       different proxies for different protocols.
+     *     - timeout (float): The default request timeout for any request, in
+     *       seconds (default: 60).
+     *     - connect_timeout (float): The default connection timeout for any
+     *       request, in seconds (default: 60).
+     *     - on_refresh_error: A callback to run when a refresh token error is
+     *       received. It will be passed a Guzzle BadResponseException, and
+     *       should return an AccessToken or null.
      * @param SessionInterface $session
      */
     public function __construct(array $config = [], SessionInterface $session = null)
@@ -91,9 +98,12 @@ class Connector implements ConnectorInterface
           'token_url' => 'https://auth.api.platform.sh/oauth2/token',
           'certifier_url' => 'https://ssh.api.platform.sh',
           'proxy' => null,
+          'timeout' => 60.0,
+          'connect_timeout' => 60.0,
           'api_token' => null,
           'api_token_type' => 'exchange',
           'gzip' => extension_loaded('zlib'),
+          'on_refresh_error' => null,
         ];
         $this->config = $config + $defaults;
 
@@ -146,6 +156,8 @@ class Connector implements ConnectorInterface
      * Get the configured accounts endpoint URL.
      *
      * @deprecated Use Connector::getApiUrl() instead
+     *
+     * @return string
      */
     public function getAccountsEndpoint()
     {
@@ -169,6 +181,7 @@ class Connector implements ConnectorInterface
      */
     public function logOut()
     {
+        $this->client = null;
         try {
             $this->revokeTokens();
         } catch (RequestException $e) {
@@ -228,6 +241,7 @@ class Connector implements ConnectorInterface
                     'token' => $token,
                     'token_type_hint' => $type,
                 ],
+                'auth' => false,
             ];
             $this->getClient()->request('post', $url, $options);
         }
@@ -266,7 +280,7 @@ class Connector implements ConnectorInterface
 
     private function getProvider()
     {
-        return $this->provider ? $this->provider : new Platformsh([
+        return $this->provider ?: new Platformsh([
           'clientId' => $this->config['client_id'],
           'clientSecret' => $this->config['client_secret'],
           'token_url' => $this->config['token_url'],
@@ -282,7 +296,7 @@ class Connector implements ConnectorInterface
      *
      * @param AccessTokenInterface $token
      */
-    protected function saveToken(AccessTokenInterface $token)
+    public function saveToken(AccessTokenInterface $token)
     {
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
             return;
@@ -367,6 +381,15 @@ class Connector implements ConnectorInterface
             if ($accessToken = $this->loadToken()) {
                 $this->oauthMiddleware->setAccessToken($accessToken);
             }
+
+            $this->oauthMiddleware->setTokenSaveCallback(function (AccessToken $token) {
+                $this->saveToken($token);
+            });
+
+// @todo
+//            if ($this->config['on_refresh_error'] !== null) {
+//                $this->oauthMiddleware->setOnRefreshError($this->config['on_refresh_error']);
+//            }
         }
 
         return $this->oauthMiddleware;
@@ -402,12 +425,18 @@ class Connector implements ConnectorInterface
                 'debug' => $this->config['debug'],
                 'verify' => $this->config['verify'],
                 'proxy' => $this->config['proxy'],
+                'timeout' => $this->config['timeout'],
+                'connect_timeout' => $this->config['connect_timeout'],
                 'auth' => 'oauth2',
             ];
 
             if ($this->config['gzip']) {
                 $config['decode_content'] = true;
                 $config['headers']['Accept-Encoding'] = 'gzip';
+            }
+
+            if ($url = $this->getApiUrl()) {
+                $config['base_url'] = $url; // @todo check this
             }
 
             $this->client = new Client($config);

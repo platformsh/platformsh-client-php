@@ -13,6 +13,7 @@ use Platformsh\Client\Model\Backups\Policy;
 use Platformsh\Client\Model\Deployment\EnvironmentDeployment;
 use Platformsh\Client\Model\Deployment\Worker;
 use Platformsh\Client\Model\Git\Commit;
+use Platformsh\Client\Model\Type\Duration;
 
 /**
  * A Platform.sh environment.
@@ -394,6 +395,21 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+    {
+        // The environments collection contains full information about each
+        // environment, so set $full to true when initializing.
+        $resources = [];
+        foreach ($data as $item) {
+            $resources[] = new static($item, $baseUrl, $client, true);
+        }
+
+        return $resources;
+    }
+
+    /**
      * Create a backup of the environment.
      *
      * @param bool $unsafeAllowInconsistent
@@ -529,7 +545,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         if (!empty($files)) {
             $values['files'] = $files;
         }
-    
+
         return $this->runLongOperation('initialize', 'post', $values);
     }
 
@@ -626,9 +642,13 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
             'interval' => $policy->getInterval(),
             'count' => $policy->getCount(),
         ];
-        if (!isset($backups['manual_count'])) {
-            $backups['manual_count'] = 3;
-        }
+
+        $backups += ['manual_count' => 3];
+
+        // Sort the backup schedule, by interval.
+        usort($backups['schedule'], function (array $a, array $b) {
+            return (new Duration($a['interval']))->compare(new Duration($b['interval']));
+        });
 
         return $this->update(['backups' => $backups]);
     }

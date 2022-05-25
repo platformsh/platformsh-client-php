@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
+use Platformsh\Client\Model\Ref\OrganizationRef;
 
 /**
  * Represents a Platform.sh subscription.
@@ -21,24 +22,26 @@ use GuzzleHttp\ClientInterface;
  * @property-read string $project_region_label
  * @property-read string $project_ui
  */
-class Subscription extends ApiResourceBase
+class Subscription extends ResourceWithReferences
 {
 
     /**
      * List of available plans.
      *
-     * @deprecated instead, use \Platformsh\Client\PlatformClient->getPlans()
+     * @deprecated
+     * @see \Platformsh\Client\PlatformClient::getPlans()
      *
-     * @var array
+     * @var string[]
      */
     public static $availablePlans = ['development', 'standard', 'medium', 'large'];
 
     /**
      * List of available regions.
      *
-     * @deprecated instead, use \Platformsh\Client\PlatformClient->getRegions()
+     * @deprecated
+     * @see \Platformsh\Client\PlatformClient::getRegions()
      *
-     * @var array
+     * @var string[]
      */
     public static $availableRegions = ['eu-3.platform.sh', 'us-2.platform.sh'];
 
@@ -182,7 +185,11 @@ class Subscription extends ApiResourceBase
      */
     public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
     {
-        $data = isset($data['subscriptions']) ? $data['subscriptions'] : [];
+        if (isset($data['items'])) {
+            static::$collectionItemsKey = 'items';
+        } elseif (isset($data['subscriptions'])) {
+            static::$collectionItemsKey = 'subscriptions';
+        }
         return parent::wrapCollection($data, $baseUrl, $client);
     }
 
@@ -207,5 +214,18 @@ class Subscription extends ApiResourceBase
             return $this->getUri($absolute);
         }
         return parent::getLink($rel, $absolute);
+    }
+
+    /**
+     * Returns detailed information about the subscription's organization, if known.
+     *
+     * @return OrganizationRef|null
+     */
+    public function getOrganizationInfo()
+    {
+        if (isset($this->data['organization_id']) && isset($this->data['ref:organizations'][$this->data['organization_id']])) {
+            return $this->data['ref:organizations'][$this->data['organization_id']];
+        }
+        return null;
     }
 }

@@ -4,8 +4,8 @@ namespace Platformsh\Client\Model\Backups;
 
 class BackupConfig
 {
-    /** @var \Platformsh\Client\Model\Backups\Policy */
-    private $policies = [];
+    /** @var Policy[] */
+    private $policies;
 
     /** @var int */
     private $manualCount;
@@ -32,7 +32,7 @@ class BackupConfig
     public static function fromData(array $data)
     {
         $policies = [];
-        foreach (isset($data['schedule']) ? $data['schedule'] : [] as $policyData) {
+        foreach ($data['schedule'] ?? [] as $policyData) {
             $policies[] = new Policy($policyData['interval'], $policyData['count']);
         }
 
@@ -52,7 +52,7 @@ class BackupConfig
     /**
      * Get a list of backup retention policies.
      *
-     * @return \Platformsh\Client\Model\Backups\Policy[]
+     * @return Policy[]
      */
     public function getPolicies()
     {

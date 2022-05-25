@@ -78,7 +78,7 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
     public static function listValidationErrors(BadResponseException $exception)
     {
         $response = $exception->getResponse();
-        if ($response && $response->getStatusCode() === 400) {
+        if ($response->getStatusCode() === 400) {
             $data = json_decode($response->getBody()->__toString(), true);
             if ($data !== null && isset($data['detail']) && is_array($data['detail'])) {
                 return $data['detail'];

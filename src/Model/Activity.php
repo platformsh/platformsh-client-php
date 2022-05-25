@@ -2,7 +2,12 @@
 
 namespace Platformsh\Client\Model;
 
+use DateTime;
+use DateTimeZone;
 use GuzzleHttp\Exception\ConnectException;
+use Platformsh\Client\Model\ActivityLog\LogItem;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * An activity on a Platform.sh environment.
@@ -12,7 +17,7 @@ use GuzzleHttp\Exception\ConnectException;
  *
  * @property-read string   $id
  * @property-read int      $completion_percent
- * @property-read string   $log
+ * @property-read string   $log Deprecated: use readLog() instead.
  * @property-read string   $created_at
  * @property-read string   $updated_at
  * @property-read string[] $environments
@@ -24,6 +29,7 @@ use GuzzleHttp\Exception\ConnectException;
  * @property-read string   $started_at
  * @property-read string   $type
  * @property-read string   $description The HTML description of the activity.
+ * @property-read string   $text The plain-text description of the activity.
  * @property-read array    $payload
  */
 class Activity extends ApiResourceBase
@@ -35,11 +41,10 @@ class Activity extends ApiResourceBase
     const STATE_COMPLETE = 'complete';
     const STATE_IN_PROGRESS = 'in_progress';
     const STATE_PENDING = 'pending';
+    const STATE_CANCELLED = 'cancelled';
 
     /**
      * Wait for the activity to complete.
-     *
-     * @todo use the FutureInterface
      *
      * @param callable  $onPoll       A function that will be called every time
      *                                the activity is polled for updates. It
@@ -48,18 +53,21 @@ class Activity extends ApiResourceBase
      * @param callable  $onLog        A function that will print new activity log
      *                                messages as they are received. It will be
      *                                passed one argument: the message as a
-     *                                string.
+     *                                string. Deprecated: use readLog() instead.
      * @param int|float $pollInterval The polling interval, in seconds.
      */
     public function wait(callable $onPoll = null, callable $onLog = null, $pollInterval = 1)
     {
         $log = $this->getProperty('log');
         $length = strlen($log);
-        if ($onLog !== null && $length > 0) {
-            $onLog($log);
+        if ($onLog !== null) {
+            @trigger_error('The $onLog parameter is deprecated. Use the readLog() method instead.', E_USER_DEPRECATED);
+            if ($length > 0) {
+                $onLog($log);
+            }
         }
         $retries = 0;
-        while (!$this->isComplete()) {
+        while (!$this->isComplete() && $this->state !== self::STATE_CANCELLED) {
             usleep($pollInterval * 1000000);
             try {
                 $this->refresh(['timeout' => $pollInterval + 5]);
@@ -79,6 +87,51 @@ class Activity extends ApiResourceBase
                 throw $e;
             }
         }
+    }
+
+    /**
+     * Allows reading the streaming activity log.
+     *
+     * @param callable|NULL $onUpdate
+     *   A callback that receives an array of LogItem objects when there are
+     *   new ones available. Usually this will be 0 items or 1 item.
+     *
+     * @see LogItem
+     *
+     * @return LogItem[]
+     */
+    public function readLog(callable $onUpdate = null)
+    {
+        $response = $this->fetchLog($onUpdate !== null);
+        $body = $response->getBody();
+        if ($onUpdate !== null) {
+            while ($line = $this->readline($body)) {
+                $onUpdate(LogItem::multipleFromJsonStream($line));
+            }
+        }
+
+        return LogItem::multipleFromJsonStream($body->__toString());
+    }
+
+    /**
+     * Reads the next line of a stream.
+     *
+     * @param StreamInterface $stream
+     * @param string $newline
+     *
+     * @return string
+     */
+    private function readline(StreamInterface $stream, $newline = "\n") {
+        $buffer = '';
+        while (!$stream->eof()) {
+            $byte = $stream->read(1);
+            $buffer .= $byte;
+            if ($byte === $newline) {
+                break;
+            }
+        }
+
+        return $buffer;
     }
 
     /**
@@ -147,9 +200,8 @@ class Activity extends ApiResourceBase
     /**
      * Get a human-readable description of the activity.
      *
-     * The "description" property contains the HTML-formatted description. This
-     * method just provides another way to access it, and a way to remove HTML
-     * easily.
+     * The "description" property contains the HTML-formatted description.
+     * The "text" property contains the plain-text description.
      *
      * @param bool $html Whether to return HTML.
      *
@@ -157,29 +209,60 @@ class Activity extends ApiResourceBase
      */
     public function getDescription($html = false)
     {
-        $description = $this->getProperty('description');
-        if ($html) {
-            return $description;
-        }
-
-        return html_entity_decode(strip_tags($description), ENT_QUOTES, 'utf-8');
+        return $this->getProperty($html ? 'description' : 'text');
     }
 
     /**
-     * @param int $timestamp
+     * Formats a timestamp as RFC3339, to be used in the API's starts_at parameter.
      *
-     * @return false|string
+     * @param int|DateTime $timestamp UNIX UTC timestamp (seconds) or DateTime
+     *
+     * @throws \RuntimeException if the timestamp is invalid
+     *
+     * @return string 2022-02-22T02:00:00.000000+00:00
      */
     public static function formatStartsAt($timestamp)
     {
-        $tz = date_default_timezone_get();
-        date_default_timezone_set('UTC');
-        $date = date('c', $timestamp);
-        date_default_timezone_set($tz);
+        if ($timestamp instanceof DateTime) {
+            // Override the timezone to produce a UTC ISO date
+            $date = clone $timestamp;
+            $date->setTimezone(new DateTimeZone("UTC"));
+        } else {
+            // Parse the UNIX UTC timestamp (seconds) into a DateTime
+            $date = DateTime::createFromFormat('U', $timestamp, new DateTimeZone("UTC"));
+        }
+
         if (!$date) {
             throw new \RuntimeException(sprintf('Failed to format timestamp: %d', $timestamp));
         }
 
-        return $date;
+        # Sample: 2022-02-22T02:00:00.000000+00:00
+        return $date->format('Y-m-d\TH:i:s.uP');
+    }
+
+    /**
+     * Fetches the activity log as a Guzzle streaming response.
+     *
+     * @param bool $stream
+     *   Whether to stream the response rather than download it all.
+     * @param int $startAt
+     *   The item to start with.
+     * @param int $maxItems
+     *   How many items to retrieve. Leave at 0 to fetch all items.
+     * @param int $maxDelay
+     *   How long to wait for new messages (on the server side). Use -1 to wait forever.
+     *
+     * @return ResponseInterface
+     */
+    private function fetchLog($stream = true, $startAt = 0, $maxItems = 0, $maxDelay = -1)
+    {
+        return $this->client->get($this->getLink('log'), [
+            'query' => [
+                'start_at' => $startAt,
+                'max_items' => $maxItems,
+                'max_delay' => $maxDelay,
+            ],
+            'stream' => $stream,
+        ]);
     }
 }

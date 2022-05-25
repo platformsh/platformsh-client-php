@@ -10,7 +10,8 @@ use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Invitation\ProjectInvitation;
-use \Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
+use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
+use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
 
 /**
  * A Platform.sh project.
@@ -55,7 +56,8 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      *
      * @todo when APIs are unified, this can be a property
      *
-     * @return int
+     * @return string|int
+     *   The ID is a numeric string. Legacy APIs may return an integer.
      */
     public function getSubscriptionId()
     {
@@ -122,7 +124,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     public function setApiUrl($url)
     {
         $projectUrl = Utils::uriFor($url)->withPath('/projects/' . \urlencode($this->id))->__toString();
-        $this->urlViaGateway = $projectUrl;
+        $this->baseUrl = $this->urlViaGateway = $projectUrl;
     }
 
     /**
@@ -143,21 +145,33 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * @param string $role
      *   The user's role on the project ('viewer' or 'admin').
      * @param InvitationEnvironment[] $environments
-     *   A list of environments for the invitation. Only used if the project role is not 'admin'.
+     *   Deprecated. A list of environments for the invitation. Replaced by $permissions.
+     * @param bool $force
+     *   Whether to re-send the invitation, if an invitation has already been sent to the same email address.
+     * @param InvitationPermission[] $permissions
+     *   A list of permissions for the invitation. Only used if the project role is not 'admin'.
      *
      * @throws AlreadyInvitedException if there is a pending invitation open with the same details
      *
-     * @return ProjectInvitation
      */
-    public function inviteUserByEmail($email, $role, array $environments = [])
+    public function inviteUserByEmail($email, $role, array $environments = [], $force = false, array $permissions = [])
     {
         $data = [
             'email' => $email,
             'role' => $role,
-            'environments' => InvitationEnvironment::listForApi($environments),
         ];
 
-        $request = new Request('post', $this->getLink('invitations'), ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($data));
+        if (!empty($permissions)) {
+            $data['permissions'] = InvitationPermission::listForApi($permissions);
+        }
+        if (!empty($environments)) {
+            $data['environments'] = InvitationEnvironment::listForApi($environments);
+        }
+        if ($force) {
+            $data['force'] = true;
+        }
+
+        $request = new Request('POST', $this->getLink('invitations'), ['Content-Type' => 'application/json'], \json_encode($data));
         try {
             $data = self::send($request, $this->client);
         } catch (BadResponseException $e) {
@@ -167,7 +181,8 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
                     $email,
                     $this,
                     $role,
-                    $environments
+                    $environments,
+                    $permissions
                 );
             }
             throw $e;
@@ -201,14 +216,37 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function getLink($rel, $absolute = true)
     {
+        /**
+         * Require the API URL to be set for 'invitations' and 'access'.
+         *
+         * These endpoints require the external API proxy or gateway, or may
+         * require it in the future.
+         *
+         * The parent method, via self::makeAbsoluteUrl(), ensures an
+         * appropriate base URL is used otherwise.
+         *
+         * @see setApiUrl()
+         * @see makeAbsoluteUrl()
+         */
+        if ($rel === 'invitations' || $rel === 'access') {
+            if (!isset($this->urlViaGateway)) {
+                throw new \RuntimeException('The API gateway URL must be set');
+            }
+        }
+
+        // Use the HAL links available on the project.
         if ($this->hasLink($rel)) {
             return parent::getLink($rel, $absolute);
         }
 
+        // If the 'self' link is not present then this might be a project
+        // stub with an 'endpoint' property.
         if ($rel === 'self') {
-            return $this->getProperty('endpoint');
+            return $this->makeAbsoluteUrl($this->getProperty('endpoint'));
         }
 
+        // If the '#ui' link is not present then this might be a project
+        // stub with a 'uri' property.
         if ($rel === '#ui') {
             return $this->getProperty('uri');
         }
@@ -237,6 +275,28 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     public function getEnvironments($limit = 0)
     {
         return Environment::getCollection($this->getLink('environments'), $limit, [], $this->client);
+    }
+
+    /**
+     * Get a list of environment types for the project.
+     *
+     * @return EnvironmentType[]
+     */
+    public function getEnvironmentTypes()
+    {
+        return EnvironmentType::getCollection($this->getLink('environment-types'), 0, [], $this->client);
+    }
+
+    /**
+     * Get an environment type.
+     *
+     * @param string $id
+     *
+     * @return EnvironmentType|false
+     */
+    public function getEnvironmentType($id)
+    {
+        return EnvironmentType::get($id, $this->getLink('environment-types'), $this->client);
     }
 
     /**
@@ -355,7 +415,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * @param bool $json
      *   Whether this variable's value is JSON-encoded.
      * @param bool $visibleBuild
-     *   Whether this this variable should be exposed during the build phase.
+     *   Whether this variable should be exposed during the build phase.
      * @param bool $visibleRuntime
      *   Whether this variable should be exposed during deploy and runtime.
      * @param bool $sensitive
@@ -470,5 +530,15 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     public function clearBuildCache()
     {
         return $this->runOperation('clear-build-cache');
+    }
+
+    /**
+     * Returns system information about the project, e.g. the API version.
+     *
+     * @return System
+     */
+    public function systemInformation()
+    {
+        return System::get($this->getLink('#system'), '', $this->client);
     }
 }
