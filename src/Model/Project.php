@@ -21,6 +21,7 @@ use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
  * @property-read string $updated_at
  * @property-read string $owner
  * @property-read string $default_branch
+ * @property-read string $region
  */
 class Project extends Resource implements HasActivitiesInterface
 {
