@@ -436,7 +436,7 @@ class Connector implements ConnectorInterface
             }
 
             if ($url = $this->getApiUrl()) {
-                $config['base_url'] = $url; // @todo check this
+                $config['base_uri'] = $url;
             }
 
             $this->client = new Client($config);
