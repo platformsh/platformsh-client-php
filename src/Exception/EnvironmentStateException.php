@@ -11,7 +11,7 @@ class EnvironmentStateException extends \RuntimeException
     public function __construct($message, Environment $environment)
     {
         $this->environment = $environment;
-        parent::__construct($message, null, null);
+        parent::__construct($message);
     }
 
     public function getEnvironment()

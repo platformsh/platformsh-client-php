@@ -229,7 +229,7 @@ class Activity extends ApiResourceBase
             $date->setTimezone(new DateTimeZone("UTC"));
         } else {
             // Parse the UNIX UTC timestamp (seconds) into a DateTime
-            $date = DateTime::createFromFormat('U', $timestamp, new DateTimeZone("UTC"));
+            $date = DateTime::createFromFormat('U', (string) $timestamp, new DateTimeZone("UTC"));
         }
 
         if (!$date) {

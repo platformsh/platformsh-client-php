@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedPrivateFieldInspection */
 
 namespace Platformsh\Client\Model\Subscription;
 

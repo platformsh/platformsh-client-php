@@ -32,7 +32,7 @@ class PlatformClient
     /** @var ConnectorInterface */
     protected $connector;
 
-    /** @var array */
+    /** @var array|null */
     protected $accountInfo;
 
     /**
@@ -210,7 +210,7 @@ class PlatformClient
      * @param string $id
      *   The project ID.
      *
-     * @return string
+     * @return string|false
      *   The project's API endpoint.
      */
     protected function locateProject($id)

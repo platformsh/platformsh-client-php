@@ -24,13 +24,13 @@ class Connector implements ConnectorInterface
     /** @var array */
     protected $config = [];
 
-    /** @var ClientInterface */
+    /** @var ClientInterface|null */
     protected $client;
 
     /** @var callable|null */
     protected $oauthMiddleware;
 
-    /** @var AbstractProvider */
+    /** @var AbstractProvider|null */
     protected $provider;
 
     /** @var SessionInterface */
