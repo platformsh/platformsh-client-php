@@ -60,6 +60,9 @@ use Platformsh\Client\Model\Type\Duration;
  *   of using this array directly.
  * @property-read string      $edge_hostname
  *   The hostname for the edge router that serves the environment.
+ * @property-read string      $type
+ *   The type of the environment. This is predominantly used for access control and is usually one of: production,
+ *   development, or staging.
  */
 class Environment extends ApiResourceBase implements HasActivitiesInterface
 {
