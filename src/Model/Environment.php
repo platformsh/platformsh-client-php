@@ -58,6 +58,11 @@ use Platformsh\Client\Model\Type\Duration;
  * @property-read array       $backups
  *   The backup configuration. It's recommended to use getBackupConfig() instead
  *   of using this array directly.
+ * @property-read string      $edge_hostname
+ *   The hostname for the edge router that serves the environment.
+ * @property-read string      $type
+ *   The type of the environment. This is predominantly used for access control and is usually one of: production,
+ *   development, or staging.
  */
 class Environment extends Resource implements HasActivitiesInterface
 {
