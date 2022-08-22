@@ -52,10 +52,15 @@ class Integration extends Resource implements HasActivitiesInterface
             if (!isset($this->data['_links'][$rel]['href'])) {
                 throw new \InvalidArgumentException("Link not found: $rel");
             }
-            if (!isset($this->data['_links']['self']['href'])) {
-                throw new \RuntimeException('Failed to find integration "self" link');
+            $relativeUrl = $this->data['_links'][$rel]['href'];
+            if ($absolute) {
+                if (!isset($this->data['_links']['self']['href'])) {
+                    throw new \RuntimeException('Failed to find integration base URL ("self" link)');
+                }
+                $base = $this->data['_links']['self']['href'];
+                return $this->makeAbsoluteUrl($relativeUrl, $base);
             }
-            return $this->makeAbsoluteUrl($this->data['_links'][$rel]['href'], $this->data['_links']['self']['href']);
+            return $relativeUrl;
         }
         return parent::getLink($rel, $absolute);
     }
