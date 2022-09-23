@@ -602,7 +602,7 @@ class PlatformClient
         $url = '/organizations';
         $values = ['name' => $name, 'label' => $label, 'country' => $country];
         if ($owner !== '') {
-            $values['owner'] = $owner;
+            $values['owner_id'] = $owner;
         }
         return Organization::create($values, $url, $this->connector->getClient());
     }
