@@ -40,6 +40,32 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * The hook link must use the integration's "self" link as the base, not
+     * the overridden base URL. This is because the external API proxy does not
+     * yet support unauthenticated requests.
+     */
+    public function getLink($rel, $absolute = true)
+    {
+        if ($rel === '#hook') {
+            if (!isset($this->data['_links'][$rel]['href'])) {
+                throw new \InvalidArgumentException("Link not found: $rel");
+            }
+            $relativeUrl = $this->data['_links'][$rel]['href'];
+            if ($absolute) {
+                if (!isset($this->data['_links']['self']['href'])) {
+                    throw new \RuntimeException('Failed to find integration base URL ("self" link)');
+                }
+                $base = $this->data['_links']['self']['href'];
+                return $this->makeAbsoluteUrl($relativeUrl, $base);
+            }
+            return $relativeUrl;
+        }
+        return parent::getLink($rel, $absolute);
+    }
+
+    /**
      * Validate the integration via the API.
      *
      * @throws \Platformsh\Client\Exception\OperationUnavailableException

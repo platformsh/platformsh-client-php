@@ -17,6 +17,7 @@ use Platformsh\Client\Model\Filter\Filter;
 use Platformsh\Client\Model\Organization\Organization;
 use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
+use Platformsh\Client\Model\ProjectStub;
 use Platformsh\Client\Model\Region;
 use Platformsh\Client\Model\Catalog;
 use Platformsh\Client\Model\Result;
@@ -70,13 +71,6 @@ class PlatformClient
      */
     public function getProject($id, $hostname = null, $https = true)
     {
-        // Search for a project in the user's project list.
-        foreach ($this->getProjects() as $project) {
-            if ($project->id === $id) {
-                return $project;
-            }
-        }
-
         // Look for a project directly if the hostname is known.
         if ($hostname !== null) {
             return $this->getProjectDirect($id, $hostname, $https);
@@ -107,6 +101,8 @@ class PlatformClient
     /**
      * Get the logged-in user's projects.
      *
+     * @deprecated replaced by getProjectStubs()
+     *
      * @param bool $reset
      *
      * @return Project[]
@@ -127,6 +123,18 @@ class PlatformClient
         }
 
         return $projects;
+    }
+
+    /**
+     * Returns the logged-in user's project stubs.
+     *
+     * @param bool $reset
+     *
+     * @return ProjectStub[]
+     */
+    public function getProjectStubs($reset = false)
+    {
+        return ProjectStub::wrapCollection($this->getAccountInfo($reset), $this->apiUrl(), $this->connector->getClient());
     }
 
     /**
@@ -622,16 +630,20 @@ class PlatformClient
      * @param string $name
      * @param string $label
      * @param string $country An ISO 2-letter country code.
+     * @param string $owner The organization owner ID. Leave empty to use the current user.
      *
      * @return Organization
      */
-    public function createOrganization($name, $label = '', $country = '')
+    public function createOrganization($name, $label = '', $country = '', $owner = '')
     {
         if (!$this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         $url = '/organizations';
         $values = ['name' => $name, 'label' => $label, 'country' => $country];
+        if ($owner !== '') {
+            $values['owner_id'] = $owner;
+        }
         return Organization::create($values, $url, $this->connector->getClient());
     }
 }
