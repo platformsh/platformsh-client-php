@@ -100,32 +100,76 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Get the SSH URL for the environment.
      *
-     * @param string $app An application name. If there is no published URL for
-     *                    this app name, the 'legacy' URL (without an app name)
-     *                    will be returned.
+     * @param string $app
+     *   An application or worker name. If there is no published URL for this
+     *   app name, the 'legacy' URL (without an app name) will be returned.
+     * @param string|null $instance
+     *   An instance ID. This is usually numeric starting with 0. Some legacy
+     *   dedicated environments have their instances starting from 1. If the
+     *   app does not have multiple instances, leave this as an empty string
+     *   or null.
      *
      * @throws EnvironmentStateException
      * @throws OperationUnavailableException
+     * @throws \InvalidArgumentException if the $instance is not found
      *
      * @return string
      */
-    public function getSshUrl($app = '')
+    public function getSshUrl($app = '', $instance = '')
     {
         $urls = $this->getSshUrls();
+        if ($instance !== '' && $instance !== null) {
+            $instances = $this->getSshInstanceURLs($app, $urls);
+            if (isset($instances[$instance])) {
+                return $instances[$instance];
+            }
+            $message = \sprintf("SSH URL not found for instance '%s' of '%s'.", $instance, $app);
+            if (count($instances)) {
+                $message .= \sprintf(' Available instances: %s', implode(', ', array_keys($instances)));
+            }
+            throw new \InvalidArgumentException($message);
+        }
         if (isset($urls[$app])) {
             return $urls[$app];
         }
 
-        // Look for the first URL whose key starts with "$app:".
-        \ksort($urls, SORT_NATURAL);
+        // Fall back to the legacy SSH URL.
+        return $this->constructLegacySshUrl();
+    }
+
+    /**
+     * List instance URLs for a specific app.
+     *
+     * @param string $app The app name.
+     * @param ?array $sshUrls
+     *
+     * @return array<mixed, string>
+     *     An array of SSH URLs for the given app, keyed by instance ID.
+     */
+    public function getSshInstanceURLs($app, $sshUrls = null)
+    {
+        $urls = $sshUrls === null ? $this->getSshUrls() : $sshUrls;
+        $instances = [];
         foreach ($urls as $key => $url) {
-            if (\strpos($key, $app . ':') === 0) {
-                return $url;
+            if (\strpos($key, "$app:") === 0) {
+                $parts = explode(':', $key, 3);
+                if (isset($parts[1])) {
+                    $instances[$parts[1]] = $url;
+                }
             }
         }
 
-        // Fall back to the legacy SSH URL.
-        return $this->constructLegacySshUrl();
+        if ($instances === []) {
+            // Handle legacy dedicated instance URLs.
+            foreach ($urls as $key => $url) {
+                if (strpos($key, 'ent-') === 0) {
+                    $instances[substr($key, 4)] = $url;
+                }
+            }
+        }
+
+        natsort($instances);
+        return $instances;
     }
 
     /**
@@ -134,25 +178,13 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * Workers themselves can be listed via getCurrentDeployment()->workers.
      *
      * @param Worker $worker
+     * @param string $instance
      *
      * @return string
      */
-    public function getWorkerSshUrl(Worker $worker)
+    public function getWorkerSshUrl(Worker $worker, $instance = '')
     {
-        list($app, $worker) = explode('--', $worker->name, 2);
-
-        $prefix = 'pf:ssh:';
-        foreach ($this->data['_links'] as $rel => $link) {
-            if ($rel === $prefix . $app && isset($link['href'])) {
-                return $this->convertSshUrl($link['href'], '--' . $worker);
-            }
-        }
-
-        throw new \RuntimeException(sprintf(
-            'Unable to find the SSH URL for the app "%s" containing the worker "%s"',
-            $app,
-            $worker
-        ));
+        return $this->getSshUrl($worker->name, $instance);
     }
 
     /**
@@ -174,21 +206,33 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
-     * Convert a full SSH URL (with schema) into a normal SSH connection string.
+     * Convert a full SSH URL (with scheme) into a normal SSH connection string.
      *
-     * @param string $url             The URL (starting with ssh://).
-     * @param string $username_suffix A suffix to append to the username.
+     * This can then be used with tools such as scp, etc.
+     *
+     * Only the username, host and path will be preserved (the port, password,
+     * query and fragment will be dropped).
+     *
+     * @param string $url The URL (starting with ssh://).
      *
      * @return string
      */
-    private function convertSshUrl($url, $username_suffix = '')
+    private function convertSshUrl($url)
     {
         $parsed = parse_url($url);
         if (!$parsed) {
             throw new \InvalidArgumentException('Invalid URL: ' . $url);
         }
+        $str = '';
+        if (!empty($parsed['user'])) {
+            $str .= $parsed['user'] . '@';
+        }
+        $str .= $parsed['host'];
+        if (!empty($parsed['path'])) {
+            $str .= ':' . $parsed['path'];
+        }
 
-        return $parsed['user'] . $username_suffix . '@' . $parsed['host'];
+        return $str;
     }
 
     /**
