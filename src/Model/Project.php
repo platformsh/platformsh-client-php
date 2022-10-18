@@ -11,6 +11,7 @@ use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Invitation\ProjectInvitation;
 use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
+use Platformsh\Client\Model\Project\Capabilities;
 
 /**
  * A Platform.sh project.
@@ -531,5 +532,18 @@ class Project extends Resource implements HasActivitiesInterface
     public function systemInformation()
     {
         return System::get($this->getLink('#system'), '', $this->client);
+    }
+
+    /**
+     * Returns the project's capabilities (features enabled by the billing system).
+     *
+     * @return Capabilities
+     */
+    public function getCapabilities()
+    {
+        $request = $this->client->createRequest('get', $this->getUri() . '/capabilities');
+        $data = self::send($request, $this->client);
+
+        return Capabilities::fromData($data);
     }
 }
