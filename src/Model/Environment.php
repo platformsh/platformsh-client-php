@@ -118,8 +118,8 @@ class Environment extends Resource implements HasActivitiesInterface
     public function getSshUrl($app = '', $instance = '')
     {
         $urls = $this->getSshUrls();
+        $instances = $this->getSshInstanceURLs($app, $urls);
         if ($instance !== '' && $instance !== null) {
-            $instances = $this->getSshInstanceURLs($app, $urls);
             if (isset($instances[$instance])) {
                 return $instances[$instance];
             }
@@ -131,6 +131,9 @@ class Environment extends Resource implements HasActivitiesInterface
         }
         if (isset($urls[$app])) {
             return $urls[$app];
+        }
+        if (!empty($instances)) {
+            return reset($instances);
         }
 
         // Fall back to the legacy SSH URL.
