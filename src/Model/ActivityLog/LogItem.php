@@ -5,40 +5,44 @@ namespace Platformsh\Client\Model\ActivityLog;
 class LogItem {
     private $timestamp;
     private $message;
+    private $id;
 
     /**
      * LogItem constructor.
      *
      * @param string $timestamp
      * @param string $message
+     * @param string $id
      */
-    public function __construct($timestamp, $message)
+    public function __construct($timestamp, $message, $id = '')
     {
         $this->timestamp = $timestamp;
         $this->message = $message;
+        $this->id = $id;
     }
 
     /**
      * @param string $str
+     *
+     * @deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      *
      * @return LogItem|FALSE
      *   The log item, or FALSE if there is not enough information.
      */
     public static function singleFromJson($str)
     {
-        $data = json_decode($str, true);
-        if ($data === null) {
-            throw new \RuntimeException('Failed to decode JSON with message: ' . json_last_error_msg() . ':' . "\n" . $data);
+        $data = static::decode($str);
+        if (isset($data['data']['timestamp'], $data['data']['message'])) {
+            $id = isset($data['_id']) ? (string) $data['_id'] : '';
+            return new static($data['data']['timestamp'], $data['data']['message'], $id);
         }
-        if (empty($data['data']['timestamp']) || empty($data['data']['message'])) {
-            return FALSE;
-        }
-
-        return new static($data['data']['timestamp'], $data['data']['message']);
+        return false;
     }
 
     /**
      * @param string $str
+     *
+     * @deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      *
      * @return static[]
      */
@@ -56,6 +60,49 @@ class LogItem {
         }
 
         return $items;
+    }
+
+    /**
+     * @param string $str
+     * @return array
+     */
+    private static function decode($str)
+    {
+        $data = json_decode($str, true);
+        if ($data === null) {
+            throw new \RuntimeException('Failed to decode JSON with message: ' . json_last_error_msg() . ':' . "\n" . $data);
+        }
+        return $data;
+    }
+
+    /**
+     * Decodes the log stream into log items and whether the "seal" was reached.
+     *
+     * The seal 🦭 guarantees that the log has ended.
+     *
+     * @param string $str
+     *
+     * @return array{'items': static[], 'seal': bool}
+     */
+    public static function multipleFromJsonStreamWithSeal($str)
+    {
+        $items = [];
+        $seal = false;
+        foreach (explode("\n", trim($str, "\n")) as $line) {
+            if ($line === '') {
+                continue;
+            }
+            $data = static::decode($line);
+            if (!empty($data['seal'])) {
+                $seal = true;
+            }
+            if (isset($data['data']['timestamp'], $data['data']['message'])) {
+                $id = isset($data['_id']) ? (string) $data['_id'] : '';
+                $items[] = new static($data['data']['timestamp'], $data['data']['message'], $id);
+            }
+        }
+
+        return ['items' => $items, 'seal' => $seal];
     }
 
     /**
@@ -82,5 +129,13 @@ class LogItem {
     public function getTime()
     {
         return new \DateTimeImmutable($this->timestamp);
+    }
+
+    /**
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 }
