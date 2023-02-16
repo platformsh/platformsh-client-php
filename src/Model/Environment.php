@@ -704,6 +704,16 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
+     * Lists source operations.
+     *
+     * @return []SourceOperation
+     */
+    public function getSourceOperations()
+    {
+        return SourceOperation::getCollection($this->getLink('#source-operations'), 0, [], $this->client);
+    }
+
+    /**
      * Runs a source operation.
      *
      * @param string $name
