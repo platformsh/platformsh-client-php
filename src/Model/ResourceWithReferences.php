@@ -4,6 +4,7 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Url;
 use Platformsh\Client\Model\Ref\Resolver;
 
 class ResourceWithReferences extends Resource
@@ -54,11 +55,49 @@ class ResourceWithReferences extends Resource
                 if ($key === 'organization_id' && isset($data['ref:organizations'][$value])) {
                     $item['ref:organizations'][$value] = $data['ref:organizations'][$value];
                 }
+                // And project-related references.
+                if ($key === 'project_id' && isset($data['ref:projects'][$value])) {
+                    $item['ref:projects'][$value] = $data['ref:projects'][$value];
+                }
+                // And team-related references.
+                if ($key === 'team_id' && isset($data['ref:teams'][$value])) {
+                    $item['ref:teams'][$value] = $data['ref:teams'][$value];
+                }
             }
 
             $resources[] = new static($item, $baseUrl, $client);
         }
 
         return $resources;
+    }
+
+    /**
+     * Returns a paginated list of resources.
+     *
+     * This is the equivalent of getCollection() with pagination logic.
+     *
+     * If 'items' is non-empty and if a non-null 'next' URL is returned, this
+     * call may be repeated with the new URL to fetch the next page.
+     *
+     * Use $options['query']['page'] to specify a page number explicitly.
+     *
+     * @param string $url
+     * @param ClientInterface $client
+     * @param array $options
+     *
+     * @return array{'items': static[], 'next': ?string}
+     */
+    public static function getPagedCollection($url, ClientInterface $client, array $options = [])
+    {
+        $request = $client->createRequest('get', $url, $options);
+        $data = static::send($request, $client);
+        $items = static::wrapCollection($data, $url, $client);
+
+        $nextUrl = null;
+        if (isset($data['_links']['next']['href'])) {
+            $nextUrl = Url::fromString($url)->combine($data['_links']['next']['href'])->__toString();
+        }
+
+        return ['items' => $items, 'next' => $nextUrl];
     }
 }
