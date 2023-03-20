@@ -654,7 +654,17 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
-     * Get a list of environment backups.
+     * Fetches a single environment backup.
+     *
+     * @return Backup|false
+     */
+    public function getBackup($id)
+    {
+        return Backup::get($id, $this->getUri() . '/backups', $this->client);
+    }
+
+    /**
+     * Fetches a list of environment backups.
      *
      * @param int $limit
      *   Limit the number of backups to return.
