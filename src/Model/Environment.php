@@ -23,7 +23,7 @@ use Platformsh\Client\Model\Type\Duration;
  * @property-read string      $id
  *   The primary ID of the environment. This is the same as the 'name' property.
  * @property-read string      $status
- *   The status of the environment: active, inactive, or dirty.
+ *   The status of the environment: active, inactive, deleting, dirty, or paused.
  * @property-read string      $head_commit
  *   The SHA-1 hash identifying the Git commit at the branch's HEAD.
  * @property-read string      $name
@@ -361,6 +361,13 @@ class Environment extends Resource implements HasActivitiesInterface
     }
 
     /**
+     * Returns whether the environment is active.
+     *
+     * It's recommended to use the status property for more nuance
+     * ('active', 'paused', etc.).
+     *
+     * @see Environment::status
+     *
      * @return bool
      */
     public function isActive()
@@ -732,5 +739,33 @@ class Environment extends Resource implements HasActivitiesInterface
             'operation' => $name,
             'variables' => (object) $variables,
         ]);
+    }
+
+    /**
+     * Pauses the environment.
+     *
+     * The environment can be resumed via resume() or any deployment.
+     *
+     * @see Environment::resume()
+     * @see Environment::redeploy()
+     * @see Environment::status
+     *
+     * @return Activity
+     */
+    public function pause()
+    {
+        return $this->runLongOperation('pause');
+    }
+
+    /**
+     * Resumes a paused environment.
+     *
+     * @see Environment::status
+     *
+     * @return Activity
+     */
+    public function resume()
+    {
+        return $this->runLongOperation('resume');
     }
 }
