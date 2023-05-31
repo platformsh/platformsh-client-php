@@ -92,6 +92,8 @@ class Connector implements ConnectorInterface
           'api_token' => null,
           'api_token_type' => 'access',
           'gzip' => extension_loaded('zlib'),
+          'on_refresh_start' => null,
+          'on_refresh_end' => null,
           'on_refresh_error' => null,
         ];
         $this->config = Collection::fromConfig($config, $defaults);
@@ -423,6 +425,12 @@ class Connector implements ConnectorInterface
                 $this->saveToken($token);
             });
 
+            if ($this->config['on_refresh_start'] !== null) {
+                $this->oauth2Plugin->setOnRefreshStart($this->config['on_refresh_start']);
+            }
+            if ($this->config['on_refresh_end'] !== null) {
+                $this->oauth2Plugin->setOnRefreshEnd($this->config['on_refresh_end']);
+            }
             if ($this->config['on_refresh_error'] !== null) {
                 $this->oauth2Plugin->setOnRefreshError($this->config['on_refresh_error']);
             }

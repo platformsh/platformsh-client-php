@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2230ff986e3652acb832e306072738e9",
+    "content-hash": "97d54b076b303dcc1fb9a02e572418a5",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -423,16 +423,16 @@
         },
         {
             "name": "pjcdawkins/guzzle-oauth2-plugin",
-            "version": "v2.3.1",
+            "version": "v2.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
-                "reference": "f8139ff410824c68a6a341dcd88bf070e5908a9e"
+                "reference": "8409e94266896da3b5eb9e8231a267783466af66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/f8139ff410824c68a6a341dcd88bf070e5908a9e",
-                "reference": "f8139ff410824c68a6a341dcd88bf070e5908a9e",
+                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/8409e94266896da3b5eb9e8231a267783466af66",
+                "reference": "8409e94266896da3b5eb9e8231a267783466af66",
                 "shasum": ""
             },
             "require": {
@@ -465,9 +465,9 @@
             ],
             "description": "An OAuth2 plugin (subscriber) for Guzzle (forked from commerceguys/guzzle-oauth2-plugin)",
             "support": {
-                "source": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/tree/master"
+                "source": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/tree/v2.3.3"
             },
-            "time": "2020-04-15T07:44:29+00:00"
+            "time": "2023-05-22T15:13:44+00:00"
         },
         {
             "name": "react/promise",
