@@ -68,4 +68,49 @@ class EnvironmentDeployment extends Resource
         }
         throw new \BadMethodCallException(sprintf('Method not found: %s()', $name));
     }
+
+    /**
+     * Returns the runtime operations defined on all the apps in this deployment.
+     *
+     * To fetch a specific runtime operation use the WebApp or Worker object.
+     *
+     * @see AppBase::getRuntimeOperations()
+     * @see AppBase::getRuntimeOperation()
+     *
+     * @return array<string, array<string, RuntimeOperation>>
+     *     A list of runtime operations keyed by operation name and app name.
+     */
+    public function getRuntimeOperations()
+    {
+        $operations = [];
+        foreach (['webapps', 'workers'] as $appType) {
+            foreach ($this->$appType as $appName => $app) {
+                /** @var AppBase $app */
+                $operations[$appName] = $app->getRuntimeOperations();
+            }
+        }
+        return $operations;
+    }
+
+    /**
+     * Executes a runtime operation on this deployment.
+     *
+     * @see RuntimeOperation
+     * @see AppBase::getRuntimeOperations()
+     * @see AppBase::getRuntimeOperation()
+     *
+     * @param string $name
+     *   The operation name.
+     * @param string $service
+     *   The name of the service or application to run the operation on.
+     *
+     * @return \Platformsh\Client\Model\Result
+     */
+    public function execRuntimeOperation($name, $service)
+    {
+        return $this->runOperation('operations', 'post', [
+            'operation' => $name,
+            'service' => $service,
+        ]);
+    }
 }
