@@ -394,16 +394,10 @@ class Environment extends Resource implements HasActivitiesInterface
     /**
      * Deactivate the environment.
      *
-     * @throws EnvironmentStateException
-     *
      * @return Activity
      */
     public function deactivate()
     {
-        if (!$this->isActive()) {
-            throw new EnvironmentStateException('Inactive environments cannot be deactivated', $this);
-        }
-
         return $this->runLongOperation('deactivate');
     }
 
