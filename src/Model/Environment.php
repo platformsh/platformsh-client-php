@@ -489,7 +489,7 @@ class Environment extends Resource implements HasActivitiesInterface
      */
     public function getVariables($limit = 0)
     {
-        return Variable::getCollection($this->getLink('#manage-variables'), $limit, [], $this->client);
+        return Variable::getCollection($this->getLink('#variables'), $limit, [], $this->client);
     }
 
     /**
@@ -537,7 +537,7 @@ class Environment extends Resource implements HasActivitiesInterface
      */
     public function getVariable($id)
     {
-        return Variable::get($id, $this->getLink('#manage-variables'), $this->client);
+        return Variable::get($id, $this->getLink('#variables'), $this->client);
     }
 
     /**
