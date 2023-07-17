@@ -162,11 +162,16 @@ abstract class Resource implements \ArrayAccess
      * @param ClientInterface $client        A suitably configured Guzzle
      *                                       client.
      *
+     * @throws \InvalidArgumentException if the resource ID is invalid
+     *
      * @return static|false The resource object, or false if the resource is
      *                      not found.
      */
     public static function get($id, $collectionUrl, ClientInterface $client)
     {
+        if ($id === '.' || $id === '..') {
+            throw new \InvalidArgumentException('Invalid resource ID: ' . $id);
+        }
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . urlencode($id) : $id;
             $request = $client->createRequest('get', $url);
