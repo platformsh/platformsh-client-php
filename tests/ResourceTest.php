@@ -2,15 +2,13 @@
 
 namespace Platformsh\Client\Tests;
 
-use PHPUnit\Framework\TestCase;
-
-class ResourceTest extends TestCase
+class ResourceTest extends \PHPUnit_Framework_TestCase
 {
 
     /** @var array */
     protected $properties;
 
-    /** @var \Platformsh\Client\Model\ApiResourceBase */
+    /** @var \Platformsh\Client\Model\Resource */
     protected $resource;
 
     public function setUp()
@@ -32,7 +30,7 @@ class ResourceTest extends TestCase
               ],
             ],
           ];
-        $this->resource = new MockApiResource($data, 'https://example.com', null, true);
+        $this->resource = new MockResource($data, null, null, true);
     }
 
     /**
@@ -51,7 +49,7 @@ class ResourceTest extends TestCase
     {
         $this->assertEquals('test-id', $this->resource['id']);
         $this->assertEquals('test name', $this->resource->getProperty('name'));
-        $this->expectException('\InvalidArgumentException');
+        $this->setExpectedException('\InvalidArgumentException');
         $this->resource->getProperty('nonexistent');
     }
 
@@ -71,7 +69,7 @@ class ResourceTest extends TestCase
     {
         $this->assertNotEmpty($this->resource->getLink('self'));
         $this->assertNotEmpty($this->resource->getLink('#operate'));
-        $this->expectException('\InvalidArgumentException');
+        $this->setExpectedException('\InvalidArgumentException');
         $this->resource->getLink('nonexistent');
     }
 
@@ -81,8 +79,8 @@ class ResourceTest extends TestCase
     public function testRequiredPropertiesBlockCreation()
     {
         $mockClient = new MockClient();
-        $this->expectException('\InvalidArgumentException');
-        MockApiResource::create([], '', $mockClient);
+        $this->setExpectedException('\InvalidArgumentException');
+        MockResource::create([], '', $mockClient);
     }
 
     /**
@@ -90,8 +88,8 @@ class ResourceTest extends TestCase
      */
     public function testInvalidPropertiesBlockUpdate()
     {
-        $resource = new MockApiResource([]);
-        $this->expectException('\InvalidArgumentException');
+        $resource = new MockResource([]);
+        $this->setExpectedException('\InvalidArgumentException');
         $resource->update(['testProperty' => 2]);
     }
 }
