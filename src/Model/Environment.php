@@ -549,7 +549,7 @@ class Environment extends Resource implements HasActivitiesInterface
      */
     public function getRoutes()
     {
-        return Route::getCollection($this->getLink('#manage-routes'), 0, [], $this->client);
+        return Route::getCollection($this->getLink('#routes'), 0, [], $this->client);
     }
 
     /**
@@ -602,7 +602,7 @@ class Environment extends Resource implements HasActivitiesInterface
      */
     public function getUser($uuid)
     {
-        return EnvironmentAccess::get($uuid, $this->getLink('#manage-access'), $this->client);
+        return EnvironmentAccess::get($uuid, $this->getLink('#access'), $this->client);
     }
 
     /**
@@ -612,7 +612,7 @@ class Environment extends Resource implements HasActivitiesInterface
      */
     public function getUsers()
     {
-        return EnvironmentAccess::getCollection($this->getLink('#manage-access'), 0, [], $this->client);
+        return EnvironmentAccess::getCollection($this->getLink('#access'), 0, [], $this->client);
     }
 
     /**
