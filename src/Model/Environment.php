@@ -394,6 +394,9 @@ class Environment extends Resource implements HasActivitiesInterface
     /**
      * Deactivate the environment.
      *
+     * @deprecated use runOperation('deactivate') instead
+     * @see Environment::runOperation()
+     *
      * @return Activity
      */
     public function deactivate()

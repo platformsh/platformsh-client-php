@@ -359,7 +359,7 @@ abstract class Resource implements \ArrayAccess
      *
      * @return Result
      */
-    protected function runOperation($op, $method = 'post', array $body = [])
+    public function runOperation($op, $method = 'POST', array $body = [])
     {
         if (!$this->operationAvailable($op, true)) {
             throw new OperationUnavailableException("Operation not available: $op");
@@ -377,6 +377,9 @@ abstract class Resource implements \ArrayAccess
 
     /**
      * Run a long-running operation.
+     *
+     * @deprecated use runOperation() instead
+     * @see Resource::runOperation()
      *
      * @param string $op
      * @param string $method
