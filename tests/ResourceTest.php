@@ -23,14 +23,14 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
             '_embedded' => [],
             '_links' => [
               'self' => [
-                'href' => 'https://example.com/',
+                'href' => 'https://example.com/resources/test-id',
               ],
               '#operate' => [
-                'href' => 'https://example.com/operate',
+                'href' => '/resources/test-id/operate',
               ],
             ],
           ];
-        $this->resource = new MockResource($data, null, null, true);
+        $this->resource = new MockResource($data, 'https://example.com/', null, true);
     }
 
     /**
