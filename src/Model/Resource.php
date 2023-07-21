@@ -389,6 +389,7 @@ abstract class Resource implements \ArrayAccess
      */
     protected function runLongOperation($op, $method = 'post', array $body = [])
     {
+        @trigger_error('This method is deprecated as actions may return multiple activities. Use runOperation() if possible.', E_USER_DEPRECATED);
         $result = $this->runOperation($op, $method, $body);
         $activities = $result->getActivities();
         if (count($activities) !== 1) {
