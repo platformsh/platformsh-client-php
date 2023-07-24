@@ -16,6 +16,7 @@ namespace Platformsh\Client\Model;
  * @property-read string $website
  * @property-read bool   $deactivated
  * @property-read bool   $email_verified
+ * @property-read bool   $phone_number_verified
  * @property-read bool   $mfa_enabled
  * @property-read string $created_at
  * @property-read string $updated_at

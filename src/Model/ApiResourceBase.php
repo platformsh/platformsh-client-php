@@ -166,11 +166,16 @@ abstract class ApiResourceBase implements \ArrayAccess
      * @param ClientInterface $client        A suitably configured Guzzle
      *                                       client.
      *
+     * @throws \InvalidArgumentException if the resource ID is invalid
+     *
      * @return static|false The resource object, or false if the resource is
      *                      not found.
      */
     public static function get($id, $collectionUrl, ClientInterface $client)
     {
+        if ($id === '.' || $id === '..') {
+            throw new \InvalidArgumentException('Invalid resource ID: ' . $id);
+        }
         try {
             $url = $collectionUrl ? rtrim($collectionUrl, '/') . '/' . urlencode($id) : $id;
             $request = new Request('get', $url);
@@ -363,7 +368,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @return Result
      */
-    protected function runOperation($op, $method = 'post', array $body = [])
+    public function runOperation($op, $method = 'POST', array $body = [])
     {
         if (!$this->operationAvailable($op, true)) {
             throw new OperationUnavailableException("Operation not available: $op");
@@ -377,6 +382,9 @@ abstract class ApiResourceBase implements \ArrayAccess
     /**
      * Run a long-running operation.
      *
+     * @deprecated use runOperation() instead
+     * @see Resource::runOperation()
+     *
      * @param string $op
      * @param string $method
      * @param array  $body
@@ -385,6 +393,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     protected function runLongOperation($op, $method = 'post', array $body = [])
     {
+        @trigger_error('This method is deprecated as actions may return multiple activities. Use runOperation() if possible.', E_USER_DEPRECATED);
         $result = $this->runOperation($op, $method, $body);
         $activities = $result->getActivities();
         if (count($activities) !== 1) {

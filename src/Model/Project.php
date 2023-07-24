@@ -12,6 +12,7 @@ use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Invitation\ProjectInvitation;
 use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
+use Platformsh\Client\Model\Project\Capabilities;
 
 /**
  * A Platform.sh project.
@@ -270,12 +271,25 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * Get a list of environments for the project.
      *
      * @param int $limit
+     *   Limit the number of environments to return.
+     * @param string|null $type
+     *   Filter by environment type.
+     * @param bool|null $active
+     *   Filter by environment status (active or not).
      *
      * @return Environment[]
      */
-    public function getEnvironments($limit = 0)
+    public function getEnvironments($limit = 0, $type = null, $active = null)
     {
-        return Environment::getCollection($this->getLink('environments'), $limit, [], $this->client);
+        $options = [];
+        if ($type !== null) {
+            $options['query']['type'] = $type;
+        }
+        if ($active !== null) {
+            $options['query']['active'] = $active ? 'true' : 'false';
+        }
+
+        return Environment::getCollection($this->getLink('environments'), $limit, $options, $this->client);
     }
 
     /**
@@ -541,5 +555,18 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     public function systemInformation()
     {
         return System::get($this->getLink('#system'), '', $this->client);
+    }
+
+    /**
+     * Returns the project's capabilities (features enabled by the billing system).
+     *
+     * @return Capabilities
+     */
+    public function getCapabilities()
+    {
+        $request = new Request('get', $this->getUri() . '/capabilities');
+        $data = self::send($request, $this->client);
+
+        return Capabilities::fromData($data);
     }
 }
