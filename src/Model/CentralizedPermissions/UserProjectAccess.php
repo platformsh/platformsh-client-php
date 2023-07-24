@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model\CentralizedPermissions;
 
 use GuzzleHttp\ClientInterface;
+use Platformsh\Client\Model\Ref\OrganizationRef;
 use Platformsh\Client\Model\Ref\ProjectRef;
 use Platformsh\Client\Model\ResourceWithReferences;
 
@@ -35,6 +36,15 @@ class UserProjectAccess extends ResourceWithReferences
     {
         if (isset($this->data['ref:projects'][$this->data['project_id']])) {
             return $this->data['ref:projects'][$this->data['project_id']];
+        }
+        return null;
+    }
+
+    /** @return OrganizationRef|null */
+    public function getOrganizationInfo()
+    {
+        if (isset($this->data['ref:organizations'][$this->data['organization_id']])) {
+            return $this->data['ref:organizations'][$this->data['organization_id']];
         }
         return null;
     }
