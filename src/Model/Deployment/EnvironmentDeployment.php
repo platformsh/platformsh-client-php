@@ -12,6 +12,8 @@ use Platformsh\Client\Model\Resource;
  * @property-read WebApp[]  $webapps
  * @property-read Worker[]  $workers
  *
+ * @property-read array $container_profiles
+ *
  * @method Route getRoute(string $originalUrl)
  * @method Service getService(string $name)
  * @method WebApp getWebApp(string $name)

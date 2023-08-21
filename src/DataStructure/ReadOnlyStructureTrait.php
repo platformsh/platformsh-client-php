@@ -97,4 +97,26 @@ trait ReadOnlyStructureTrait
     {
         return $this->data;
     }
+
+    /**
+     * Gets a single property.
+     *
+     * @param bool $required
+     *
+     * @throws \InvalidArgumentException if $required is true and the property is not set
+     *
+     * @return mixed|null
+     *   Returns the property value, or null if $required is false and the property is not set.
+     */
+    public function getProperty($property, $required = true)
+    {
+        if (!array_key_exists($property, $this->data)) {
+            if ($required) {
+                throw new \InvalidArgumentException("Property not found: $property");
+            }
+            return null;
+        }
+
+        return $this->data[$property];
+    }
 }

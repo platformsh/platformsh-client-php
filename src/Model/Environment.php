@@ -69,16 +69,41 @@ class Environment extends Resource implements HasActivitiesInterface
     use HasActivitiesTrait;
 
     /**
+     * Returns the environment's deployments.
+     *
+     * @return EnvironmentDeployment[]
+     */
+    public function getDeployments()
+    {
+        return EnvironmentDeployment::getCollection($this->getUri() . '/deployments', 0, [], $this->client);
+    }
+
+    /**
+     * Get the next deployment of this environment.
+     *
+     * @return EnvironmentDeployment|false
+     */
+    public function getNextDeployment()
+    {
+        return EnvironmentDeployment::get('next', $this->getUri() . '/deployments', $this->client);
+    }
+
+    /**
      * Get the current deployment of this environment.
      *
-     * @throws \RuntimeException if no current deployment is found.
+     * @param bool $required
+     *   Whether to throw an exception if not found.
+     *   The current deployment would not exist if the environment is inactive.
      *
-     * @return EnvironmentDeployment
-     */
-    public function getCurrentDeployment()
+     * @throws EnvironmentStateException if no current deployment is found and $required is true
+     *
+     * @return EnvironmentDeployment|false
+     *   The deployment, or false if no current deployment is found and $required is false
+     **/
+    public function getCurrentDeployment($required = true)
     {
         $deployment = EnvironmentDeployment::get('current', $this->getUri() . '/deployments', $this->client);
-        if (!$deployment) {
+        if (!$deployment && $required) {
             throw new EnvironmentStateException('Current deployment not found', $this);
         }
 
