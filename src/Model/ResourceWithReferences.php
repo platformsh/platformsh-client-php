@@ -44,27 +44,29 @@ class ResourceWithReferences extends Resource
     {
         $data = self::resolveReferences(new Resolver($client, $baseUrl), $data);
 
+        // Add referenced information for the whole collection onto individual
+        // resources, based on this map of resource keys to reference API sets.
+        $map = [
+            'project_id' => 'projects',
+            'owner_id' => 'users',
+            'user_id' => 'users',
+            'organization_id' => 'organizations',
+            'team_id' => 'teams',
+        ];
+
         $resources = [];
         foreach ($data[static::$collectionItemsKey] as $item) {
-            foreach ($item as $key => $value) {
-                // Add user-related references onto the individual item (the rest of $data is discarded).
-                if (\in_array($key, ['owner_id', 'user_id']) && isset($data['ref:users'][$value])) {
-                    $item['ref:users'][$value] = $data['ref:users'][$value];
-                }
-                // And organization-related references.
-                if ($key === 'organization_id' && isset($data['ref:organizations'][$value])) {
-                    $item['ref:organizations'][$value] = $data['ref:organizations'][$value];
-                }
-                // And project-related references.
-                if ($key === 'project_id' && isset($data['ref:projects'][$value])) {
-                    $item['ref:projects'][$value] = $data['ref:projects'][$value];
-                }
-                // And team-related references.
-                if ($key === 'team_id' && isset($data['ref:teams'][$value])) {
-                    $item['ref:teams'][$value] = $data['ref:teams'][$value];
+            if (isset($item['resource_type'], $item['resource_id'])) {
+                $set = $item['resource_type'] . 's';
+                if (isset($data['ref:' . $set][$item['resource_id']])) {
+                    $item['ref:' . $set][$item['resource_id']] = $data['ref:' . $set][$item['resource_id']];
                 }
             }
-
+            foreach ($map as $key => $set) {
+                if (isset($item[$key]) && isset($data['ref:' . $set][$item[$key]])) {
+                    $item['ref:' . $set][$item[$key]] = $data['ref:' . $set][$item[$key]];
+                }
+            }
             $resources[] = new static($item, $baseUrl, $client);
         }
 

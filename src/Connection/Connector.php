@@ -36,9 +36,13 @@ class Connector implements ConnectorInterface
      * @param array            $config
      *     Possible configuration keys are:
      *     - api_url (string): The API base URL.
-     *     - token_url (string): The OAuth 2.0 token URL.
-     *     - revoke_url (string): The OAuth 2.0 revocation URL.
-     *     - certifier_url (string): The SSH certificate issuer URL.
+     *     - auth_url (string): The Auth API URL.
+     *     - auth_api_enabled (bool): Whether the Auth API is enabled. Always true if auth_url is set.
+     *     - centralized_permissions_enabled (bool): Whether the Centralized User Management API is enabled.
+     *     - strict_project_references (bool): Whether to throw an exception if project references cannot be resolved.
+     *     - token_url (string): The OAuth 2.0 token URL. Can be empty if auth_url is set.
+     *     - revoke_url (string): The OAuth 2.0 revocation URL. Can be empty if auth_url is set.
+     *     - certifier_url (string): The SSH certificate issuer URL. Can be empty if auth_url is set.
      *     - client_id (string): The OAuth2 client ID for this client.
      *     - debug (bool): Whether or not Guzzle debugging should be enabled
      *       (default: false).
@@ -75,9 +79,13 @@ class Connector implements ConnectorInterface
           'verify' => true,
           'user_agent' => null,
           'cache' => false,
-          'revoke_url' => 'https://auth.api.platform.sh/oauth2/revoke',
-          'token_url' => 'https://auth.api.platform.sh/oauth2/token',
-          'certifier_url' => 'https://ssh.api.platform.sh',
+          'auth_url' => 'https://auth.api.platform.sh',
+          'auth_api_enabled' => true,
+          'revoke_url' => '',
+          'token_url' => '',
+          'certifier_url' => '',
+          'centralized_permissions_enabled' => false,
+          'strict_project_references' => false,
           'proxy' => null,
           'timeout' => 60.0,
           'connect_timeout' => 60.0,
@@ -90,6 +98,23 @@ class Connector implements ConnectorInterface
 
         if (!isset($this->config['user_agent'])) {
             $this->config['user_agent'] = $this->defaultUserAgent();
+        }
+
+        if (!empty($this->config['auth_url'])) {
+            $this->config['auth_api_enabled'] = true;
+            if (empty($this->config['token_url'])) {
+                $this->config['token_url'] = rtrim($this->config['auth_url'], '/') . '/oauth2/token';
+            }
+            if (empty($this->config['revoke_url'])) {
+                $this->config['revoke_url'] = rtrim($this->config['auth_url'], '/') . '/oauth2/revoke';
+            }
+            if (empty($this->config['certifier_url'])) {
+                $this->config['certifier_url'] = $this->config['auth_url'];
+            }
+        }
+
+        if (!empty($this->config['centralized_permissions_enabled']) && empty($this->config['auth_api_enabled'])) {
+            throw new \InvalidArgumentException('auth_api_enabled is needed if centralized_permissions_enabled is true');
         }
 
         if (isset($session)) {
@@ -229,6 +254,16 @@ class Connector implements ConnectorInterface
     public function getSession()
     {
         return $this->session;
+    }
+
+    /**
+     * Returns the access token saved in the session, if any.
+     *
+     * @return false|string
+     */
+    public function getAccessToken()
+    {
+        return $this->session->get('accessToken');
     }
 
     /**
