@@ -111,6 +111,9 @@ class Metadata {
         while (strlen($container) > 0) {
             $key = $this->readString($container);
             $value = $this->readString($container);
+            if ($value !== '') {
+                $value = $this->readString($value);
+            }
             $tuples[$key] = $value;
         }
         return $tuples;
