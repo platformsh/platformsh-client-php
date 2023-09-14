@@ -368,7 +368,7 @@ class PlatformClient
     public function getSubscriptions($organizationId = null)
     {
         if (isset($organizationId)) {
-            $url = $this->apiUrl() . '/' . $organizationId . '/subscriptions';
+            $url = $this->apiUrl() . '/organizations/' . $organizationId . '/subscriptions';
         } else {
             $url = $this->apiUrl() . '/subscriptions';
         }
