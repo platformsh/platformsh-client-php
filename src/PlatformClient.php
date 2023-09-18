@@ -142,10 +142,12 @@ class PlatformClient
     /**
      * Returns all the projects that the current user can access.
      *
+     * @param string|null $vendor
+     *
      * @return BasicProjectInfo[]
      *   A list of basic project information.
      */
-    public function getMyProjects()
+    public function getMyProjects($vendor = null)
     {
         $projects = [];
         if (!empty($this->connector->getConfig()['centralized_permissions_enabled'])) {
@@ -157,7 +159,10 @@ class PlatformClient
             $extendedAccesses = UserExtendedAccess::byUser($userId, ['query' => ['filter[resource_type]' => 'project']], $this->connector->getClient());
             foreach ($extendedAccesses as $extendedAccess) {
                 try {
-                    $projects[] = BasicProjectInfo::fromExtendedAccess($extendedAccess);
+                    $project = BasicProjectInfo::fromExtendedAccess($extendedAccess);
+                    if ($vendor === null || $vendor === $project->vendor) {
+                        $projects[] = $project;
+                    }
                 } catch (ProjectReferenceException $e) {
                     // This exception may be thrown on non-production
                     // environments where grants and project reference

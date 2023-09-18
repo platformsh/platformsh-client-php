@@ -19,6 +19,7 @@ use Platformsh\Client\Model\Subscription;
  * @property-read string $label The organization's "human-readable" name
  * @property-read string $country ISO 2-letter country code
  * @property-read string $namespace
+ * @property-read string $vendor
  * @property-read string $created_at
  * @property-read string $updated_at
  */

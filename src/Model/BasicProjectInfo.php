@@ -33,6 +33,8 @@ class BasicProjectInfo
     public $organization_id;
     /** @var string|null */
     public $owner_id;
+    /** @var string|null */
+    public $vendor;
 
     private function __construct($id, $title)
     {
@@ -50,6 +52,7 @@ class BasicProjectInfo
         $obj->status = $stub->status;
         $obj->owner_id = $stub->getProperty('owner', false, false) ?: null;
         $obj->organization_id = $stub->getProperty('organization_id', false, false) ?: null;
+        $obj->vendor = $stub->getProperty('vendor', false, false) ?: null;
         return $obj;
     }
 
@@ -70,6 +73,11 @@ class BasicProjectInfo
         $obj->organization_id = $extendedAccess->organization_id;
         $obj->organization_ref = $extendedAccess->getOrganizationInfo();
         $obj->owner_id = $ref->organization_id;
+        if (($vendor = $ref->getProperty('vendor', false)) !== null) {
+            $obj->vendor = $vendor;
+        } elseif ($obj->organization_ref !== null) {
+            $obj->vendor = $obj->organization_ref->getProperty('vendor', false);
+        }
         return $obj;
     }
 }
