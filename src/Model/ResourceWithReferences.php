@@ -4,6 +4,7 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Url;
 use Platformsh\Client\Model\Ref\Resolver;
 
 class ResourceWithReferences extends ApiResourceBase
@@ -43,22 +44,62 @@ class ResourceWithReferences extends ApiResourceBase
     {
         $data = self::resolveReferences(new Resolver($client, $baseUrl), $data);
 
+        // Add referenced information for the whole collection onto individual
+        // resources, based on this map of resource keys to reference API sets.
+        $map = [
+            'project_id' => 'projects',
+            'owner_id' => 'users',
+            'user_id' => 'users',
+            'organization_id' => 'organizations',
+            'team_id' => 'teams',
+        ];
+
         $resources = [];
         foreach ($data[static::$collectionItemsKey] as $item) {
-            foreach ($item as $key => $value) {
-                // Add user-related references onto the individual item (the rest of $data is discarded).
-                if (\in_array($key, ['owner_id', 'user_id']) && isset($data['ref:users'][$value])) {
-                    $item['ref:users'][$value] = $data['ref:users'][$value];
-                }
-                // And organization-related references.
-                if ($key === 'organization_id' && isset($data['ref:organizations'][$value])) {
-                    $item['ref:organizations'][$value] = $data['ref:organizations'][$value];
+            if (isset($item['resource_type'], $item['resource_id'])) {
+                $set = $item['resource_type'] . 's';
+                if (isset($data['ref:' . $set][$item['resource_id']])) {
+                    $item['ref:' . $set][$item['resource_id']] = $data['ref:' . $set][$item['resource_id']];
                 }
             }
-
+            foreach ($map as $key => $set) {
+                if (isset($item[$key]) && isset($data['ref:' . $set][$item[$key]])) {
+                    $item['ref:' . $set][$item[$key]] = $data['ref:' . $set][$item[$key]];
+                }
+            }
             $resources[] = new static($item, $baseUrl, $client);
         }
 
         return $resources;
+    }
+
+    /**
+     * Returns a paginated list of resources.
+     *
+     * This is the equivalent of getCollection() with pagination logic.
+     *
+     * If 'items' is non-empty and if a non-null 'next' URL is returned, this
+     * call may be repeated with the new URL to fetch the next page.
+     *
+     * Use $options['query']['page'] to specify a page number explicitly.
+     *
+     * @param string $url
+     * @param ClientInterface $client
+     * @param array $options
+     *
+     * @return array{'items': static[], 'next': ?string}
+     */
+    public static function getPagedCollection($url, ClientInterface $client, array $options = [])
+    {
+        $request = $client->createRequest('get', $url, $options);
+        $data = static::send($request, $client);
+        $items = static::wrapCollection($data, $url, $client);
+
+        $nextUrl = null;
+        if (isset($data['_links']['next']['href'])) {
+            $nextUrl = Url::fromString($url)->combine($data['_links']['next']['href'])->__toString();
+        }
+
+        return ['items' => $items, 'next' => $nextUrl];
     }
 }

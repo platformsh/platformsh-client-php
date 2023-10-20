@@ -16,6 +16,15 @@ class EnvironmentTypeAccess extends ApiResourceBase
     const ROLE_VIEWER = 'viewer';
     const ROLE_CONTRIBUTOR = 'contributor';
 
+    public function isOperationAvailable($op)
+    {
+        if ($op === 'edit') {
+            // TODO remove this when the API exposes #edit links for /environment-types/ID/access when centralized_permissions are enabled
+            return true;
+        }
+        return parent::isOperationAvailable($op);
+    }
+
     /**
      * {@inheritdoc}
      */
