@@ -23,4 +23,34 @@ use Platformsh\Client\DataStructure\ReadOnlyStructureTrait;
 abstract class AppBase
 {
     use ReadOnlyStructureTrait;
+
+    /**
+     * Returns runtime operations defined for the app, keyed by name.
+     *
+     * @return array<string, RuntimeOperation>
+     */
+    public function getRuntimeOperations()
+    {
+        return array_map(function (array $data) {
+            return RuntimeOperation::fromData($data);
+        }, $this->data['operations']);
+    }
+
+    /**
+     * Returns a single runtime operation.
+     *
+     * @param string $name
+     *
+     * @throws \InvalidArgumentException if not found
+     *
+     * @return RuntimeOperation
+     */
+    public function getRuntimeOperation($name)
+    {
+        if (!isset($this->data['operations'][$name])) {
+            throw new \InvalidArgumentException(sprintf('Operation not found: %s', $name));
+        }
+
+        return RuntimeOperation::fromData($this->data['operations'][$name]);
+    }
 }

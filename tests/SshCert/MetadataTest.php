@@ -11,7 +11,7 @@ class MetadataTest extends TestCase {
     public function setUp()
     {
         // Key generated with:
-        // ssh-keygen -s test -I 'foo' -V '20140513120000:20200429060000' test.pub
+        // ssh-keygen -s test -I 'foo' -V '20140513120000:20200429060000' -O extension:test-flag@example.com -O extension:test-value@example.com=bar test.pub
         $this->metadata = new Metadata(\file_get_contents(dirname(__DIR__) . '/data/ssh-certs/test-cert.pub'));
     }
 
@@ -25,5 +25,11 @@ class MetadataTest extends TestCase {
 
     public function testGetKeyId() {
         $this->assertEquals('foo', $this->metadata->getKeyId());
+    }
+
+    public function testExtensions() {
+        $ext = $this->metadata->getExtensions();
+        $this->assertTrue(isset($ext['test-flag@example.com']));
+        $this->assertEquals('bar', $ext['test-value@example.com']);
     }
 }
