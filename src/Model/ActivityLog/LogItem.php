@@ -64,13 +64,13 @@ class LogItem {
 
     /**
      * @param string $str
-     * @return array
+     * @return array|null
      */
     private static function decode($str)
     {
         $data = json_decode($str, true);
         if ($data === null) {
-            throw new \RuntimeException('Failed to decode JSON with message: ' . json_last_error_msg() . ':' . "\n" . $data);
+            trigger_error(sprintf('Failed to decode JSON line with message: %s: %s', json_last_error_msg(), $str), E_USER_WARNING);
         }
         return $data;
     }
