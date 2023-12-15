@@ -37,7 +37,6 @@ class Connector implements ConnectorInterface
      *     Possible configuration keys are:
      *     - api_url (string): The API base URL.
      *     - auth_url (string): The Auth API URL.
-     *     - auth_api_enabled (bool): Whether the Auth API is enabled. Always true if auth_url is set.
      *     - centralized_permissions_enabled (bool): Whether the Centralized User Management API is enabled.
      *     - strict_project_references (bool): Whether to throw an exception if project references cannot be resolved.
      *     - token_url (string): The OAuth 2.0 token URL. Can be empty if auth_url is set.
@@ -80,7 +79,6 @@ class Connector implements ConnectorInterface
           'user_agent' => null,
           'cache' => false,
           'auth_url' => 'https://auth.api.platform.sh',
-          'auth_api_enabled' => true,
           'revoke_url' => '',
           'token_url' => '',
           'certifier_url' => '',
@@ -103,7 +101,6 @@ class Connector implements ConnectorInterface
         }
 
         if (!empty($this->config['auth_url'])) {
-            $this->config['auth_api_enabled'] = true;
             if (empty($this->config['token_url'])) {
                 $this->config['token_url'] = rtrim($this->config['auth_url'], '/') . '/oauth2/token';
             }
@@ -113,10 +110,6 @@ class Connector implements ConnectorInterface
             if (empty($this->config['certifier_url'])) {
                 $this->config['certifier_url'] = $this->config['auth_url'];
             }
-        }
-
-        if (!empty($this->config['centralized_permissions_enabled']) && empty($this->config['auth_api_enabled'])) {
-            throw new \InvalidArgumentException('auth_api_enabled is needed if centralized_permissions_enabled is true');
         }
 
         if (isset($session)) {

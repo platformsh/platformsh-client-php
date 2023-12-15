@@ -111,6 +111,8 @@ class Project extends Resource implements HasActivitiesInterface
      */
     public function addUser($user, $role, $byUuid = false)
     {
+        trigger_error('Calling Project::addUser() is deprecated; the method will be removed in a future version. Use Project::inviteUserByEmail() instead.', E_USER_DEPRECATED);
+
         $property = $byUuid ? 'user' : 'email';
         $body = [$property => $user, 'role' => $role];
 
