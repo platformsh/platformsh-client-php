@@ -579,12 +579,7 @@ class PlatformClient
         }
 
         try {
-            // Use the Auth API (/users/me) if enabled.
-            if (!empty($this->connector->getConfig()['auth_api_enabled'])) {
-                return $this->userId = $this->getUser('me')->id;
-            }
-            // Otherwise fall back to the legacy account info function.
-            return $this->userId = $this->getAccountInfo($reset)['id'];
+            return $this->userId = $this->getUser('me')->id;
         } catch (BadResponseException $e) {
             if ($e->getResponse() && $e->getResponse()->getStatusCode() === 403) {
                 return $this->userId = false;
