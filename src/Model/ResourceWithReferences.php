@@ -40,9 +40,16 @@ class ResourceWithReferences extends Resource
         return $data;
     }
 
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+    public static function wrapCollection($data, $baseUrl, ClientInterface $client)
     {
+        if ($data instanceof Collection) {
+            $parent = $data;
+            $data = $data->getData();
+        } else {
+            $parent = new Collection($data, $client);
+        }
         $data = self::resolveReferences(new Resolver($client, $baseUrl), $data);
+        $parent->setData($data);
 
         // Add referenced information for the whole collection onto individual
         // resources, based on this map of resource keys to reference API sets.
@@ -67,7 +74,9 @@ class ResourceWithReferences extends Resource
                     $item['ref:' . $set][$item[$key]] = $data['ref:' . $set][$item[$key]];
                 }
             }
-            $resources[] = new static($item, $baseUrl, $client);
+            $resource = new static($item, $baseUrl, $client);
+            $resource->setParentCollection($parent);
+            $resources[] = $resource;
         }
 
         return $resources;
@@ -87,7 +96,7 @@ class ResourceWithReferences extends Resource
      * @param ClientInterface $client
      * @param array $options
      *
-     * @return array{'items': static[], 'next': ?string}
+     * @return array{items: static[], next: ?string}
      */
     public static function getPagedCollection($url, ClientInterface $client, array $options = [])
     {

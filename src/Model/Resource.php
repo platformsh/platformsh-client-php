@@ -34,6 +34,9 @@ abstract class Resource implements \ArrayAccess
     /** @var bool */
     protected $isFull = false;
 
+    /** @var Collection|null */
+    protected $parentCollection;
+
     /**
      * Resource constructor.
      *
@@ -301,7 +304,7 @@ abstract class Resource implements \ArrayAccess
     }
 
     /**
-     * Get a collection of resources.
+     * Returns a list of resources (a collection).
      *
      * @param string          $url     The collection URL.
      * @param int             $limit   A limit on the number of resources to
@@ -314,37 +317,61 @@ abstract class Resource implements \ArrayAccess
      */
     public static function getCollection($url, $limit, array $options, ClientInterface $client)
     {
-        $request = $client->createRequest('get', $url, $options);
-        $data = self::send($request, $client);
+        $items = static::getCollectionWithParent($url, $client, $options)['items'];
 
-        // @todo remove this when the API implements a 'count' parameter
-        if (!empty($limit) && count($data) > $limit) {
-            $data = array_slice($data, 0, $limit);
+        if (!empty($limit) && count($items) > $limit) {
+            $items = array_slice($items, 0, $limit);
         }
 
-        return static::wrapCollection($data, $url, $client);
+        return $items;
+    }
+
+    /**
+     * Returns a list of resources and the Collection that contained them.
+     *
+     * @param string          $url     The collection URL.
+     * @param ClientInterface $client A suitably configured Guzzle client.
+     * @param array           $options An array of additional Guzzle request
+     *                                 options.
+     *
+     * @return array{items: static[], collection: Collection}
+     */
+    public static function getCollectionWithParent($url, ClientInterface $client, array $options = [])
+    {
+        $request = $client->createRequest('GET', $url, $options);
+        $data = self::send($request, $client);
+        $collection = new Collection($data, $client);
+        return ['items' => static::wrapCollection($collection, $url, $client), 'collection' => $collection];
     }
 
     /**
      * Create an array of resource instances from a collection's JSON data.
      *
-     * @param array           $data    The deserialized JSON from the
-     *                                 collection (i.e. a list of resources,
-     *                                 each of which is an array of data).
-     * @param string          $baseUrl The URL to the collection.
-     * @param ClientInterface $client  A suitably configured Guzzle client.
+     * @param array|Collection $data    The deserialized JSON from the
+     *                                  collection (i.e. a list of resources,
+     *                                  each of which is an array of data).
+     * @param string           $baseUrl The URL to the collection.
+     * @param ClientInterface  $client  A suitably configured Guzzle client.
      *
      * @return static[]
      */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+    public static function wrapCollection($data, $baseUrl, ClientInterface $client)
     {
+        if ($data instanceof Collection) {
+            $parent = $data;
+            $data = $data->getData();
+        } else {
+            $parent = new Collection($data, $client);
+        }
         $resources = [];
         $items = $data;
         if (isset(static::$collectionItemsKey)) {
             $items = $items[static::$collectionItemsKey];
         }
         foreach ($items as $item) {
-            $resources[] = new static($item, $baseUrl, $client);
+            $resource = new static($item, $baseUrl, $client);
+            $resource->setParentCollection($parent);
+            $resources[] = $resource;
         }
 
         return $resources;
@@ -662,5 +689,28 @@ abstract class Resource implements \ArrayAccess
     protected function isProperty($key)
     {
         return $key !== '_links' && $key !== '_embedded';
+    }
+
+    /**
+     * Returns the wrapping collection, if this resource's data was fetched via one.
+     *
+     * Useful for pagination.
+     *
+     * @return Collection|null
+     */
+    public function getParentCollection()
+    {
+        return $this->parentCollection;
+    }
+
+    /**
+     * Sets a parent collection for this resource.
+     *
+     * @param Collection $parent
+     * @return void
+     */
+    protected function setParentCollection(Collection $parent)
+    {
+        $this->parentCollection = $parent;
     }
 }
