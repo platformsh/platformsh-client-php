@@ -179,11 +179,12 @@ class Subscription extends ResourceWithReferences
     /**
      * @inheritdoc
      */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+    public static function wrapCollection($data, $baseUrl, ClientInterface $client)
     {
-        if (isset($data['items'])) {
+        $dataArray = $data instanceof Collection ? $data->getData() : $data;
+        if (isset($dataArray['items'])) {
             static::$collectionItemsKey = 'items';
-        } elseif (isset($data['subscriptions'])) {
+        } elseif (isset($dataArray['subscriptions'])) {
             static::$collectionItemsKey = 'subscriptions';
         }
         return parent::wrapCollection($data, $baseUrl, $client);

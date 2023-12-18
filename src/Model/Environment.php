@@ -486,21 +486,6 @@ class Environment extends Resource implements HasActivitiesInterface
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
-    {
-        // The environments collection contains full information about each
-        // environment, so set $full to true when initializing.
-        $resources = [];
-        foreach ($data as $item) {
-            $resources[] = new static($item, $baseUrl, $client, true);
-        }
-
-        return $resources;
-    }
-
-    /**
      * Create a backup of the environment.
      *
      * @param bool $unsafeAllowInconsistent
