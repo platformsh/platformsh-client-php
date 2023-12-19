@@ -16,6 +16,12 @@ use Platformsh\Client\Model\Result;
  */
 class ProjectUserAccess extends ResourceWithReferences
 {
+    const ROLE_ADMIN = 'admin';
+    const ROLE_VIEWER = 'viewer';
+
+    public static $projectRoles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
+    public static $environmentTypeRoles = ['admin', 'contributor', 'viewer'];
+
     /**
      * @return UserRef
      */

@@ -5,6 +5,10 @@ namespace Platformsh\Client\Model;
 /**
  * A user with access to a Platform.sh project.
  *
+ * @deprecated This can and should be replaced by ProjectUserAccess when the "Centralized Permissions" API is available
+ *
+ * @see \Platformsh\Client\Model\UserAccess\ProjectUserAccess
+ *
  * @property-read string $id
  * @property-read string $role
  */
