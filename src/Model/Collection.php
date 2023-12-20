@@ -6,16 +6,24 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ParseException;
 use Platformsh\Client\Exception\ApiResponseException;
+use Platformsh\Client\Model\Ref\Resolver;
 
+/**
+ * Represents a collection of items.
+ *
+ * Automatically resolves references when fetching the next or previous page.
+ */
 class Collection
 {
     private $data;
     private $client;
+    private $resolver;
 
     public function __construct(array $data, ClientInterface $client)
     {
         $this->data = $data;
         $this->client = $client;
+        $this->resolver = new Resolver($client, $data['_links']['self']['href']);
     }
 
     /**
@@ -80,6 +88,7 @@ class Collection
         try {
             $response = $this->client->send($request);
             $data = $response->json();
+            $data = $this->resolver->resolveReferences($data);
 
             return new static($data, $this->client);
         } catch (BadResponseException $e) {
