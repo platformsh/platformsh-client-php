@@ -17,13 +17,15 @@ class Collection
 {
     private $data;
     private $client;
+    private $baseUrl;
     private $resolver;
 
-    public function __construct(array $data, ClientInterface $client)
+    public function __construct(array $data, ClientInterface $client, $baseUrl)
     {
         $this->data = $data;
         $this->client = $client;
-        $this->resolver = new Resolver($client, $data['_links']['self']['href']);
+        $this->baseUrl = $baseUrl;
+        $this->resolver = new Resolver($client, $baseUrl);
     }
 
     /**
@@ -90,7 +92,7 @@ class Collection
             $data = $response->json();
             $data = $this->resolver->resolveReferences($data);
 
-            return new static($data, $this->client);
+            return new static($data, $this->client, $this->baseUrl);
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
         } catch (ParseException $e) {

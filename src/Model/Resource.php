@@ -340,7 +340,7 @@ abstract class Resource implements \ArrayAccess
     {
         $request = $client->createRequest('GET', $url, $options);
         $data = self::send($request, $client);
-        $collection = new Collection($data, $client);
+        $collection = new Collection($data, $client, $url);
         return ['items' => static::wrapCollection($collection, $url, $client), 'collection' => $collection];
     }
 
@@ -361,7 +361,7 @@ abstract class Resource implements \ArrayAccess
             $parent = $data;
             $data = $data->getData();
         } else {
-            $parent = new Collection($data, $client);
+            $parent = new Collection($data, $client, $baseUrl);
         }
         $resources = [];
         $items = $data;
