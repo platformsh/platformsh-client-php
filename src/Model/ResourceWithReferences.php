@@ -46,7 +46,7 @@ class ResourceWithReferences extends Resource
             $parent = $data;
             $data = $data->getData();
         } else {
-            $parent = new Collection($data, $client);
+            $parent = new Collection($data, $client, $baseUrl);
         }
         $data = self::resolveReferences(new Resolver($client, $baseUrl), $data);
         $parent->setData($data);
