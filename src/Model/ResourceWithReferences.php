@@ -96,7 +96,7 @@ class ResourceWithReferences extends Resource
      * @param ClientInterface $client
      * @param array $options
      *
-     * @return array{items: static[], next: ?string}
+     * @return array{items: static[], next: ?string, previous: ?string}
      */
     public static function getPagedCollection($url, ClientInterface $client, array $options = [])
     {
@@ -104,11 +104,15 @@ class ResourceWithReferences extends Resource
         $data = static::send($request, $client);
         $items = static::wrapCollection($data, $url, $client);
 
-        $nextUrl = null;
-        if (isset($data['_links']['next']['href'])) {
-            $nextUrl = Url::fromString($url)->combine($data['_links']['next']['href'])->__toString();
+        $ret = ['items' => $items, 'next' => null, 'previous' => null];
+
+        $base = Url::fromString($url);
+        foreach (['previous', 'next'] as $rel) {
+            if (isset($data['_links'][$rel]['href'])) {
+                $ret[$rel] = $base->combine($data['_links'][$rel]['href'])->__toString();
+            }
         }
 
-        return ['items' => $items, 'next' => $nextUrl];
+        return $ret;
     }
 }
