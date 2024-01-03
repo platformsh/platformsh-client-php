@@ -37,6 +37,16 @@ class Collection
     }
 
     /**
+     * Returns the total count of items in a collection (across all pages), if available.
+     *
+     * @return int|null
+     */
+    public function getTotalCount()
+    {
+        return isset($this->data['count']) ? (int) $this->data['count'] : null;
+    }
+
+    /**
      * @internal
      * @param array $data
      * @return void
@@ -66,6 +76,17 @@ class Collection
     }
 
     /**
+     * @return string|null
+     */
+    public function getNextPageUrl()
+    {
+        if (empty($this->data['_links']['next']['href'])) {
+            return null;
+        }
+        return $this->data['_links']['next']['href'];
+    }
+
+    /**
      * @return bool
      */
     public function hasPreviousPage()
@@ -82,6 +103,17 @@ class Collection
             return null;
         }
         return $this->doFetchPage($this->data['_links']['previous']['href']);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPreviousPageUrl()
+    {
+        if (empty($this->data['_links']['previous']['href'])) {
+            return null;
+        }
+        return $this->data['_links']['previous']['href'];
     }
 
     private function doFetchPage($url)
