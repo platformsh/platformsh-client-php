@@ -22,6 +22,7 @@ use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
 use Platformsh\Client\Model\Subscription\SubscriptionOptions;
+use Platformsh\Client\Model\Team\Team;
 use Platformsh\Client\Model\User;
 
 class PlatformClient
@@ -715,5 +716,27 @@ class PlatformClient
             $values['owner_id'] = $owner;
         }
         return Organization::create($values, $url, $this->connector->getClient());
+    }
+
+    /**
+     * Fetches a team by ID.
+     *
+     * @param string $id
+     * @param Organization|null $organization
+     *
+     * @throws \RuntimeException if the given organization and team IDs conflict
+     *
+     * @return Team|false
+     */
+    public function getTeam($id, Organization $organization = null)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $team = Team::get($id, '/teams', $this->connector->getClient());
+        if ($organization && $team && $team->organization_id !== $organization->id) {
+            throw new \RuntimeException(sprintf('Found team %s, but it is not part of the specified organization %s', $team->id, $organization->id));
+        }
+        return $team;
     }
 }

@@ -11,6 +11,7 @@ use Platformsh\Client\Model\ResourceWithReferences;
 use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\Subscription;
+use Platformsh\Client\Model\Team\Team;
 
 /**
  * @property-read string $id The organization ID
@@ -66,6 +67,16 @@ class Organization extends ResourceWithReferences
     public function getMembers()
     {
         return Member::getCollection($this->getLink('members'), 0, [], $this->client);
+    }
+
+    /**
+     * Returns an organization member, by user ID.
+     *
+     * @return Member|false
+     */
+    public function getMember($userId)
+    {
+        return Member::get($userId, $this->getLink('members'), $this->client);
     }
 
     /**
@@ -209,5 +220,22 @@ class Organization extends ResourceWithReferences
         $url = $this->getLink('profile');
         $response = $this->client->get($url);
         return new Profile($response->json(), $url, $this->client);
+    }
+
+    /**
+     * Creates a Team.
+     *
+     * @param string $label
+     * @param string[] $projectPermissions
+     *
+     * @return Team
+     */
+    public function createTeam($label, $projectPermissions = [])
+    {
+        $data = ['label' => $label, 'organization_id' => $this->id];
+        if ($projectPermissions !== []) {
+            $data['project_permissions'] = $projectPermissions;
+        }
+        return Team::create($data, '/teams', $this->client);
     }
 }
