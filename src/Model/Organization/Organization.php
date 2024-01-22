@@ -19,6 +19,7 @@ use Platformsh\Client\Model\Team\Team;
  * @property-read string $name The organization's machine name (used in URLs)
  * @property-read string $label The organization's "human-readable" name
  * @property-read string $country ISO 2-letter country code
+ * @property-read string[] $capabilities List of enabled features.
  * @property-read string $namespace
  * @property-read string $vendor
  * @property-read string $created_at
