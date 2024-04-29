@@ -48,6 +48,8 @@ class Connector implements ConnectorInterface
      *     - verify (bool): Whether or not SSL verification should be enabled
      *       (default: true).
      *     - user_agent (string): The HTTP User-Agent for API requests.
+     *     - headers (array<string, string>): Additional headers to send to the API (an associative array of header names and values).
+     *     - subscribers (\SubscriberInterface[]): Additional Guzzle subscribers (an array of SubscriberInterface objects).
      *     - cache (array|bool): Caching. Set to true to enable in-memory
      *       caching, to false (the default) to disable caching, or to an array
      *       of options as expected by the Guzzle cache subscriber.
@@ -77,6 +79,8 @@ class Connector implements ConnectorInterface
           'debug' => false,
           'verify' => true,
           'user_agent' => null,
+          'headers' => [],
+          'subscribers' => [],
           'cache' => false,
           'auth_url' => 'https://auth.api.platform.sh',
           'revoke_url' => '',
@@ -482,6 +486,14 @@ class Connector implements ConnectorInterface
                 'auth' => 'oauth2',
               ],
             ];
+
+            if (!empty($this->config['headers'])) {
+                $options['defaults']['headers'] += $this->config['headers'];
+            }
+
+            if (!empty($this->config['subscribers'])) {
+                $options['defaults']['subscribers'] = array_merge($options['defaults']['subscribers'], $this->config['subscribers']);
+            }
 
             if ($this->config['gzip']) {
                 $options['defaults']['decode_content'] = true;
