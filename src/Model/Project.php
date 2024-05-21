@@ -12,6 +12,7 @@ use Platformsh\Client\Model\Invitation\ProjectInvitation;
 use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
 use Platformsh\Client\Model\Project\Capabilities;
+use Platformsh\Client\Model\Project\Settings;
 
 /**
  * A Platform.sh project.
@@ -560,5 +561,19 @@ class Project extends Resource implements HasActivitiesInterface
         $data = self::send($request, $this->client);
 
         return Capabilities::fromData($data);
+    }
+
+    /**
+     * Returns the project settings.
+     *
+     * @return Settings
+     */
+    public function getSettings()
+    {
+        $url = $this->getUri() . '/settings';
+        $request = $this->client->createRequest('get', $this->getUri() . '/settings');
+        $data = self::send($request, $this->client);
+
+        return new Settings($data, $url, $this->client);
     }
 }
