@@ -63,6 +63,8 @@ class Connector implements ConnectorInterface
      *     - on_refresh_error: A callback to run when a refresh token error is
      *       received. It will be passed a Guzzle BadResponseException, and
      *       should return an AccessToken or null.
+     *     - on_step_up_auth_response: A callback to run when a refresh token error is
+     *       received. It will be passed a Guzzle ResponseInterface.
      * @param SessionInterface $session
      */
     public function __construct(array $config = [], SessionInterface $session = null)
@@ -97,6 +99,7 @@ class Connector implements ConnectorInterface
           'on_refresh_start' => null,
           'on_refresh_end' => null,
           'on_refresh_error' => null,
+          'on_step_up_auth_response' => null,
         ];
         $this->config = Collection::fromConfig($config, $defaults);
 
@@ -430,6 +433,9 @@ class Connector implements ConnectorInterface
             }
             if ($this->config['on_refresh_error'] !== null) {
                 $this->oauth2Plugin->setOnRefreshError($this->config['on_refresh_error']);
+            }
+            if ($this->config['on_step_up_auth_response'] !== null) {
+                $this->oauth2Plugin->setOnStepUpAuthResponse($this->config['on_step_up_auth_response']);
             }
         }
 

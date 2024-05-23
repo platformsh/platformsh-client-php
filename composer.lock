@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "97d54b076b303dcc1fb9a02e572418a5",
+    "content-hash": "f90884fa3b4e45fffd6bc291356adfee",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -423,16 +423,16 @@
         },
         {
             "name": "pjcdawkins/guzzle-oauth2-plugin",
-            "version": "v2.3.3",
+            "version": "v2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pjcdawkins/guzzle-oauth2-plugin.git",
-                "reference": "8409e94266896da3b5eb9e8231a267783466af66"
+                "reference": "aefcf3f77ad36edfd43f28813312b4f3666efac0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/8409e94266896da3b5eb9e8231a267783466af66",
-                "reference": "8409e94266896da3b5eb9e8231a267783466af66",
+                "url": "https://api.github.com/repos/pjcdawkins/guzzle-oauth2-plugin/zipball/aefcf3f77ad36edfd43f28813312b4f3666efac0",
+                "reference": "aefcf3f77ad36edfd43f28813312b4f3666efac0",
                 "shasum": ""
             },
             "require": {
@@ -465,9 +465,9 @@
             ],
             "description": "An OAuth2 plugin (subscriber) for Guzzle (forked from commerceguys/guzzle-oauth2-plugin)",
             "support": {
-                "source": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/tree/v2.3.3"
+                "source": "https://github.com/pjcdawkins/guzzle-oauth2-plugin/tree/v2.4.0"
             },
-            "time": "2023-05-22T15:13:44+00:00"
+            "time": "2024-05-23T13:14:55+00:00"
         },
         {
             "name": "react/promise",
@@ -1856,5 +1856,5 @@
     "platform-overrides": {
         "php": "5.5.9"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
