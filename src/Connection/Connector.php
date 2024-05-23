@@ -64,7 +64,8 @@ class Connector implements ConnectorInterface
      *       received. It will be passed a Guzzle BadResponseException, and
      *       should return an AccessToken or null.
      *     - on_step_up_auth_response: A callback to run when a refresh token error is
-     *       received. It will be passed a Guzzle ResponseInterface.
+     *       received. It will be passed a Guzzle ResponseInterface, and
+     *       should return an AccessToken or null.
      * @param SessionInterface $session
      */
     public function __construct(array $config = [], SessionInterface $session = null)
