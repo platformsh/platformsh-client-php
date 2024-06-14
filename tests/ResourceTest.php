@@ -25,10 +25,10 @@ class ResourceTest extends TestCase
             '_embedded' => [],
             '_links' => [
               'self' => [
-                'href' => 'https://example.com/',
+                'href' => 'https://example.com/resources/test-id',
               ],
               '#operate' => [
-                'href' => 'https://example.com/operate',
+                'href' => '/resources/test-id/operate',
               ],
             ],
           ];
