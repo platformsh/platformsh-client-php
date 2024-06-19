@@ -68,7 +68,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     /**
      * @inheritdoc
      */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         return $this->hasProperty($offset);
     }
@@ -99,7 +99,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     /**
      * @inheritdoc
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->getProperty($offset, false);
     }
@@ -122,7 +122,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @throws \BadMethodCallException
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, $value): mixed
     {
         throw new \BadMethodCallException('Properties are read-only');
     }
@@ -132,7 +132,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @throws \BadMethodCallException
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         throw new \BadMethodCallException('Properties are read-only');
     }
