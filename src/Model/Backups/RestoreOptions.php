@@ -13,6 +13,9 @@ class RestoreOptions
     /** @var bool|null */
     private $restoreCode;
 
+    /** @var bool|null */
+    private $restoreResources;
+
     /** @var string|null */
     private $resourcesInit;
 
@@ -47,6 +50,16 @@ class RestoreOptions
     }
 
     /**
+     * @param bool|null $restoreResources
+     * @return RestoreOptions
+     */
+    public function setRestoreResources($restoreResources)
+    {
+        $this->restoreResources = $restoreResources;
+        return $this;
+    }
+
+    /**
      * @param string|null $init
      * @return RestoreOptions
      */
@@ -72,6 +85,9 @@ class RestoreOptions
         }
         if ($this->restoreCode !== null) {
             $arr['restore_code'] = $this->restoreCode;
+        }
+        if ($this->restoreResources !== null) {
+            $arr['restore_resources'] = $this->restoreResources;
         }
         if ($this->resourcesInit !== null) {
             $arr['resources']['init'] = $this->resourcesInit;
