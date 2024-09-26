@@ -69,6 +69,13 @@ class Resolver
                 }
             }
         }
+        if (isset($data['ref:teams'])) {
+            foreach ($data['ref:teams'] as &$item) {
+                if ($item !== null && !$item instanceof TeamRef) {
+                    $item = TeamRef::fromData($item);
+                }
+            }
+        }
         return $data;
     }
 }
