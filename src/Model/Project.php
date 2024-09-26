@@ -63,10 +63,9 @@ class Project extends Resource implements HasActivitiesInterface
      */
     public function getSubscriptionId()
     {
-        if ($this->hasProperty('subscription_id', false)) {
-            return $this->getProperty('subscription_id');
+        if (isset($this->data['subscription_id'])) {
+            return $this->data['subscription_id'];
         }
-
         if (isset($this->data['subscription']['license_uri'])) {
             return basename($this->data['subscription']['license_uri']);
         }
@@ -395,11 +394,9 @@ class Project extends Resource implements HasActivitiesInterface
      */
     public function isSuspended()
     {
-        return isset($this->data['status'])
-          ? $this->data['status'] === 'suspended'
-          : (bool) $this->getProperty('subscription')['suspended'];
+        return !empty($this->data['subscription']['suspended'])
+            || (isset($this->data['status']) && $this->data['status'] === 'suspended');
     }
-
 
     /**
      * Get a list of variables.
