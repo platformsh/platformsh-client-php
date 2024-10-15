@@ -223,11 +223,16 @@ class Environment extends Resource implements HasActivitiesInterface
     private function constructLegacySshUrl()
     {
         if (!$this->hasLink('ssh')) {
-            $id = $this->data['id'];
-            if (!$this->isActive()) {
-                throw new EnvironmentStateException("No SSH URL found for environment '$id'. It is not currently active.", $this);
+            if ($this->data['status'] !== 'active') {
+                throw new EnvironmentStateException(sprintf(
+                    "No SSH URL found for environment '%s'. It is not currently active (status: %s).",
+                    $this->data['id'], $this->data['status']
+                ), $this);
             }
-            throw new OperationUnavailableException("No SSH URL found for environment '$id'. You may not have permission to SSH.");
+            throw new OperationUnavailableException(sprintf(
+                "No SSH URL found for environment '%s'. You may not have permission to SSH.",
+                $this->data['id']
+            ));
         }
 
         return $this->convertSshUrl($this->getLink('ssh'));
