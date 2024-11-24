@@ -4,7 +4,8 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Url;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use Platformsh\Client\Model\Ref\Resolver;
 
 class ResourceWithReferences extends ApiResourceBase
@@ -40,32 +41,43 @@ class ResourceWithReferences extends ApiResourceBase
         return $data;
     }
 
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
+    public static function wrapCollection($data, $baseUrl, ClientInterface $client)
     {
+        if ($data instanceof Collection) {
+            $parent = $data;
+            $data = $data->getData();
+        } else {
+            $parent = new Collection($data, $client, $baseUrl);
+        }
         $data = self::resolveReferences(new Resolver($client, $baseUrl), $data);
+        $parent->setData($data);
+
+        // Add referenced information for the whole collection onto individual
+        // resources, based on this map of resource keys to reference API sets.
+        $map = [
+            'project_id' => 'projects',
+            'owner_id' => 'users',
+            'user_id' => 'users',
+            'organization_id' => 'organizations',
+            'team_id' => 'teams',
+        ];
 
         $resources = [];
         foreach ($data[static::$collectionItemsKey] as $item) {
-            foreach ($item as $key => $value) {
-                // Add user-related references onto the individual item (the rest of $data is discarded).
-                if (\in_array($key, ['owner_id', 'user_id']) && isset($data['ref:users'][$value])) {
-                    $item['ref:users'][$value] = $data['ref:users'][$value];
-                }
-                // And organization-related references.
-                if ($key === 'organization_id' && isset($data['ref:organizations'][$value])) {
-                    $item['ref:organizations'][$value] = $data['ref:organizations'][$value];
-                }
-                // And project-related references.
-                if ($key === 'project_id' && isset($data['ref:projects'][$value])) {
-                    $item['ref:projects'][$value] = $data['ref:projects'][$value];
-                }
-                // And team-related references.
-                if ($key === 'team_id' && isset($data['ref:teams'][$value])) {
-                    $item['ref:teams'][$value] = $data['ref:teams'][$value];
+            if (isset($item['resource_type'], $item['resource_id'])) {
+                $set = $item['resource_type'] . 's';
+                if (isset($data['ref:' . $set][$item['resource_id']])) {
+                    $item['ref:' . $set][$item['resource_id']] = $data['ref:' . $set][$item['resource_id']];
                 }
             }
-
-            $resources[] = new static($item, $baseUrl, $client);
+            foreach ($map as $key => $set) {
+                if (isset($item[$key]) && isset($data['ref:' . $set][$item[$key]])) {
+                    $item['ref:' . $set][$item[$key]] = $data['ref:' . $set][$item[$key]];
+                }
+            }
+            $resource = new static($item, $baseUrl, $client);
+            $resource->setParentCollection($parent);
+            $resources[] = $resource;
         }
 
         return $resources;
@@ -85,19 +97,25 @@ class ResourceWithReferences extends ApiResourceBase
      * @param ClientInterface $client
      * @param array $options
      *
-     * @return array{'items': static[], 'next': ?string}
+     * @return array{items: static[], next: ?string, previous: ?string}
      */
     public static function getPagedCollection($url, ClientInterface $client, array $options = [])
     {
-        $request = $client->createRequest('get', $url, $options);
-        $data = static::send($request, $client);
+        $request = new Request('get', $url);
+        $data = static::send($request, $client, $options);
         $items = static::wrapCollection($data, $url, $client);
 
-        $nextUrl = null;
-        if (isset($data['_links']['next']['href'])) {
-            $nextUrl = Url::fromString($url)->combine($data['_links']['next']['href'])->__toString();
+        $ret = ['items' => $items, 'next' => null, 'previous' => null];
+
+        $base = new Uri($url);
+        foreach (['previous', 'next'] as $rel) {
+            if (isset($data['_links'][$rel]['href'])) {
+                $next = new Uri($data['_links'][$rel]['href']);
+                $resolved = $base->withPath($next->getPath())->withQuery($next->getQuery());
+                $ret[$rel] = $resolved->__toString();
+            }
         }
 
-        return ['items' => $items, 'next' => $nextUrl];
+        return $ret;
     }
 }

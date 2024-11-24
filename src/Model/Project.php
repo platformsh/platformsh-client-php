@@ -13,6 +13,7 @@ use Platformsh\Client\Model\Invitation\ProjectInvitation;
 use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
 use Platformsh\Client\Model\Project\Capabilities;
+use Platformsh\Client\Model\Project\Settings;
 
 /**
  * A Platform.sh project.
@@ -63,10 +64,9 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function getSubscriptionId()
     {
-        if ($this->hasProperty('subscription_id', false)) {
-            return $this->getProperty('subscription_id');
+        if (isset($this->data['subscription_id'])) {
+            return $this->data['subscription_id'];
         }
-
         if (isset($this->data['subscription']['license_uri'])) {
             return basename($this->data['subscription']['license_uri']);
         }
@@ -112,6 +112,8 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function addUser($user, $role, $byUuid = false)
     {
+        trigger_error('Calling Project::addUser() is deprecated; the method will be removed in a future version. Use Project::inviteUserByEmail() instead.', E_USER_DEPRECATED);
+
         $property = $byUuid ? 'user' : 'email';
         $body = [$property => $user, 'role' => $role];
 
@@ -402,11 +404,9 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function isSuspended()
     {
-        return isset($this->data['status'])
-          ? $this->data['status'] === 'suspended'
-          : (bool) $this->getProperty('subscription')['suspended'];
+        return !empty($this->data['subscription']['suspended'])
+            || (isset($this->data['status']) && $this->data['status'] === 'suspended');
     }
-
 
     /**
      * Get a list of variables.
@@ -568,5 +568,19 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
         $data = self::send($request, $this->client);
 
         return Capabilities::fromData($data);
+    }
+
+    /**
+     * Returns the project settings.
+     *
+     * @return Settings
+     */
+    public function getSettings()
+    {
+        $url = $this->getUri() . '/settings';
+        $request = $this->client->createRequest('get', $this->getUri() . '/settings');
+        $data = self::send($request, $this->client);
+
+        return new Settings($data, $url, $this->client);
     }
 }

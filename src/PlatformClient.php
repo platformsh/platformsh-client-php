@@ -13,6 +13,9 @@ use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Billing\PlanRecord;
 use Platformsh\Client\Model\Billing\PlanRecordQuery;
+use Platformsh\Client\Exception\ProjectReferenceException;
+use Platformsh\Client\Model\BasicProjectInfo;
+use Platformsh\Client\Model\CentralizedPermissions\UserExtendedAccess;
 use Platformsh\Client\Model\Filter\Filter;
 use Platformsh\Client\Model\Organization\Organization;
 use Platformsh\Client\Model\Plan;
@@ -25,6 +28,7 @@ use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
 use Platformsh\Client\Model\Subscription;
 use Platformsh\Client\Model\Subscription\SubscriptionOptions;
+use Platformsh\Client\Model\Team\Team;
 use Platformsh\Client\Model\User;
 
 class PlatformClient
@@ -33,8 +37,11 @@ class PlatformClient
     /** @var ConnectorInterface */
     protected $connector;
 
-    /** @var array|null */
+    /** @var array|null A per-client cache for account info */
     protected $accountInfo;
+
+    /** @var string|null A per-client cache for the user ID */
+    protected $userId;
 
     /**
      * @param ConnectorInterface $connector
@@ -101,7 +108,7 @@ class PlatformClient
     /**
      * Get the logged-in user's projects.
      *
-     * @deprecated replaced by getProjectStubs()
+     * @deprecated replaced by getMyProjects()
      *
      * @param bool $reset
      *
@@ -128,6 +135,8 @@ class PlatformClient
     /**
      * Returns the logged-in user's project stubs.
      *
+     * @deprecated replaced by getMyProjects()
+     *
      * @param bool $reset
      *
      * @return ProjectStub[]
@@ -138,12 +147,55 @@ class PlatformClient
     }
 
     /**
+     * Returns all the projects that the current user can access.
+     *
+     * @param string|null $vendor
+     *
+     * @return BasicProjectInfo[]
+     *   A list of basic project information.
+     */
+    public function getMyProjects($vendor = null)
+    {
+        $projects = [];
+        if (!empty($this->connector->getConfig()['centralized_permissions_enabled'])) {
+            $userId = $this->getMyUserId();
+            if ($userId === false) {
+                throw new \InvalidArgumentException('No user ID specified');
+            }
+            $strict = !empty($this->connector->getConfig()['strict_project_references']);
+            $extendedAccesses = UserExtendedAccess::byUser($userId, ['query' => ['filter[resource_type]' => 'project']], $this->connector->getClient());
+            foreach ($extendedAccesses as $extendedAccess) {
+                try {
+                    $project = BasicProjectInfo::fromExtendedAccess($extendedAccess);
+                    if ($vendor === null || $vendor === $project->vendor) {
+                        $projects[] = $project;
+                    }
+                } catch (ProjectReferenceException $e) {
+                    // This exception may be thrown on non-production
+                    // environments where grants and project reference
+                    // information are not correctly synchronized.
+                    if ($strict) {
+                        throw $e;
+                    }
+                    trigger_error($e->getMessage(), E_USER_WARNING);
+                }
+            }
+        } else {
+            foreach ($this->getProjectStubs() as $stub) {
+                $projects[] = BasicProjectInfo::fromStub($stub);
+            }
+        }
+        return $projects;
+    }
+
+    /**
      * Get account information for the logged-in user.
      *
      * This information includes various integrated details such as the
      * projects the user can access, their registered SSH keys, and legacy
      * information.
      *
+     * For projects, getMyProjects() is recommended.
      * For purely user profile related information, getUser() is recommended.
      *
      * @see PlatformClient::getUser()
@@ -538,6 +590,57 @@ class PlatformClient
     }
 
     /**
+     * Returns the current user's ID, if any.
+     *
+     * @param bool $reset Reset the per-client cache.
+     *
+     * @return string|false
+     *   The user ID, or false if the access token is not associated with a user.
+     */
+    public function getMyUserId($reset = false)
+    {
+        if (isset($this->userId) && !$reset) {
+            return $this->userId;
+        }
+
+        $accessToken = $this->connector->getAccessToken();
+        if ($accessToken && ($claims = $this->unsafeGetJwtClaims($accessToken))) {
+            if (!empty($claims['sub']) && preg_match('/^[a-zA-Z0-9-]+$/', $claims['sub']) === 1) {
+                return $this->userId = $claims['sub'];
+            }
+            return $this->userId = false;
+        }
+
+        try {
+            return $this->userId = $this->getUser('me')->id;
+        } catch (BadResponseException $e) {
+            if ($e->getResponse() && $e->getResponse()->getStatusCode() === 403) {
+                return $this->userId = false;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Returns the payload of a JWT without verification.
+     *
+     * @param string $jwt
+     * @return array|false
+     */
+    private function unsafeGetJwtClaims($jwt)
+    {
+        $split = explode('.', $jwt, 3);
+        if (!isset($split[1])) {
+            return false;
+        }
+        $json = base64_decode($split[1], true);
+        if (!$json) {
+            return false;
+        }
+        return json_decode($json, true) ?: false;
+    }
+
+    /**
      * Lists all available organizations.
      *
      * @param \Platformsh\Client\Model\Filter\FilterInterface[] $filters
@@ -645,5 +748,27 @@ class PlatformClient
             $values['owner_id'] = $owner;
         }
         return Organization::create($values, $url, $this->connector->getClient());
+    }
+
+    /**
+     * Fetches a team by ID.
+     *
+     * @param string $id
+     * @param Organization|null $organization
+     *
+     * @throws \RuntimeException if the given organization and team IDs conflict
+     *
+     * @return Team|false
+     */
+    public function getTeam($id, Organization $organization = null)
+    {
+        if (!$this->connector->getApiUrl()) {
+            throw new \RuntimeException('No API URL configured');
+        }
+        $team = Team::get($id, '/teams', $this->connector->getClient());
+        if ($organization && $team && $team->organization_id !== $organization->id) {
+            throw new \RuntimeException(sprintf('Found team %s, but it is not part of the specified organization %s', $team->id, $organization->id));
+        }
+        return $team;
     }
 }

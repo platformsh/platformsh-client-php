@@ -69,16 +69,41 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     use HasActivitiesTrait;
 
     /**
+     * Returns the environment's deployments.
+     *
+     * @return EnvironmentDeployment[]
+     */
+    public function getDeployments()
+    {
+        return EnvironmentDeployment::getCollection($this->getUri() . '/deployments', 0, [], $this->client);
+    }
+
+    /**
+     * Get the next deployment of this environment.
+     *
+     * @return EnvironmentDeployment|false
+     */
+    public function getNextDeployment()
+    {
+        return EnvironmentDeployment::get('next', $this->getUri() . '/deployments', $this->client);
+    }
+
+    /**
      * Get the current deployment of this environment.
      *
-     * @throws \RuntimeException if no current deployment is found.
+     * @param bool $required
+     *   Whether to throw an exception if not found.
+     *   The current deployment would not exist if the environment is inactive.
      *
-     * @return EnvironmentDeployment
-     */
-    public function getCurrentDeployment()
+     * @throws EnvironmentStateException if no current deployment is found and $required is true
+     *
+     * @return EnvironmentDeployment|false
+     *   The deployment, or false if no current deployment is found and $required is false
+     **/
+    public function getCurrentDeployment($required = true)
     {
         $deployment = EnvironmentDeployment::get('current', $this->getUri() . '/deployments', $this->client);
-        if (!$deployment) {
+        if (!$deployment && $required) {
             throw new EnvironmentStateException('Current deployment not found', $this);
         }
 
@@ -198,11 +223,16 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     private function constructLegacySshUrl()
     {
         if (!$this->hasLink('ssh')) {
-            $id = $this->data['id'];
-            if (!$this->isActive()) {
-                throw new EnvironmentStateException("No SSH URL found for environment '$id'. It is not currently active.", $this);
+            if ($this->data['status'] !== 'active') {
+                throw new EnvironmentStateException(sprintf(
+                    "No SSH URL found for environment '%s'. It is not currently active (status: %s).",
+                    $this->data['id'], $this->data['status']
+                ), $this);
             }
-            throw new OperationUnavailableException("No SSH URL found for environment '$id'. You may not have permission to SSH.");
+            throw new OperationUnavailableException(sprintf(
+                "No SSH URL found for environment '%s'. You may not have permission to SSH.",
+                $this->data['id']
+            ));
         }
 
         return $this->convertSshUrl($this->getLink('ssh'));
@@ -461,21 +491,6 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
-    {
-        // The environments collection contains full information about each
-        // environment, so set $full to true when initializing.
-        $resources = [];
-        foreach ($data as $item) {
-            $resources[] = new static($item, $baseUrl, $client, true);
-        }
-
-        return $resources;
-    }
-
-    /**
      * Create a backup of the environment.
      *
      * @param bool $unsafeAllowInconsistent
@@ -601,6 +616,9 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * @param array $files
      *   An array of files that may be used in conjunction or in place of the
      *   repository parameter info.
+     *
+     * @deprecated use instead: runOperation('initialize', 'POST', ['profile' => '', 'repository' => ''])
+     * @see Environment::runOperation()
      *
      * @deprecated use instead: runOperation('initialize', 'POST', ['profile' => '', 'repository' => ''])
      * @see Environment::runOperation()

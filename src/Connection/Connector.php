@@ -58,15 +58,23 @@ class Connector implements ConnectorInterface
      * @param array            $config
      *     Possible configuration keys are:
      *     - api_url (string): The API base URL.
-     *     - token_url (string): The OAuth 2.0 token URL.
-     *     - revoke_url (string): The OAuth 2.0 revocation URL.
-     *     - certifier_url (string): The SSH certificate issuer URL.
+     *     - auth_url (string): The Auth API URL.
+     *     - centralized_permissions_enabled (bool): Whether the Centralized User Management API is enabled.
+     *     - strict_project_references (bool): Whether to throw an exception if project references cannot be resolved.
+     *     - token_url (string): The OAuth 2.0 token URL. Can be empty if auth_url is set.
+     *     - revoke_url (string): The OAuth 2.0 revocation URL. Can be empty if auth_url is set.
+     *     - certifier_url (string): The SSH certificate issuer URL. Can be empty if auth_url is set.
      *     - client_id (string): The OAuth2 client ID for this client.
      *     - debug (bool): Whether or not Guzzle debugging should be enabled
      *       (default: false).
      *     - verify (bool): Whether or not SSL verification should be enabled
      *       (default: true).
      *     - user_agent (string): The HTTP User-Agent for API requests.
+     *     - headers (array<string, string>): Additional headers to send to the API (an associative array of header names and values).
+     *     - subscribers (\SubscriberInterface[]): Additional Guzzle subscribers (an array of SubscriberInterface objects).
+     *     - cache (array|bool): Caching. Set to true to enable in-memory
+     *       caching, to false (the default) to disable caching, or to an array
+     *       of options as expected by the Guzzle cache subscriber.
      *     - proxy (array|string): A proxy setting, passed to Guzzle directly.
      *       Use a string to specify an HTTP proxy, or an array to specify
      *       different proxies for different protocols.
@@ -76,6 +84,9 @@ class Connector implements ConnectorInterface
      *       request, in seconds (default: 60).
      *     - on_refresh_error: A callback to run when a refresh token error is
      *       received. It will be passed a Guzzle BadResponseException, and
+     *       should return an AccessToken or null.
+     *     - on_step_up_auth_response: A callback to run when a refresh token error is
+     *       received. It will be passed a Guzzle ResponseInterface, and
      *       should return an AccessToken or null.
      * @param SessionInterface $session
      */
@@ -93,22 +104,42 @@ class Connector implements ConnectorInterface
           'debug' => false,
           'verify' => true,
           'user_agent' => null,
+          'headers' => [],
+          'subscribers' => [],
           'cache' => false,
-          'revoke_url' => 'https://auth.api.platform.sh/oauth2/revoke',
-          'token_url' => 'https://auth.api.platform.sh/oauth2/token',
-          'certifier_url' => 'https://ssh.api.platform.sh',
+          'auth_url' => 'https://auth.api.platform.sh',
+          'revoke_url' => '',
+          'token_url' => '',
+          'certifier_url' => '',
+          'centralized_permissions_enabled' => false,
+          'strict_project_references' => false,
           'proxy' => null,
           'timeout' => 60.0,
           'connect_timeout' => 60.0,
           'api_token' => null,
           'api_token_type' => 'exchange',
           'gzip' => extension_loaded('zlib'),
+          'on_refresh_start' => null,
+          'on_refresh_end' => null,
           'on_refresh_error' => null,
+          'on_step_up_auth_response' => null,
         ];
         $this->config = $config + $defaults;
 
         if (!isset($this->config['user_agent'])) {
             $this->config['user_agent'] = $this->defaultUserAgent();
+        }
+
+        if (!empty($this->config['auth_url'])) {
+            if (empty($this->config['token_url'])) {
+                $this->config['token_url'] = rtrim($this->config['auth_url'], '/') . '/oauth2/token';
+            }
+            if (empty($this->config['revoke_url'])) {
+                $this->config['revoke_url'] = rtrim($this->config['auth_url'], '/') . '/oauth2/revoke';
+            }
+            if (empty($this->config['certifier_url'])) {
+                $this->config['certifier_url'] = $this->config['auth_url'];
+            }
         }
 
         if (isset($session)) {
@@ -256,6 +287,16 @@ class Connector implements ConnectorInterface
     }
 
     /**
+     * Returns the access token saved in the session, if any.
+     *
+     * @return false|string
+     */
+    public function getAccessToken()
+    {
+        return $this->session->get('accessToken');
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -382,13 +423,18 @@ class Connector implements ConnectorInterface
                 $this->oauthMiddleware->setAccessToken($accessToken);
             }
 
-            $this->oauthMiddleware->setTokenSaveCallback(function (AccessToken $token) {
-                $this->saveToken($token);
-            });
-
 // @todo
+//            if ($this->config['on_refresh_start'] !== null) {
+//                $this->oauth2Plugin->setOnRefreshStart($this->config['on_refresh_start']);
+//            }
+//            if ($this->config['on_refresh_end'] !== null) {
+//                $this->oauth2Plugin->setOnRefreshEnd($this->config['on_refresh_end']);
+//            }
 //            if ($this->config['on_refresh_error'] !== null) {
-//                $this->oauthMiddleware->setOnRefreshError($this->config['on_refresh_error']);
+//                $this->oauth2Plugin->setOnRefreshError($this->config['on_refresh_error']);
+//            }
+//            if ($this->config['on_step_up_auth_response'] !== null) {
+//                $this->oauth2Plugin->setOnStepUpAuthResponse($this->config['on_step_up_auth_response']);
 //            }
         }
 
@@ -429,6 +475,14 @@ class Connector implements ConnectorInterface
                 'connect_timeout' => $this->config['connect_timeout'],
                 'auth' => 'oauth2',
             ];
+
+            if (!empty($this->config['headers'])) {
+                $options['defaults']['headers'] += $this->config['headers'];
+            }
+
+            if (!empty($this->config['subscribers'])) {
+                $options['defaults']['subscribers'] = array_merge($options['defaults']['subscribers'], $this->config['subscribers']);
+            }
 
             if ($this->config['gzip']) {
                 $config['decode_content'] = true;

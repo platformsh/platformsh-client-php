@@ -12,6 +12,7 @@ use Platformsh\Client\Model\ResourceWithReferences;
 use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\Subscription;
+use Platformsh\Client\Model\Team\Team;
 
 /**
  * @property-read string $id The organization ID
@@ -19,7 +20,9 @@ use Platformsh\Client\Model\Subscription;
  * @property-read string $name The organization's machine name (used in URLs)
  * @property-read string $label The organization's "human-readable" name
  * @property-read string $country ISO 2-letter country code
+ * @property-read string[] $capabilities List of enabled features.
  * @property-read string $namespace
+ * @property-read string $vendor
  * @property-read string $created_at
  * @property-read string $updated_at
  */
@@ -66,6 +69,16 @@ class Organization extends ResourceWithReferences
     public function getMembers()
     {
         return Member::getCollection($this->getLink('members'), 0, [], $this->client);
+    }
+
+    /**
+     * Returns an organization member, by user ID.
+     *
+     * @return Member|false
+     */
+    public function getMember($userId)
+    {
+        return Member::get($userId, $this->getLink('members'), $this->client);
     }
 
     /**
@@ -213,5 +226,22 @@ class Organization extends ResourceWithReferences
         $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
 
         return new Profile($data, $url, $this->client);
+    }
+
+    /**
+     * Creates a Team.
+     *
+     * @param string $label
+     * @param string[] $projectPermissions
+     *
+     * @return Team
+     */
+    public function createTeam($label, $projectPermissions = [])
+    {
+        $data = ['label' => $label, 'organization_id' => $this->id];
+        if ($projectPermissions !== []) {
+            $data['project_permissions'] = $projectPermissions;
+        }
+        return Team::create($data, '/teams', $this->client);
     }
 }

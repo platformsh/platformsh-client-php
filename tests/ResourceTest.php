@@ -25,14 +25,14 @@ class ResourceTest extends TestCase
             '_embedded' => [],
             '_links' => [
               'self' => [
-                'href' => 'https://example.com/',
+                'href' => 'https://example.com/resources/test-id',
               ],
               '#operate' => [
-                'href' => 'https://example.com/operate',
+                'href' => '/resources/test-id/operate',
               ],
             ],
           ];
-        $this->resource = new MockApiResource($data, 'https://api.example.com', null, true);
+        $this->resource = new MockApiResource($data, 'https://example.com/', null, true);
     }
 
     /**

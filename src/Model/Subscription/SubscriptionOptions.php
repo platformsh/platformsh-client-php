@@ -11,6 +11,8 @@ final class SubscriptionOptions {
     private $default_branch;
     /** @var string|NULL */
     private $options_url;
+    /** @var array|NULL */
+    private $options_custom;
     /** @var string|NULL */
     private $plan;
     /** @var int|NULL */
