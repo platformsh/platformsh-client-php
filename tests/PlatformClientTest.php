@@ -19,7 +19,7 @@ class PlatformClientTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->apiUrl = 'https://api.example.com';
         $this->connector = new MockConnector(['api_url' => $this->apiUrl]);

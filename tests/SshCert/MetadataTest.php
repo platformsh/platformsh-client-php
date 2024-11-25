@@ -8,7 +8,7 @@ use Platformsh\Client\SshCert\Metadata;
 class MetadataTest extends TestCase {
     private $metadata;
 
-    public function setUp()
+    public function setUp(): void
     {
         // Key generated with:
         // ssh-keygen -s test -I 'foo' -V '20140513120000:20200429060000' test.pub

@@ -3,7 +3,7 @@
     "description": "Platform.sh API client",
     "license": "MIT",
     "require": {
-        "php": ">=7.2.5",
+        "php": ">=8.0",
         "cocur/slugify": "^3.0",
         "guzzlehttp/guzzle": "^6.3 || ^7.0",
         "platformsh/oauth2": ">=0.0.3 <2",
@@ -11,7 +11,7 @@
         "khill/php-duration": "^1.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -30,7 +30,7 @@
     ],
     "config": {
         "platform": {
-            "php": "7.2.5"
+            "php": "8.0"
         }
     }
 }

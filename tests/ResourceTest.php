@@ -13,7 +13,7 @@ class ResourceTest extends TestCase
     /** @var \Platformsh\Client\Model\ApiResourceBase */
     protected $resource;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->properties = [
           'id' => 'test-id',
