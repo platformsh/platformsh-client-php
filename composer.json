@@ -5,8 +5,8 @@
     "require": {
         "php": ">=8.2",
         "cocur/slugify": "^3.0",
-        "guzzlehttp/guzzle": "^6.3 || ^7.0",
-        "platformsh/oauth2": ">=0.0.3 <2",
+        "guzzlehttp/guzzle": "^7 || ^8",
+        "platformsh/oauth2": "^1.0.0@beta",
         "ext-json": "*",
         "khill/php-duration": "^1.1"
     },

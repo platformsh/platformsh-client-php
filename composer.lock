@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7bd485e3cfda17fd53104e17af86d3b2",
+    "content-hash": "83a0f6d2584ecab2ca9047c2f05f1c09",
     "packages": [
         {
             "name": "cocur/slugify",
@@ -584,24 +584,25 @@
         },
         {
             "name": "platformsh/oauth2",
-            "version": "0.0.3",
+            "version": "1.0.0-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/platformsh/platformsh-oauth2-php.git",
-                "reference": "5daa2274b4cbc95658e5b32ebe4f05b5090e4549"
+                "reference": "db3d6db547516c07b64281279ea3f9a11f4df002"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/5daa2274b4cbc95658e5b32ebe4f05b5090e4549",
-                "reference": "5daa2274b4cbc95658e5b32ebe4f05b5090e4549",
+                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/db3d6db547516c07b64281279ea3f9a11f4df002",
+                "reference": "db3d6db547516c07b64281279ea3f9a11f4df002",
                 "shasum": ""
             },
             "require": {
                 "league/oauth2-client": "^2.2",
-                "php": ">=5.6.0"
+                "php": ">=8.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7"
+                "phpunit/phpunit": "^11",
+                "symplify/easy-coding-standard": "^12.3"
             },
             "type": "library",
             "autoload": {
@@ -621,9 +622,9 @@
             "description": "Platform.sh OAuth2 client",
             "support": {
                 "issues": "https://github.com/platformsh/platformsh-oauth2-php/issues",
-                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/0.0.3"
+                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/1.0.0-beta"
             },
-            "time": "2021-10-20T20:12:14+00:00"
+            "time": "2024-11-25T11:17:35+00:00"
         },
         {
             "name": "psr/http-client",
@@ -2533,7 +2534,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "platformsh/oauth2": 10
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
