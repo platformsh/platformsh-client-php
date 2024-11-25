@@ -584,16 +584,16 @@
         },
         {
             "name": "platformsh/oauth2",
-            "version": "1.0.0-beta",
+            "version": "1.0.0-beta3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/platformsh/platformsh-oauth2-php.git",
-                "reference": "db3d6db547516c07b64281279ea3f9a11f4df002"
+                "reference": "3c0e12549850837a827ca432a50aa052e3cab250"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/db3d6db547516c07b64281279ea3f9a11f4df002",
-                "reference": "db3d6db547516c07b64281279ea3f9a11f4df002",
+                "url": "https://api.github.com/repos/platformsh/platformsh-oauth2-php/zipball/3c0e12549850837a827ca432a50aa052e3cab250",
+                "reference": "3c0e12549850837a827ca432a50aa052e3cab250",
                 "shasum": ""
             },
             "require": {
@@ -622,9 +622,9 @@
             "description": "Platform.sh OAuth2 client",
             "support": {
                 "issues": "https://github.com/platformsh/platformsh-oauth2-php/issues",
-                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/1.0.0-beta"
+                "source": "https://github.com/platformsh/platformsh-oauth2-php/tree/1.0.0-beta3"
             },
-            "time": "2024-11-25T11:17:35+00:00"
+            "time": "2024-11-25T19:19:41+00:00"
         },
         {
             "name": "psr/http-client",
