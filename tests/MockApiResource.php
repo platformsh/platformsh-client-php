@@ -9,7 +9,7 @@ class MockApiResource extends ApiResourceBase
 
     protected static $required = ['testProperty'];
 
-    protected static function checkProperty($property, $value)
+    protected static function checkProperty($property, $value): array
     {
         $errors = [];
         if ($property === 'testProperty' && $value != '1') {

@@ -4,15 +4,16 @@ namespace Platformsh\Client\Tests\SshCert;
 
 use PHPUnit\Framework\TestCase;
 use Platformsh\Client\SshCert\Metadata;
+use function file_get_contents;
 
 class MetadataTest extends TestCase {
-    private $metadata;
+    private Metadata $metadata;
 
-    public function setUp()
+    public function setUp(): void
     {
         // Key generated with:
         // ssh-keygen -s test -I 'foo' -V '20140513120000:20200429060000' -O extension:test-flag@example.com -O extension:test-value@example.com=bar test.pub
-        $this->metadata = new Metadata(\file_get_contents(dirname(__DIR__) . '/data/ssh-certs/test-cert.pub'));
+        $this->metadata = new Metadata(file_get_contents(dirname(__DIR__) . '/data/ssh-certs/test-cert.pub'));
     }
 
     public function testGetValidAfter() {

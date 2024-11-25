@@ -2,21 +2,22 @@
 
 namespace Platformsh\Client\Tests;
 
+use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Connection\Connector;
 
 class MockConnector extends Connector
 {
 
-    protected $mockValues = [];
-    protected $mockStatus = 200;
+    protected array $mockValues = [];
+    protected int $mockStatus = 200;
 
     /**
      * Set the response that all future API calls should return.
      *
      * @param array $values The response body, which will be encoded as JSON.
-     * @param int   $status The HTTP status code.
+     * @param int $status The HTTP status code.
      */
-    public function setMockResult(array $values, $status = 200)
+    public function setMockResult(array $values, int $status = 200): void
     {
         $this->mockValues = $values;
         $this->mockStatus = $status;
@@ -27,7 +28,7 @@ class MockConnector extends Connector
     /**
      * @inheritdoc
      */
-    public function isLoggedIn()
+    public function isLoggedIn(): bool
     {
         $this->session->set('refreshToken', 'test');
         // @todo test the login method
@@ -40,25 +41,11 @@ class MockConnector extends Connector
      * Add a mock handler so that API responses will be intercepted with the
      * mockStatus and mockValues properties.
      */
-    public function getClient()
+    public function getClient(): MockClient|ClientInterface
     {
-        return $this->getMockClient($this->mockValues, $this->mockStatus);
-    }
-
-    /**
-     * @param array $values
-     * @param int   $status
-     * @param array $options
-     *
-     * @return \GuzzleHttp\ClientInterface
-     */
-    private function getMockClient($values, $status, array $options = [])
-    {
-        return new MockClient(
-            [
-                'mockStatus' => $status,
-                'mockValues' => $values,
-            ] + $options
-        );
+        return MockClient::create([
+            'mockStatus' => $this->mockStatus,
+            'mockValues' => $this->mockValues,
+        ]);
     }
 }

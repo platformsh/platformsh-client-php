@@ -3,17 +3,16 @@
 namespace Platformsh\Client\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Platformsh\Client\Model\ApiResourceBase;
 
 class ResourceTest extends TestCase
 {
 
-    /** @var array */
-    protected $properties;
+    protected array $properties;
 
-    /** @var \Platformsh\Client\Model\ApiResourceBase */
-    protected $resource;
+    protected ApiResourceBase $resource;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->properties = [
           'id' => 'test-id',
@@ -80,9 +79,8 @@ class ResourceTest extends TestCase
      */
     public function testRequiredPropertiesBlockCreation()
     {
-        $mockClient = new MockClient();
         $this->expectException('\InvalidArgumentException');
-        MockApiResource::create([], '', $mockClient);
+        MockApiResource::create([], '', MockClient::create());
     }
 
     /**

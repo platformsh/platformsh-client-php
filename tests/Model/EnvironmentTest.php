@@ -2,6 +2,7 @@
 
 namespace Platformsh\Client\Tests\Model;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Platformsh\Client\Model\Environment;
 
@@ -91,7 +92,7 @@ class EnvironmentTest extends TestCase
             if ($case['result'] === false) {
                 try {
                     $environment->getSshUrl($case['app'], $case['instance']);
-                } catch (\InvalidArgumentException $e) {
+                } catch (InvalidArgumentException $e) {
                     $this->assertStringContainsString('SSH URL not found for instance', $e->getMessage(), "case $i");
                 }
                 continue;
