@@ -6,9 +6,9 @@ namespace Platformsh\Client\Model\Backups;
 
 class RestoreOptions
 {
-    private ?string $environmentName;
+    private ?string $environmentName = null;
 
-    private ?string $branchFrom;
+    private ?string $branchFrom = null;
 
     private ?bool $restoreCode;
 

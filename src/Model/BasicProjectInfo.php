@@ -21,15 +21,15 @@ class BasicProjectInfo
 
     public string $title;
 
-    public ?string $region;
+    public ?string $region = null;
 
-    public ?string $subscription_id;
+    public ?string $subscription_id = null;
 
-    public ?OrganizationRef $organization_ref;
+    public ?OrganizationRef $organization_ref = null;
 
-    public ?string $created_at;
+    public ?string $created_at = null;
 
-    public ?string $status;
+    public ?string $status = null;
 
     public ?string $organization_id;
 

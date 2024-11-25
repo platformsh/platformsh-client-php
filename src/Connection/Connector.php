@@ -26,11 +26,11 @@ class Connector implements ConnectorInterface
 {
     protected array $config = [];
 
-    protected ?ClientInterface $client;
+    protected ?ClientInterface $client = null;
 
     protected $oauthMiddleware;
 
-    protected ?AbstractProvider $provider;
+    protected ?AbstractProvider $provider = null;
 
     protected SessionInterface $session;
 

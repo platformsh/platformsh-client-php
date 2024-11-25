@@ -34,7 +34,7 @@ abstract class ApiResourceBase implements \ArrayAccess
 
     protected bool $isFull = false;
 
-    protected ?Collection $parentCollection;
+    protected ?Collection $parentCollection = null;
 
     /**
      * @param array           $data    The raw data for the resource
@@ -230,7 +230,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @return static[]
      */
-    public static function getCollection(string $url, int $limit, array $options, ClientInterface $client): static
+    public static function getCollection(string $url, int $limit, array $options, ClientInterface $client): array
     {
         $items = static::getCollectionWithParent($url, $client, $options)['items'];
 

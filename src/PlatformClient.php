@@ -38,7 +38,7 @@ class PlatformClient
     /**
      * @var array|null A per-client cache for account info
      */
-    protected ?array $accountInfo;
+    protected ?array $accountInfo = null;
 
     /**
      * @var string|false|null A per-client cache for the user ID

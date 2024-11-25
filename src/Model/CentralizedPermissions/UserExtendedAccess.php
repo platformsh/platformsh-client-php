@@ -27,7 +27,7 @@ class UserExtendedAccess extends ResourceWithReferences
     /**
      * @return static[]
      */
-    public static function byUser(string $userId, array $options, ClientInterface $client): static
+    public static function byUser(string $userId, array $options, ClientInterface $client): array
     {
         return self::getCollection('/users/' . rawurlencode($userId) . '/extended-access', 0, $options, $client);
     }

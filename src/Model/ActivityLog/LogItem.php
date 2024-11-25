@@ -46,7 +46,7 @@ class LogItem
      * @return static[]
      *@deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      */
-    public static function multipleFromJsonStream(string $str): static
+    public static function multipleFromJsonStream(string $str): array
     {
         $items = [];
         foreach (explode("\n", trim($str, "\n")) as $line) {
