@@ -12,7 +12,6 @@ use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RequestOptions;
 use League\OAuth2\Client\Grant\ClientCredentials;
 use League\OAuth2\Client\Grant\Password;
-use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Token\AccessTokenInterface;
 use Platformsh\Client\Session\Session;
@@ -30,7 +29,7 @@ class Connector implements ConnectorInterface
 
     protected $oauthMiddleware;
 
-    protected ?AbstractProvider $provider = null;
+    protected ?Platformsh $provider = null;
 
     protected SessionInterface $session;
 
@@ -225,7 +224,7 @@ class Connector implements ConnectorInterface
         if ($this->isLoggedIn()) {
             $this->logOut();
         }
-        $token = $this->getProvider()->getAccessToken(new Password(), [
+        $token = $this->getOAuth2Provider()->getAccessToken(new Password(), [
             'username' => $username,
             'password' => $password,
             'totp' => $totp,
@@ -311,6 +310,19 @@ class Connector implements ConnectorInterface
         return $this->client;
     }
 
+    public function getOAuth2Provider(): Platformsh
+    {
+        return $this->provider ?: new Platformsh([
+            'clientId' => $this->config['client_id'],
+            'clientSecret' => $this->config['client_secret'],
+            'token_url' => $this->config['token_url'],
+            'api_url' => $this->config['api_url'],
+            'debug' => $this->config['debug'],
+            'verify' => $this->config['verify'],
+            'proxy' => $this->config['proxy'],
+        ]);
+    }
+
     /**
      * Load the current access token.
      */
@@ -363,7 +375,7 @@ class Connector implements ConnectorInterface
                 $grantOptions['api_token'] = $this->config['api_token'];
             }
 
-            $this->oauthMiddleware = new GuzzleMiddleware($this->getProvider(), $grant, $grantOptions);
+            $this->oauthMiddleware = new GuzzleMiddleware($this->getOAuth2Provider(), $grant, $grantOptions);
             $this->oauthMiddleware->setTokenSaveCallback(function (AccessToken $token) {
                 $this->saveToken($token);
             });
@@ -450,18 +462,5 @@ class Connector implements ConnectorInterface
             ];
             $this->getClient()->request('post', $url, $options);
         }
-    }
-
-    private function getProvider(): AbstractProvider|Platformsh
-    {
-        return $this->provider ?: new Platformsh([
-            'clientId' => $this->config['client_id'],
-            'clientSecret' => $this->config['client_secret'],
-            'token_url' => $this->config['token_url'],
-            'api_url' => $this->config['api_url'],
-            'debug' => $this->config['debug'],
-            'verify' => $this->config['verify'],
-            'proxy' => $this->config['proxy'],
-        ]);
     }
 }
