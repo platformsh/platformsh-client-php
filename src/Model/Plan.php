@@ -24,7 +24,7 @@ class Plan extends ApiResourceBase
         return parent::__get($name);
     }
 
-    public function update(array $values)
+    public function update(array $values): Result
     {
         throw new \BadMethodCallException('Update is not available for plans');
     }

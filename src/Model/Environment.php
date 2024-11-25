@@ -309,7 +309,6 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @throws EnvironmentStateException
      */
-    #[\ReturnTypeWillChange]
     public function delete(): Result
     {
         if ($this->isActive()) {
@@ -654,7 +653,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Lists source operations.
      *
-     * @return []SourceOperation
+     * @return SourceOperation[]
      */
     public function getSourceOperations(): array
     {

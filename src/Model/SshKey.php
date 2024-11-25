@@ -44,7 +44,7 @@ class SshKey extends ApiResourceBase
     /**
      * @throws \BadMethodCallException
      */
-    public function update(array $values)
+    public function update(array $values): Result
     {
         throw new \BadMethodCallException('Update is not implemented for SSH keys');
     }

@@ -17,10 +17,8 @@ class ApiResponseException extends RequestException
 {
     /**
      * Wraps a GuzzleException.
-     *
-     * @return GuzzleException
      */
-    public static function wrapGuzzleException(GuzzleException $e): RequestException|GuzzleException
+    public static function wrapGuzzleException(GuzzleException $e): GuzzleException
     {
         return $e instanceof RequestException ? self::alterMessage($e) : $e;
     }

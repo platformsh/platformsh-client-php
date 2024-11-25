@@ -157,8 +157,7 @@ abstract class ApiResourceBase implements \ArrayAccess
 
             return new static($data, $url, $client, true);
         } catch (BadResponseException $e) {
-            $response = $e->getResponse();
-            if ($response && $response->getStatusCode() === 404) {
+            if ($e->getResponse()->getStatusCode() === 404) {
                 return false;
             }
             throw $e;
@@ -169,6 +168,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      * Create a resource.
      *
      * @return Result
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public static function create(array $body, string $collectionUrl, ClientInterface $client)
     {
@@ -179,7 +179,7 @@ abstract class ApiResourceBase implements \ArrayAccess
 
         $request = new Request('post', $collectionUrl, [
             'Content-Type' => 'application/json',
-        ], \GuzzleHttp\json_encode($body));
+        ], \GuzzleHttp\Utils::jsonEncode($body));
         $data = self::send($request, $client);
 
         return new Result($data, $collectionUrl, $client, static::class);
@@ -349,11 +349,8 @@ abstract class ApiResourceBase implements \ArrayAccess
 
     /**
      * Delete the resource.
-     *
-     * @return Result
      */
-    #[\ReturnTypeWillChange]
-    public function delete()
+    public function delete(): Result
     {
         $data = $this->sendRequest($this->getUri(), 'delete');
 
@@ -364,10 +361,8 @@ abstract class ApiResourceBase implements \ArrayAccess
      * Update the resource.
      *
      * This updates the resource's internal data with the API response.
-     *
-     * @return Result
      */
-    public function update(array $values)
+    public function update(array $values): Result
     {
         if ($errors = $this->checkUpdate($values)) {
             $message = 'Cannot update resource due to validation error(s): ' . implode('; ', $errors);

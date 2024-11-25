@@ -51,8 +51,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      *
      * @internal
      */
-    #[\ReturnTypeWillChange]
-    public function delete()
+    public function delete(): Result
     {
         throw new \BadMethodCallException('Projects should not be deleted directly. Delete the subscription instead.');
     }

@@ -50,10 +50,7 @@ class PlatformClient
         $this->connector = $connector ?: new Connector();
     }
 
-    /**
-     * @return ConnectorInterface
-     */
-    public function getConnector(): ConnectorInterface|Connector
+    public function getConnector(): ConnectorInterface
     {
         return $this->connector;
     }
@@ -262,12 +259,12 @@ class PlatformClient
      * @param string|SubscriptionOptions $options
      *   Subscription request options, which override the other arguments.
      *   If a string is passed, it will be used as the region ID (deprecated). See getRegions().
-     * @param string|null $plan                The plan. See getPlans(). @deprecated
-     * @param string|null $title               The project title. @deprecated
-     * @param int|null $storage             The storage of each environment, in MiB. @deprecated
-     * @param int|null $environments        The number of available environments. @deprecated
-     * @param array  $activation_callback An activation callback for the subscription. @deprecated
-     * @param string|null $options_url         The catalog options URL. See getCatalog(). @deprecated
+     * @param string|null $plan The plan. See getPlans(). @deprecated
+     * @param string|null $title The project title. @deprecated
+     * @param int|null $storage The storage of each environment, in MiB. @deprecated
+     * @param int|null $environments The number of available environments. @deprecated
+     * @param array|null $activation_callback An activation callback for the subscription. @deprecated
+     * @param string|null $options_url The catalog options URL. See getCatalog(). @deprecated
      *
      * @return Subscription
      *   A subscription, representing a project. Use Subscription::wait() or
@@ -277,14 +274,12 @@ class PlatformClient
      * @see PlatformClient::getCatalog()
      * @see PlatformClient::getRegions()
      * @see Subscription::wait()
-     *
-     * @noinspection PhpTooManyParametersInspection
      */
     public function createSubscription(SubscriptionOptions|string $options, string $plan = null, string $title = null, int $storage = null, int $environments = null, array $activation_callback = null, string $options_url = null): Subscription
     {
         if ($options instanceof SubscriptionOptions) {
             $values = $options->toArray();
-        } elseif (\is_string($options)) {
+        } else {
             \trigger_error('The previous arguments list has been replaced by a single SubscriptionOptions argument', E_USER_DEPRECATED);
             if ($plan === null) {
                 // Backwards-compatible default.
@@ -299,8 +294,6 @@ class PlatformClient
                 'activation_callback' => $activation_callback,
                 'options_url' => $options_url,
             ]);
-        } else {
-            throw new \InvalidArgumentException('The first argument must be a SubscriptionOptions object or a string');
         }
 
         if ($id = $options->organizationId()) {

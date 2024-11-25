@@ -75,7 +75,7 @@ class Subscription extends ResourceWithReferences
     /**
      * Wait for the subscription's project to be provisioned.
      *
-     * @param callable  $onPoll   A function that will be called every time the
+     * @param callable|null $onPoll A function that will be called every time the
      *                            subscription is refreshed. It will be passed
      *                            one argument: the Subscription object.
      * @param int $interval The polling interval, in seconds.
@@ -83,7 +83,7 @@ class Subscription extends ResourceWithReferences
     public function wait(callable $onPoll = null, int $interval = 2): void
     {
         while ($this->isPending()) {
-            sleep($interval > 1 ? $interval : 1);
+            sleep(max($interval, 1));
             $this->refresh();
             if ($onPoll !== null) {
                 $onPoll($this);
@@ -199,7 +199,7 @@ class Subscription extends ResourceWithReferences
 
     protected function setData(array $data): void
     {
-        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : $data;
+        $data = $data['subscriptions'][0] ?? $data;
         $this->data = $data;
     }
 }

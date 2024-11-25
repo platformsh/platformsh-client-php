@@ -12,7 +12,7 @@ use Platformsh\Client\Model\Project;
  * Git blob resource.
  *
  * @property-read string $sha
- * @property-read string $size
+ * @property-read int|float $size
  * @property-read string $encoding
  * @property-read string $content
  */

@@ -32,7 +32,7 @@ class SetupOptions
     {
         $request = new Request('post', $url, [
             'Content-Type' => 'application/json',
-        ], \GuzzleHttp\json_encode($body));
+        ], Utils::jsonEncode($body));
         $response = $client->send($request);
         $data = Utils::jsonDecode((string) $response->getBody(), true);
         return new self($data);

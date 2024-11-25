@@ -27,7 +27,7 @@ class Connector implements ConnectorInterface
 
     protected ?ClientInterface $client = null;
 
-    protected $oauthMiddleware;
+    protected ?GuzzleMiddleware $oauthMiddleware = null;
 
     protected ?Platformsh $provider = null;
 
@@ -356,10 +356,8 @@ class Connector implements ConnectorInterface
      * Get an OAuth2 middleware to add to Guzzle clients.
      *
      * @throws \RuntimeException
-     *
-     * @return GuzzleMiddleware
      */
-    protected function getOauthMiddleware(): GuzzleMiddleware|callable|null
+    protected function getOauthMiddleware(): GuzzleMiddleware
     {
         if (! $this->oauthMiddleware) {
             if (! $this->isLoggedIn()) {

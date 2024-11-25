@@ -84,13 +84,12 @@ class Result extends ApiResourceBase
         return new $resourceClass($data, $this->baseUrl, $this->client);
     }
 
-    public function update(array $values)
+    public function update(array $values): self
     {
         throw new \BadMethodCallException('Cannot update() a Result instance directly. Perhaps use getEntity().');
     }
 
-    #[\ReturnTypeWillChange]
-    public function delete()
+    public function delete(): self
     {
         throw new \BadMethodCallException('Cannot delete() a Result instance directly. Perhaps use getEntity().');
     }

@@ -22,7 +22,7 @@ class Catalog
     {
         $request = new Request('post', $url, [
             'Content-Type' => 'application/json',
-        ], \GuzzleHttp\json_encode($data));
+        ], Utils::jsonEncode($data));
         $response = $client->send($request);
         $data = Utils::jsonDecode($response->getBody()->__toString(), true);
         $items = [];

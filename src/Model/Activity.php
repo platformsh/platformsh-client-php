@@ -51,11 +51,11 @@ class Activity extends ApiResourceBase
     /**
      * Wait for the activity to complete.
      *
-     * @param callable  $onPoll       A function that will be called every time
+     * @param callable|null $onPoll A function that will be called every time
      *                                the activity is polled for updates. It
      *                                will be passed one argument: the
      *                                Activity object.
-     * @param callable  $onLog        A function that will print new activity log
+     * @param callable|null $onLog A function that will print new activity log
      *                                messages as they are received. It will be
      *                                passed one argument: the message as a
      *                                string. Deprecated: use readLog() instead.

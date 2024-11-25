@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Platformsh\Client\Model\Project;
 
 use Platformsh\Client\Model\ApiResourceBase;
+use Platformsh\Client\Model\Result;
 
 /**
  * Settings represent various flags on a project.
@@ -17,8 +18,7 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class Settings extends ApiResourceBase
 {
-    #[\ReturnTypeWillChange]
-    public function delete()
+    public function delete(): Result
     {
         throw new \BadMethodCallException('Settings cannot be deleted');
     }
