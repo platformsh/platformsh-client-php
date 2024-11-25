@@ -5,6 +5,7 @@ namespace Platformsh\Client\Model\Organization;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Utils;
 use Platformsh\Client\Model\Organization\Invitation\AlreadyInvitedException;
 use Platformsh\Client\Model\Organization\Invitation\OrganizationInvitation;
 use Platformsh\Client\Model\Ref\UserRef;
@@ -55,7 +56,7 @@ class Organization extends ResourceWithReferences
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody(), true);
         $this->setData($data);
 
         return new Result($data, $this->baseUrl, $this->client, get_called_class());
@@ -209,7 +210,7 @@ class Organization extends ResourceWithReferences
     {
         $url = $this->getLink('address');
         $response = $this->client->get($url);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody()->__toString(), true);
 
         return new Address($data, $url, $this->client);
     }
@@ -223,7 +224,7 @@ class Organization extends ResourceWithReferences
     {
         $url = $this->getLink('profile');
         $response = $this->client->get($url);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody()->__toString(), true);
 
         return new Profile($data, $url, $this->client);
     }

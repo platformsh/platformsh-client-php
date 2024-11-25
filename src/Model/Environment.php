@@ -3,7 +3,6 @@
 namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
-use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
@@ -179,7 +178,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         $urls = $sshUrls === null ? $this->getSshUrls() : $sshUrls;
         $instances = [];
         foreach ($urls as $key => $url) {
-            if (\strpos($key, "$app:") === 0) {
+            if (str_starts_with($key, "$app:")) {
                 $parts = explode(':', $key, 3);
                 if (isset($parts[1])) {
                     $instances[$parts[1]] = $url;
@@ -190,7 +189,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         if ($instances === []) {
             // Handle legacy dedicated instance URLs.
             foreach ($urls as $key => $url) {
-                if (strpos($key, 'ent-') === 0) {
+                if (str_starts_with($key, 'ent-')) {
                     $instances[substr($key, 4)] = $url;
                 }
             }
@@ -279,7 +278,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         $prefixLength = strlen($prefix);
         $sshUrls = [];
         foreach ($this->data['_links'] as $rel => $link) {
-            if (strpos($rel, $prefix) === 0 && isset($link['href'])) {
+            if (str_starts_with($rel, $prefix) && isset($link['href'])) {
                 $sshUrls[substr($rel, $prefixLength)] = $this->convertSshUrl($link['href']);
             }
         }
@@ -734,13 +733,13 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Add a scheduled backup policy.
      *
-     * @param \Platformsh\Client\Model\Backups\Policy $policy
+     * @param Policy $policy
      *
-     * @return \Platformsh\Client\Model\Result
+     * @return Result
      */
     public function addBackupPolicy(Policy $policy)
     {
-        $backups = isset($this->data['backups']) ? $this->data['backups'] : [];
+        $backups = $this->data['backups'] ?? [];
         $backups['schedule'][] = [
             'interval' => $policy->getInterval(),
             'count' => $policy->getCount(),
@@ -775,7 +774,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   Variables to define during the operation, as a nested associative
      *   array, e.g. ['env'=>['foo'=>'bar']]
      *
-     * @return \Platformsh\Client\Model\Result
+     * @return Result
      */
     public function runSourceOperation(string $name, array $variables = []): Result
     {

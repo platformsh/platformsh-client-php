@@ -48,7 +48,7 @@ class ProjectUserAccess extends ResourceWithReferences
     {
         $roles = [];
         foreach ($this->data['permissions'] as $permission) {
-            if (strpos($permission, ':') !== false) {
+            if (str_contains($permission, ':')) {
                 list($type, $role) = explode(':', $permission, 2);
                 $roles[$type] = $role;
             }

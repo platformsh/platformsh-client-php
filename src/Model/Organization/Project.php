@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\Model\Organization;
 
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 
 /**
  * Represents a project within an organization.
@@ -16,7 +16,7 @@ use Platformsh\Client\Model\Resource;
  * @property-read string $created_at
  * @property-read string $updated_at
  */
-class Project extends Resource
+class Project extends ApiResourceBase
 {
     protected static $collectionItemsKey = 'items';
 }

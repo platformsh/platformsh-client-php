@@ -4,6 +4,7 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Utils;
 use Platformsh\Client\DataStructure\ReadOnlyStructureTrait;
 
 /**
@@ -30,7 +31,7 @@ class SetupOptions
     {
         $request = new Request('post', $url, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($body));
         $response = $client->send($request);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody(), true);
         return new self($data);
     }
 
@@ -45,7 +46,7 @@ class SetupOptions
     public static function get($url, ClientInterface $client)
     {
         $response = $client->get($url);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody(), true);
         return new self($data);
     }
 }

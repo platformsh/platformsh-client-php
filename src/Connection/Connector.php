@@ -7,6 +7,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\RequestOptions;
 use League\OAuth2\Client\Grant\ClientCredentials;
 use League\OAuth2\Client\Grant\Password;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -71,7 +72,7 @@ class Connector implements ConnectorInterface
      *       (default: true).
      *     - user_agent (string): The HTTP User-Agent for API requests.
      *     - headers (array<string, string>): Additional headers to send to the API (an associative array of header names and values).
-     *     - subscribers (\SubscriberInterface[]): Additional Guzzle subscribers (an array of SubscriberInterface objects).
+     *     - middlewares (callable[]): Additional Guzzle HTTP handlers.
      *     - cache (array|bool): Caching. Set to true to enable in-memory
      *       caching, to false (the default) to disable caching, or to an array
      *       of options as expected by the Guzzle cache subscriber.
@@ -241,7 +242,7 @@ class Connector implements ConnectorInterface
         $url = $this->config[$key];
 
         // Backwards compatibility.
-        if (strpos($url, '//') === false) {
+        if (!str_contains($url, '//')) {
             $url = Utils::uriFor($this->config['accounts'])
                 ->withPath($this->config[$key])
                 ->__toString();
@@ -458,7 +459,7 @@ class Connector implements ConnectorInterface
     /**
      * @inheritdoc
      */
-    public function getClient()
+    public function getClient(): ClientInterface
     {
         if (!isset($this->client)) {
             $stack = HandlerStack::create();
@@ -466,26 +467,28 @@ class Connector implements ConnectorInterface
 
             $config = [
                 'handler' => $stack,
-                'headers' => ['User-Agent' => $this->config['user_agent']],
-                'debug' => $this->config['debug'],
-                'verify' => $this->config['verify'],
-                'proxy' => $this->config['proxy'],
-                'timeout' => $this->config['timeout'],
-                'connect_timeout' => $this->config['connect_timeout'],
+                RequestOptions::HEADERS => ['User-Agent' => $this->config['user_agent']],
+                RequestOptions::DEBUG => $this->config['debug'],
+                RequestOptions::VERIFY => $this->config['verify'],
+                RequestOptions::PROXY => $this->config['proxy'],
+                RequestOptions::TIMEOUT => $this->config['timeout'],
+                RequestOptions::CONNECT_TIMEOUT => $this->config['connect_timeout'],
                 'auth' => 'oauth2',
             ];
 
-            if (!empty($this->config['headers'])) {
-                $options['defaults']['headers'] += $this->config['headers'];
+            if (!empty($this->config['middlewares'])) {
+                foreach ($this->config['middlewares'] as $middleware) {
+                    $stack->push($middleware);
+                }
             }
 
-            if (!empty($this->config['subscribers'])) {
-                $options['defaults']['subscribers'] = array_merge($options['defaults']['subscribers'], $this->config['subscribers']);
+            if (!empty($this->config['headers'])) {
+                $config[RequestOptions::HEADERS] += $this->config['headers'];
             }
 
             if ($this->config['gzip']) {
-                $config['decode_content'] = true;
-                $config['headers']['Accept-Encoding'] = 'gzip';
+                $config[RequestOptions::DECODE_CONTENT] = true;
+                $config[RequestOptions::HEADERS]['Accept-Encoding'] = 'gzip';
             }
 
             if ($url = $this->getApiUrl()) {

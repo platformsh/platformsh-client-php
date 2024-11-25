@@ -51,7 +51,7 @@ class EnvironmentDeployment extends ApiResourceBase
      */
     public function __call($name, $arguments)
     {
-        if (strpos($name, 'get') === 0) {
+        if (str_starts_with($name, 'get')) {
             $type = substr($name, 3);
             $property = strtolower($type) . 's';
             if (!isset(self::$types[$property])) {

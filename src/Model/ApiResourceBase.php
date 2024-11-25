@@ -125,7 +125,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @throws \BadMethodCallException
      */
-    public function offsetSet(mixed $offset, $value): mixed
+    public function offsetSet(mixed $offset, $value): void
     {
         throw new \BadMethodCallException('Properties are read-only');
     }
@@ -238,7 +238,7 @@ abstract class ApiResourceBase implements \ArrayAccess
             if ($body) {
                 $response->getBody()->seek(0);
                 $body = $response->getBody()->getContents();
-                $data = \GuzzleHttp\json_decode($body, true);
+                $data = \GuzzleHttp\Utils::jsonDecode($body, true);
             }
 
             return (array) $data;
@@ -333,17 +333,17 @@ abstract class ApiResourceBase implements \ArrayAccess
     /**
      * Returns a list of resources and the Collection that contained them.
      *
-     * @param string          $url     The collection URL.
+     * @param string $url     The collection URL.
      * @param ClientInterface $client A suitably configured Guzzle client.
      * @param array           $options An array of additional Guzzle request
      *                                 options.
      *
      * @return array{items: static[], collection: Collection}
      */
-    public static function getCollectionWithParent($url, ClientInterface $client, array $options = [])
+    public static function getCollectionWithParent(string $url, ClientInterface $client, array $options = []): array
     {
-        $request = $client->createRequest('GET', $url, $options);
-        $data = self::send($request, $client);
+        $request = new Request('GET', $url);
+        $data = self::send($request, $client, $options);
         $collection = new Collection($data, $client, $url);
         return ['items' => static::wrapCollection($collection, $url, $client), 'collection' => $collection];
     }
@@ -624,7 +624,7 @@ abstract class ApiResourceBase implements \ArrayAccess
             throw new \InvalidArgumentException("Link not found: $rel");
         }
         $url = $this->data['_links'][$rel]['href'];
-        if ($absolute || strpos($url, '//') !== false) {
+        if ($absolute || str_contains($url, '//')) {
             $url = $this->makeAbsoluteUrl($url);
         }
         return $url;

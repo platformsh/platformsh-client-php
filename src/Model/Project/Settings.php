@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\Model\Project;
 
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 
 /**
  * Settings represent various flags on a project.
@@ -13,7 +13,7 @@ use Platformsh\Client\Model\Resource;
  *
  * @property-read array{cpu: int, memory: int} $build_resources
  */
-class Settings extends Resource
+class Settings extends ApiResourceBase
 {
     public function delete()
     {

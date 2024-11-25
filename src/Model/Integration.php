@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Utils;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 
@@ -90,22 +91,22 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Process an API exception to list integration validation errors.
      *
-     * @param \GuzzleHttp\Exception\BadResponseException $exception
+     * @param BadResponseException $exception
      *   An exception received during integration create, update, or validate.
      *
-     * @see \Platformsh\Client\Model\Integration::validate()
-     *
-     * @throws \GuzzleHttp\Exception\BadResponseException
+     * @return string[] A list of errors.
+     *@throws BadResponseException
      *   The original exception is re-thrown if specific validation errors
      *   cannot be found.
      *
-     * @return string[] A list of errors.
+     * @see \Platformsh\Client\Model\Integration::validate()
+     *
      */
     public static function listValidationErrors(BadResponseException $exception)
     {
         $response = $exception->getResponse();
         if ($response->getStatusCode() === 400) {
-            $data = json_decode($response->getBody()->__toString(), true);
+            $data = Utils::jsonDecode($response->getBody(), true);
             if ($data !== null && isset($data['detail']) && is_array($data['detail'])) {
                 return $data['detail'];
             }

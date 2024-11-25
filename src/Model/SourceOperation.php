@@ -11,4 +11,4 @@ namespace Platformsh\Client\Model;
  * @property-read string $operation
  * @property-read string $command
  */
-class SourceOperation extends Resource {}
+class SourceOperation extends ApiResourceBase {}

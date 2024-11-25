@@ -11,7 +11,7 @@ class Session implements SessionInterface
     private $id;
 
     /** @var array */
-    private $data = [];
+    private $data;
 
     /** @var array */
     private $original = [];
@@ -73,7 +73,7 @@ class Session implements SessionInterface
     {
         $this->lazyLoad();
 
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        return $this->data[$key] ?? null;
     }
 
     /**

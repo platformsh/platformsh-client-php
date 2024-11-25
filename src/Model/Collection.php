@@ -4,7 +4,8 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ParseException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Utils;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Model\Ref\Resolver;
 
@@ -118,17 +119,15 @@ class Collection
 
     private function doFetchPage($url)
     {
-        $request = $this->client->createRequest('GET', $url);
+        $request = new Request('GET', $url);
         try {
             $response = $this->client->send($request);
-            $data = $response->json();
+            $data = Utils::jsonDecode($response->getBody(), true);
             $data = $this->resolver->resolveReferences($data);
 
             return new static($data, $this->client, $this->baseUrl);
         } catch (BadResponseException $e) {
             throw ApiResponseException::create($e->getRequest(), $e->getResponse());
-        } catch (ParseException $e) {
-            throw ApiResponseException::create($request, isset($response) ? $response : null);
         }
     }
 }

@@ -564,7 +564,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function getCapabilities()
     {
-        $request = $this->client->createRequest('get', $this->getUri() . '/capabilities');
+        $request = new Request('GET', $this->getUri() . '/capabilities');
         $data = self::send($request, $this->client);
 
         return Capabilities::fromData($data);
@@ -578,7 +578,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     public function getSettings()
     {
         $url = $this->getUri() . '/settings';
-        $request = $this->client->createRequest('get', $this->getUri() . '/settings');
+        $request = new Request('GET', $this->getUri() . '/settings');
         $data = self::send($request, $this->client);
 
         return new Settings($data, $url, $this->client);

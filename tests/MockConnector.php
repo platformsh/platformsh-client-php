@@ -41,7 +41,7 @@ class MockConnector extends Connector
      * Add a mock handler so that API responses will be intercepted with the
      * mockStatus and mockValues properties.
      */
-    public function getClient(): MockClient|ClientInterface
+    public function getClient(): ClientInterface
     {
         return MockClient::create([
             'mockStatus' => $this->mockStatus,

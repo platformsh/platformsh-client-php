@@ -12,10 +12,10 @@ class PlanRecordQuery
      * @param \DateTime|null $start
      * @param \DateTime|null $end
      */
-    public function setPeriod(\DateTime $start = null, \DateTime $end = null)
+    public function setPeriod(\DateTime $start = null, \DateTime $end = null): void
     {
-        $this->filters['start'] = $start !== null? $start->format('c') : null;
-        $this->filters['end'] = $end !== null ? $end->format('c') : null;
+        $this->filters['start'] = $start?->format('c');
+        $this->filters['end'] = $end?->format('c');
     }
 
     /**

@@ -1,13 +1,13 @@
 <?php
-/** @noinspection PhpDocMissingThrowsInspection */
-/** @noinspection PhpUnhandledExceptionInspection */
+
 declare(strict_types=1);
 
 namespace Platformsh\Client;
 
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\Psr7\Utils as Psr7Utils;
+use GuzzleHttp\Utils;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
@@ -226,11 +226,11 @@ class PlatformClient
      * @param array  $options
      *
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     private function simpleGet($url, array $options = [])
     {
-        return (array) \GuzzleHttp\json_decode(
+        return (array) Utils::jsonDecode(
           $this->getConnector()
                ->getClient()
                ->request('get', $url, $options)
@@ -528,11 +528,11 @@ class PlatformClient
     public function getSshCertificate(string $publicKey): string
     {
         $response = $this->connector->getClient()->post(
-            Utils::uriFor($this->connector->getConfig()['certifier_url'])->withPath('/ssh'),
+            Psr7Utils::uriFor($this->connector->getConfig()['certifier_url'])->withPath('/ssh'),
             ['json' => ['key' => $publicKey]]
         );
 
-        return \GuzzleHttp\json_decode((string) $response->getBody(), true)['certificate'];
+        return Utils::jsonDecode((string) $response->getBody(), true)['certificate'];
     }
 
     /**

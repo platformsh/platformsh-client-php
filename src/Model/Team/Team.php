@@ -3,7 +3,7 @@
 namespace Platformsh\Client\Model\Team;
 
 use GuzzleHttp\ClientInterface;
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 use Platformsh\Client\Model\Result;
 
 /**
@@ -15,7 +15,7 @@ use Platformsh\Client\Model\Result;
  * @property-read string $created_at
  * @property-read string $updated_at
  */
-class Team extends Resource
+class Team extends ApiResourceBase
 {
     protected static $collectionItemsKey = 'items';
 

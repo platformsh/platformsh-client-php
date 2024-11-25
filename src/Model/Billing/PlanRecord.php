@@ -2,7 +2,6 @@
 
 namespace Platformsh\Client\Model\Billing;
 
-use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Model\ApiResourceBase;
 
 /**
@@ -18,16 +17,5 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class PlanRecord extends ApiResourceBase
 {
-
-    const COLLECTION_NAME = 'plan';
-
-    /**
-     * @inheritdoc
-     */
-    public static function wrapCollection(array $data, $baseUrl, ClientInterface $client)
-    {
-        $data = isset($data[self::COLLECTION_NAME]) ? $data[self::COLLECTION_NAME] : [];
-        return parent::wrapCollection($data, $baseUrl, $client);
-    }
-
+    protected static $collectionItemsKey = 'plan';
 }

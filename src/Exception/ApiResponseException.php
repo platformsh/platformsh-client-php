@@ -4,6 +4,7 @@ namespace Platformsh\Client\Exception;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Utils;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -16,7 +17,7 @@ class ApiResponseException extends RequestException
     /**
      * Wraps a GuzzleException.
      *
-     * @param \GuzzleHttp\Exception\GuzzleException $e
+     * @param GuzzleException $e
      *
      * @return GuzzleException
      */
@@ -72,14 +73,14 @@ class ApiResponseException extends RequestException
         $contents = $response->getBody()->getContents();
 
         try {
-            $json = \GuzzleHttp\json_decode($contents, true);
+            $json = Utils::jsonDecode($contents, true);
             foreach ($responseInfoProperties as $property) {
                 if (!empty($json[$property])) {
                     $value = $json[$property];
                     $details .= " [$property] " . (is_scalar($value) ? $value : json_encode($value));
                 }
             }
-        } catch (\InvalidArgumentException $parseException) {
+        } catch (\InvalidArgumentException) {
             // Occasionally the response body may not be JSON.
             if ($contents) {
                 $details .= " [extra] Non-JSON response body";

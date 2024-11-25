@@ -37,14 +37,14 @@ class Resolver
             return $data;
         }
         foreach ($data['_links'] as $key => $link) {
-            if (\strpos($key, 'ref:') === 0 && ($parts = \explode(':', $key, 3)) && \count($parts) === 3) {
+            if (str_starts_with($key, 'ref:') && ($parts = \explode(':', $key, 3)) && \count($parts) === 3) {
                 $set = $parts[1];
                 $linkUri = Utils::uriFor($link['href']);
                 $absoluteUrl = Utils::uriFor($this->baseUrl)->withPath($linkUri->getPath())->withQuery($linkUri->getQuery());
                 if (!isset($data['ref:' . $set])) {
                     $data['ref:' . $set] = [];
                 }
-                $data['ref:' . $set] += \GuzzleHttp\json_decode($this->client->get($absoluteUrl)->getBody()->__toString(), true);
+                $data['ref:' . $set] += \GuzzleHttp\Utils::jsonDecode($this->client->get($absoluteUrl)->getBody(), true);
                 unset($data['_links'][$key]);
             }
         }

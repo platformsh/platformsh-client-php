@@ -3,6 +3,7 @@
 namespace Platformsh\Client\Model\Organization;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Utils;
 use Platformsh\Client\Model\ApiResourceBase;
 use Platformsh\Client\Model\Result;
 
@@ -34,7 +35,7 @@ class Profile extends ApiResourceBase
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody(), true);
         $this->setData($data);
 
         return new Result($data, $this->baseUrl, $this->client, get_called_class());

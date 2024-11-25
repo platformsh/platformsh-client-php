@@ -2,7 +2,7 @@
 
 namespace Platformsh\Client\Model\Team;
 
-use Platformsh\Client\Model\Resource;
+use Platformsh\Client\Model\ApiResourceBase;
 
 /**
  * @property-read string $team_id
@@ -12,7 +12,7 @@ use Platformsh\Client\Model\Resource;
  * @property-read string $granted_at
  * @property-read string $updated_at
  */
-class TeamProjectAccess extends Resource
+class TeamProjectAccess extends ApiResourceBase
 {
     protected static $collectionItemsKey = 'items';
 }

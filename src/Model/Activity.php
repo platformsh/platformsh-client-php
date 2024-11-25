@@ -80,7 +80,7 @@ class Activity extends ApiResourceBase
                 }
             } catch (ConnectException $e) {
                 // Retry on timeout.
-                if (strpos($e->getMessage(), 'cURL error 28') !== false && $retries <= 5) {
+                if (str_contains($e->getMessage(), 'cURL error 28') && $retries <= 5) {
                     $retries++;
                     continue;
                 }

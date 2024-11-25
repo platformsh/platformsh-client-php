@@ -80,7 +80,7 @@ class Duration
     /**
      * Compares the current Duration object to another one.
      *
-     * @param \Platformsh\Client\Model\Type\Duration $other
+     * @param Duration $other
      *
      * @return int
      *     0 if the durations are equal, 1 if the current duration is greater,

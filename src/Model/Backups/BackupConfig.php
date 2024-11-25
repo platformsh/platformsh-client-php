@@ -36,7 +36,7 @@ class BackupConfig
             $policies[] = new Policy($policyData['interval'], $policyData['count']);
         }
 
-        return new static($policies, isset($data['manual_count']) ? $data['manual_count'] : 1);
+        return new static($policies, $data['manual_count'] ?? 1);
     }
 
     /**

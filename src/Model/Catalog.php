@@ -4,6 +4,7 @@ namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Utils;
 
 /**
  * Represents a Platform.sh catalog.
@@ -23,7 +24,7 @@ class Catalog
     {
         $request = new Request('post', $url, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($data));
         $response = $client->send($request);
-        $data = \GuzzleHttp\json_decode($response->getBody()->__toString(), true);
+        $data = Utils::jsonDecode($response->getBody(), true);
         $items = [];
         foreach ($data as $item) {
             $items[] = CatalogItem::fromData($item);
