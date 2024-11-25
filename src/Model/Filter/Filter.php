@@ -9,29 +9,29 @@ namespace Platformsh\Client\Model\Filter;
  */
 class Filter implements FilterInterface
 {
-    private $name;
+    private string $name;
 
-    private $operator;
+    private string $operator;
 
-    private $value;
+    private string|int|float $value;
 
     /**
      * @param string $name
      *   The filter name.
-     * @param string|int|float $value
+     * @param float|int|string $value
      *   The filter value. Multiple values should be joined together in a
      *   string separated by commas.
      * @param string $operator
      *   One of the FilterInterface::OP_ constants.
      */
-    public function __construct($name, $value, $operator = FilterInterface::OP_EQUAL)
+    public function __construct(string $name, float|int|string $value, string $operator = FilterInterface::OP_EQUAL)
     {
         $this->name = $name;
         $this->value = $value;
         $this->operator = $operator;
     }
 
-    final public function params()
+    final public function params(): array
     {
         return [
             \sprintf('filter[%s][%s]', $this->name, $this->operator) => $this->value,

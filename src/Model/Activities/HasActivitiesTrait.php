@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Platformsh\Client\Model\Activities;
 
+use DateTime;
 use Platformsh\Client\Model\Activity;
 
 /**
@@ -13,12 +14,12 @@ use Platformsh\Client\Model\Activity;
  */
 trait HasActivitiesTrait
 {
-    public function getActivity($id)
+    public function getActivity(string $id): Activity|false
     {
         return Activity::get($id, $this->getUri() . '/activities', $this->client);
     }
 
-    public function getActivities($limit = 0, $type = null, $startsAt = null, $state = null, $result = null)
+    public function getActivities(int $limit = 0, array|string $type = null, DateTime|int $startsAt = null, array|string $state = null, array|string $result = null): array
     {
         $query = '';
         if ($type !== null) {

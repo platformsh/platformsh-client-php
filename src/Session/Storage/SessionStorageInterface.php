@@ -8,17 +8,11 @@ interface SessionStorageInterface
 {
     /**
      * Load data from a session.
-     *
-     * @param string $sessionId
-     *
-     * @return array
      */
-    public function load($sessionId);
+    public function load(string $sessionId): array;
 
     /**
      * Save data to a session.
-     *
-     * @param string $sessionId
      */
-    public function save($sessionId, array $data);
+    public function save(string $sessionId, array $data);
 }

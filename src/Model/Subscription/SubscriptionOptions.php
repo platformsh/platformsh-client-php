@@ -7,66 +7,32 @@ namespace Platformsh\Client\Model\Subscription;
 
 final class SubscriptionOptions
 {
-    /**
-     * @var string|null
-     */
-    private $project_region;
+    private ?string $project_region;
+
+    private ?string $project_title;
+
+    private ?string $default_branch;
+
+    private ?string $options_url;
+
+    private ?array $options_custom;
+
+    private ?string $plan;
+
+    private ?int $environments;
+
+    private ?int $storage;
+
+    private ?string $owner;
 
     /**
-     * @var string|null
-     */
-    private $project_title;
-
-    /**
-     * @var string|null
-     */
-    private $default_branch;
-
-    /**
-     * @var string|null
-     */
-    private $options_url;
-
-    /**
-     * @var array|null
-     */
-    private $options_custom;
-
-    /**
-     * @var string|null
-     */
-    private $plan;
-
-    /**
-     * @var int|null
-     */
-    private $environments;
-
-    /**
-     * @var int|null
-     */
-    private $storage;
-
-    /**
-     * @var string|null
-     */
-    private $owner;
-
-    /**
-     * @var array|null
      * @deprecated This is no longer supported. Poll the subscription instead of submitting a callback.
      */
-    private $activation_callback;
+    private ?array $activation_callback;
 
-    /**
-     * @var string|null
-     */
-    private $organization_id;
+    private ?string $organization_id;
 
-    /**
-     * @return SubscriptionOptions
-     */
-    public static function fromArray(array $options)
+    public static function fromArray(array $options): self
     {
         $obj = new self();
         foreach ($options as $key => $value) {
@@ -79,10 +45,7 @@ final class SubscriptionOptions
         return $obj;
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         $arr = [];
         foreach ($this as $key => $value) {
@@ -93,10 +56,7 @@ final class SubscriptionOptions
         return $arr;
     }
 
-    /**
-     * @return string|null
-     */
-    public function organizationId()
+    public function organizationId(): ?string
     {
         return $this->organization_id;
     }

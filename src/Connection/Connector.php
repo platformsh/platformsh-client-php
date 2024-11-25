@@ -24,30 +24,15 @@ use Platformsh\OAuth2\Client\Provider\Platformsh;
 
 class Connector implements ConnectorInterface
 {
-    /**
-     * @var array
-     */
-    protected $config = [];
+    protected array $config = [];
 
-    /**
-     * @var ClientInterface|null
-     */
-    protected $client;
+    protected ?ClientInterface $client;
 
-    /**
-     * @var callable|null
-     */
     protected $oauthMiddleware;
 
-    /**
-     * @var AbstractProvider|null
-     */
-    protected $provider;
+    protected ?AbstractProvider $provider;
 
-    /**
-     * @var SessionInterface
-     */
-    protected $session;
+    protected SessionInterface $session;
 
     /**
      * @var array
@@ -57,7 +42,7 @@ class Connector implements ConnectorInterface
      * the key in the AccessToken constructor. The right-hand side is the key
      * that will be stored.
      */
-    private $storageKeys = [
+    private array $storageKeys = [
         'access_token' => 'accessToken',
         'refresh_token' => 'refreshToken',
         'token_type' => 'tokenType',
@@ -170,10 +155,7 @@ class Connector implements ConnectorInterface
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->config;
     }
@@ -182,20 +164,16 @@ class Connector implements ConnectorInterface
      * Get the configured accounts endpoint URL.
      *
      * @deprecated Use Connector::getApiUrl() instead
-     *
-     * @return string
      */
-    public function getAccountsEndpoint()
+    public function getAccountsEndpoint(): string
     {
         return $this->config['accounts'];
     }
 
     /**
      * Get the configured API gateway URL (without trailing slash).
-     *
-     * @return string
      */
-    public function getApiUrl()
+    public function getApiUrl(): string
     {
         return rtrim($this->config['api_url'], '/');
     }
@@ -203,7 +181,7 @@ class Connector implements ConnectorInterface
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException if tokens cannot be revoked.
      */
-    public function logOut()
+    public function logOut(): void
     {
         $this->client = null;
         try {
@@ -222,17 +200,15 @@ class Connector implements ConnectorInterface
         }
     }
 
-    public function getSession()
+    public function getSession(): Session|SessionInterface
     {
         return $this->session;
     }
 
     /**
      * Returns the access token saved in the session, if any.
-     *
-     * @return false|string
      */
-    public function getAccessToken()
+    public function getAccessToken(): false|string
     {
         return $this->session->get('accessToken');
     }
@@ -241,7 +217,7 @@ class Connector implements ConnectorInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
      */
-    public function logIn($username, $password, $force = false, $totp = null)
+    public function logIn(string $username, string $password, bool $force = false, int|string $totp = null): void
     {
         if (! $force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
@@ -261,7 +237,7 @@ class Connector implements ConnectorInterface
     /**
      * Save an access token to the session.
      */
-    public function saveToken(AccessTokenInterface $token)
+    public function saveToken(AccessTokenInterface $token): void
     {
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
             return;
@@ -274,12 +250,12 @@ class Connector implements ConnectorInterface
         $this->session->save();
     }
 
-    public function isLoggedIn()
+    public function isLoggedIn(): bool
     {
         return $this->session->get($this->storageKeys['access_token']) || $this->config['api_token'];
     }
 
-    public function setApiToken($token, $type)
+    public function setApiToken(string $token, string $type): void
     {
         $this->config['api_token'] = $token;
         if (! in_array($type, ['access', 'exchange'], true)) {
@@ -337,10 +313,8 @@ class Connector implements ConnectorInterface
 
     /**
      * Load the current access token.
-     *
-     * @return AccessToken|null
      */
-    protected function loadToken()
+    protected function loadToken(): ?AccessToken
     {
         if ($this->config['api_token'] && $this->config['api_token_type'] === 'access') {
             return new AccessToken([
@@ -373,7 +347,7 @@ class Connector implements ConnectorInterface
      *
      * @return GuzzleMiddleware
      */
-    protected function getOauthMiddleware()
+    protected function getOauthMiddleware(): GuzzleMiddleware|callable|null
     {
         if (! $this->oauthMiddleware) {
             if (! $this->isLoggedIn()) {
@@ -417,10 +391,7 @@ class Connector implements ConnectorInterface
         return $this->oauthMiddleware;
     }
 
-    /**
-     * @return string
-     */
-    private function defaultUserAgent()
+    private function defaultUserAgent(): string
     {
         $version = trim(file_get_contents(__DIR__ . '/../../version.txt')) ?: '2.0.x';
 
@@ -438,10 +409,8 @@ class Connector implements ConnectorInterface
      * Get a configured OAuth 2.0 URL.
      *
      * @param string $key Either 'token_url' or 'revoke_url'
-     *
-     * @return string
      */
-    private function getOAuthUrl($key)
+    private function getOAuthUrl(string $key): string
     {
         $url = $this->config[$key];
 
@@ -462,7 +431,7 @@ class Connector implements ConnectorInterface
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function revokeTokens()
+    private function revokeTokens(): void
     {
         $revocations = array_filter([
             'refresh_token' => $this->session->get('refreshToken'),
@@ -483,7 +452,7 @@ class Connector implements ConnectorInterface
         }
     }
 
-    private function getProvider()
+    private function getProvider(): AbstractProvider|Platformsh
     {
         return $this->provider ?: new Platformsh([
             'clientId' => $this->config['client_id'],

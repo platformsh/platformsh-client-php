@@ -22,12 +22,8 @@ class Ref extends ApiResourceBase
 {
     /**
      * Get a Ref object in a project.
-     *
-     * @param string          $refName
-     *
-     * @return static|false
      */
-    public static function fromName($refName, Project $project, ClientInterface $client)
+    public static function fromName(string $refName, Project $project, ClientInterface $client): false|static
     {
         $url = $project->getUri() . '/git/refs';
 
@@ -36,10 +32,8 @@ class Ref extends ApiResourceBase
 
     /**
      * Get the commit for this ref.
-     *
-     * @return Commit|false
      */
-    public function getCommit()
+    public function getCommit(): false|Commit
     {
         $data = $this->object;
         if ($data['type'] !== 'commit') {

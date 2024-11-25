@@ -19,5 +19,5 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class PlanRecord extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'plan';
+    protected static ?string $collectionItemsKey = 'plan';
 }

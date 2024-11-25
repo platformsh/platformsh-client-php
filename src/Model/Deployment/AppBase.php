@@ -31,7 +31,7 @@ abstract class AppBase
      *
      * @return array<string, RuntimeOperation>
      */
-    public function getRuntimeOperations()
+    public function getRuntimeOperations(): array
     {
         return array_map(function (array $data) {
             return RuntimeOperation::fromData($data);
@@ -41,13 +41,9 @@ abstract class AppBase
     /**
      * Returns a single runtime operation.
      *
-     * @param string $name
-     *
-     * @throws \InvalidArgumentException if not found
-     *
-     * @return RuntimeOperation
+     *@throws \InvalidArgumentException if not found
      */
-    public function getRuntimeOperation($name)
+    public function getRuntimeOperation(string $name): RuntimeOperation
     {
         if (! isset($this->data['operations'][$name])) {
             throw new \InvalidArgumentException(sprintf('Operation not found: %s', $name));

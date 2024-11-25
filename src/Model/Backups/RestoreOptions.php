@@ -6,76 +6,56 @@ namespace Platformsh\Client\Model\Backups;
 
 class RestoreOptions
 {
-    /**
-     * @var string|null
-     */
-    private $environmentName;
+    private ?string $environmentName;
+
+    private ?string $branchFrom;
+
+    private ?bool $restoreCode;
+
+    private ?bool $restoreResources;
+
+    private ?string $resourcesInit;
 
     /**
-     * @var string|null
-     */
-    private $branchFrom;
-
-    /**
-     * @var bool|null
-     */
-    private $restoreCode;
-
-    /**
-     * @var bool|null
-     */
-    private $restoreResources;
-
-    /**
-     * @var string|null
-     */
-    private $resourcesInit;
-
-    /**
-     * @param string|null $environmentName
      * @return RestoreOptions
      */
-    public function setEnvironmentName($environmentName)
+    public function setEnvironmentName(?string $environmentName): static
     {
         $this->environmentName = $environmentName;
         return $this;
     }
 
     /**
-     * @param string|null $branchFrom
      * @return RestoreOptions
      */
-    public function setBranchFrom($branchFrom)
+    public function setBranchFrom(?string $branchFrom): static
     {
         $this->branchFrom = $branchFrom;
         return $this;
     }
 
     /**
-     * @param bool|null $restoreCode
      * @return RestoreOptions
      */
-    public function setRestoreCode($restoreCode)
+    public function setRestoreCode(?bool $restoreCode): static
     {
         $this->restoreCode = $restoreCode;
         return $this;
     }
 
     /**
-     * @param bool|null $restoreResources
      * @return RestoreOptions
      */
-    public function setRestoreResources($restoreResources)
+    public function setRestoreResources(?bool $restoreResources): static
     {
         $this->restoreResources = $restoreResources;
         return $this;
     }
 
     /**
-     * @param string|null $init
      * @return RestoreOptions
      */
-    public function setResourcesInit($init)
+    public function setResourcesInit(?string $init): static
     {
         $this->resourcesInit = $init;
         return $this;
@@ -83,10 +63,8 @@ class RestoreOptions
 
     /**
      * Returns a resource options structure as an associative array.
-     *
-     * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $arr = [];
         if ($this->environmentName !== null) {

@@ -20,21 +20,16 @@ class ProjectAccess extends ApiResourceBase
 
     public const ROLE_VIEWER = 'viewer';
 
-    public static $roles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
+    public static array $roles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
 
-    /**
-     * @var array
-     */
-    protected static $required = ['role'];
+    protected static array $required = ['role'];
 
     /**
      * Get the account information for this user.
      *
      * @throws \Exception
-     *
-     * @return Account
      */
-    public function getAccount()
+    public function getAccount(): Account
     {
         $uuid = $this->getProperty('id');
         $url = $this->makeAbsoluteUrl('/api/users');
@@ -53,7 +48,7 @@ class ProjectAccess extends ApiResourceBase
      * @return string|false
      *   The user's environment role, or false if not found.
      */
-    public function getEnvironmentRole(Environment $environment)
+    public function getEnvironmentRole(Environment $environment): false|string
     {
         $access = $environment->getUser($this->id);
 
@@ -64,10 +59,8 @@ class ProjectAccess extends ApiResourceBase
      * Change the user's environment-level role.
      *
      * @param string $newRole The new role (see EnvironmentAccess::$roles).
-     *
-     * @return Result
      */
-    public function changeEnvironmentRole(Environment $environment, $newRole)
+    public function changeEnvironmentRole(Environment $environment, string $newRole): Result
     {
         $access = $environment->getUser($this->id);
         if ($access) {
@@ -85,15 +78,13 @@ class ProjectAccess extends ApiResourceBase
 
     /**
      * Check whether the user is editable.
-     *
-     * @return bool
      */
-    public function isEditable()
+    public function isEditable(): bool
     {
         return $this->operationAvailable('edit');
     }
 
-    protected static function checkProperty($property, $value)
+    protected static function checkProperty(string $property, mixed $value): array
     {
         $errors = [];
         if ($property === 'email' && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {

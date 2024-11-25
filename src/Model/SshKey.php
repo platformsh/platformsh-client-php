@@ -13,9 +13,9 @@ namespace Platformsh\Client\Model;
  */
 class SshKey extends ApiResourceBase
 {
-    protected static $required = ['value'];
+    protected static array $required = ['value'];
 
-    protected static $allowedAlgorithms = [
+    protected static array $allowedAlgorithms = [
         'ssh-rsa',
         'ssh-dsa',
         'ssh-ed25519',
@@ -26,12 +26,8 @@ class SshKey extends ApiResourceBase
 
     /**
      * Validate an SSH public key.
-     *
-     * @param string $value
-     *
-     * @return bool
      */
-    public static function validatePublicKey($value)
+    public static function validatePublicKey(string $value): bool
     {
         $value = preg_replace('/\s+/', ' ', $value);
         if (! strpos($value, ' ')) {
@@ -53,13 +49,13 @@ class SshKey extends ApiResourceBase
         throw new \BadMethodCallException('Update is not implemented for SSH keys');
     }
 
-    public function getUri($absolute = true)
+    public function getUri(bool $absolute = true): string
     {
         // Work around absence of HAL links in the current API.
         return $this->baseUrl;
     }
 
-    protected static function checkProperty($property, $value)
+    protected static function checkProperty(string $property, mixed $value): array
     {
         if ($property === 'value' && ! self::validatePublicKey($value)) {
             return ['The SSH key is invalid'];

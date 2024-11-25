@@ -10,14 +10,14 @@ class File implements SessionStorageInterface
 
     public const DIR_MODE = 0700;
 
-    protected $directory;
+    protected string $directory;
 
     /**
      * @param string|null $directory
      *   A writable directory where session files will be saved. Leave null
      *   to use the default.
      */
-    public function __construct($directory = null)
+    public function __construct(string $directory = null)
     {
         $this->directory = $directory ?: $this->getDefaultDirectory();
     }
@@ -25,7 +25,7 @@ class File implements SessionStorageInterface
     /**
      * @throws \Exception
      */
-    public function save($sessionId, array $data)
+    public function save(string $sessionId, array $data): void
     {
         $filename = $this->getFilename($sessionId);
         if (empty($data)) {
@@ -42,7 +42,7 @@ class File implements SessionStorageInterface
         chmod($filename, self::FILE_MODE);
     }
 
-    public function load($sessionId)
+    public function load(string $sessionId): array
     {
         $data = [];
         $filename = $this->getFilename($sessionId);
@@ -58,10 +58,8 @@ class File implements SessionStorageInterface
 
     /**
      * Get the default directory for session files.
-     *
-     * @return string
      */
-    protected function getDefaultDirectory()
+    protected function getDefaultDirectory(): string
     {
         // Default to ~/.platformsh/.session, but if it's not writable, fall
         // back to the temporary directory.
@@ -82,12 +80,8 @@ class File implements SessionStorageInterface
 
     /**
      * Tests whether a file path is writable (even if it doesn't exist).
-     *
-     * @param string $path
-     *
-     * @return bool
      */
-    protected function canWrite($path)
+    protected function canWrite(string $path): bool
     {
         if (is_writable($path)) {
             return true;
@@ -106,10 +100,8 @@ class File implements SessionStorageInterface
 
     /**
      * Finds the user's home directory.
-     *
-     * @return string|null
      */
-    protected function getHomeDirectory()
+    protected function getHomeDirectory(): ?string
     {
         $home = getenv('HOME');
         if (! $home && ($userProfile = getenv('USERPROFILE'))) {
@@ -122,12 +114,7 @@ class File implements SessionStorageInterface
         return $home;
     }
 
-    /**
-     * @param string $sessionId
-     *
-     * @return string
-     */
-    protected function getFilename($sessionId)
+    protected function getFilename(string $sessionId): string
     {
         $id = preg_replace('/[^\w\-]+/', '-', $sessionId);
         $dir = $this->getDirectory();
@@ -135,10 +122,7 @@ class File implements SessionStorageInterface
         return "{$dir}/sess-{$id}/sess-{$id}.json";
     }
 
-    /**
-     * @return string
-     */
-    protected function getDirectory()
+    protected function getDirectory(): string
     {
         return rtrim($this->directory, '/');
     }
@@ -146,11 +130,9 @@ class File implements SessionStorageInterface
     /**
      * Create a directory.
      *
-     * @throws \Exception
-     *
-     * @param string $dir
+     *@throws \Exception
      */
-    protected function mkDir($dir)
+    protected function mkDir(string $dir): void
     {
         if (! file_exists($dir)) {
             mkdir($dir, self::DIR_MODE, true);

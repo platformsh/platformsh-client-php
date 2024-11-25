@@ -59,9 +59,9 @@ class Activity extends ApiResourceBase
      *                                messages as they are received. It will be
      *                                passed one argument: the message as a
      *                                string. Deprecated: use readLog() instead.
-     * @param int|float $pollInterval The polling interval, in seconds.
+     * @param float|int $pollInterval The polling interval, in seconds.
      */
-    public function wait(callable $onPoll = null, callable $onLog = null, $pollInterval = 1)
+    public function wait(callable $onPoll = null, callable $onLog = null, float|int $pollInterval = 1): void
     {
         $log = $this->getProperty('log');
         $length = strlen($log);
@@ -107,7 +107,7 @@ class Activity extends ApiResourceBase
      *
      * @return LogItem[]
      */
-    public function readLog(callable $onUpdate = null)
+    public function readLog(callable $onUpdate = null): array
     {
         $response = $this->fetchLog($onUpdate !== null);
         $body = $response->getBody();
@@ -122,20 +122,16 @@ class Activity extends ApiResourceBase
 
     /**
      * Determine whether the activity is complete.
-     *
-     * @return bool
      */
-    public function isComplete()
+    public function isComplete(): bool
     {
         return $this->getCompletionPercent() >= 100;
     }
 
     /**
      * Get the completion progress of the activity, in percent.
-     *
-     * @return int
      */
-    public function getCompletionPercent()
+    public function getCompletionPercent(): int
     {
         return (int) $this->getProperty('completion_percent');
     }
@@ -152,10 +148,8 @@ class Activity extends ApiResourceBase
      * @param string|null $branchFrom If a new environment will be created
      *                                (depending on $target), this specifies
      *                                the name of the parent branch.
-     *
-     * @return Activity
      */
-    public function restore($target = null, $branchFrom = null)
+    public function restore(string $target = null, string $branchFrom = null): self
     {
         if ($this->getProperty('type') !== 'environment.backup') {
             throw new \BadMethodCallException('Cannot restore activity (wrong type)');
@@ -178,7 +172,7 @@ class Activity extends ApiResourceBase
     /**
      * Cancel this activity.
      */
-    public function cancel()
+    public function cancel(): void
     {
         $this->runOperation('cancel');
     }
@@ -190,10 +184,8 @@ class Activity extends ApiResourceBase
      * The "text" property contains the plain-text description.
      *
      * @param bool $html Whether to return HTML.
-     *
-     * @return string
      */
-    public function getDescription($html = false)
+    public function getDescription(bool $html = false): string
     {
         return $this->getProperty($html ? 'description' : 'text');
     }
@@ -201,13 +193,12 @@ class Activity extends ApiResourceBase
     /**
      * Formats a timestamp as RFC3339, to be used in the API's starts_at parameter.
      *
-     * @param int|DateTime $timestamp UNIX UTC timestamp (seconds) or DateTime
-     *
-     * @throws \RuntimeException if the timestamp is invalid
+     * @param DateTime|int $timestamp UNIX UTC timestamp (seconds) or DateTime
      *
      * @return string 2022-02-22T02:00:00.000000+00:00
+     *@throws \RuntimeException if the timestamp is invalid
      */
-    public static function formatStartsAt($timestamp)
+    public static function formatStartsAt(DateTime|int $timestamp): string
     {
         if ($timestamp instanceof DateTime) {
             // Override the timezone to produce a UTC ISO date
@@ -228,12 +219,8 @@ class Activity extends ApiResourceBase
 
     /**
      * Reads the next line of a stream.
-     *
-     * @param string $newline
-     *
-     * @return string
      */
-    private function readline(StreamInterface $stream, $newline = "\n")
+    private function readline(StreamInterface $stream, string $newline = "\n"): string
     {
         $buffer = '';
         while (! $stream->eof()) {
@@ -258,10 +245,8 @@ class Activity extends ApiResourceBase
      *   How many items to retrieve. Leave at 0 to fetch all items.
      * @param int $maxDelay
      *   How long to wait for new messages (on the server side). Use -1 to wait forever.
-     *
-     * @return ResponseInterface
      */
-    private function fetchLog($stream = true, $startAt = 0, $maxItems = 0, $maxDelay = -1)
+    private function fetchLog(bool $stream = true, int $startAt = 0, int $maxItems = 0, int $maxDelay = -1): ResponseInterface
     {
         return $this->client->get($this->getLink('log'), [
             'query' => [

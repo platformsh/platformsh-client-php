@@ -11,24 +11,22 @@ use Platformsh\Client\Model\Project;
  */
 class AlreadyInvitedException extends \RuntimeException
 {
-    private $email;
+    private string $email;
 
-    private $project;
+    private Project $project;
 
-    private $role;
+    private string $role;
 
-    private $environments;
+    private array $environments;
 
-    private $permissions;
+    private array $permissions;
 
     /**
-     * @param string $message
      * @param string $email
-     * @param string $role
      * @param Environment[] $environments
      * @param Permission[] $permissions
      */
-    public function __construct($message, $email, Project $project, $role, array $environments, array $permissions)
+    public function __construct(string $message, $email, Project $project, string $role, array $environments, array $permissions)
     {
         parent::__construct($message);
         $this->email = $email;
@@ -38,26 +36,17 @@ class AlreadyInvitedException extends \RuntimeException
         $this->permissions = $permissions;
     }
 
-    /**
-     * @return string
-     */
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    /**
-     * @return Project
-     */
-    public function getProject()
+    public function getProject(): Project
     {
         return $this->project;
     }
 
-    /**
-     * @return string
-     */
-    public function getRole()
+    public function getRole(): string
     {
         return $this->role;
     }
@@ -65,7 +54,7 @@ class AlreadyInvitedException extends \RuntimeException
     /**
      * @return Environment[]
      */
-    public function getEnvironments()
+    public function getEnvironments(): array
     {
         return $this->environments;
     }
@@ -73,7 +62,7 @@ class AlreadyInvitedException extends \RuntimeException
     /**
      * @return Permission[]
      */
-    public function getPermissions()
+    public function getPermissions(): array
     {
         return $this->permissions;
     }

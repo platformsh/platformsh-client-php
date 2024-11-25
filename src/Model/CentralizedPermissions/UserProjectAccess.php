@@ -22,19 +22,14 @@ use Platformsh\Client\Model\ResourceWithReferences;
 class UserProjectAccess extends ResourceWithReferences
 {
     /**
-     * @param string $userId
-     *
      * @return static[]
      */
-    public static function byUser($userId, array $options, ClientInterface $client)
+    public static function byUser(string $userId, array $options, ClientInterface $client): static
     {
         return self::getCollection('/users/' . rawurlencode($userId) . '/project-access', 0, $options, $client);
     }
 
-    /**
-     * @return ProjectRef|null
-     */
-    public function getProjectInfo()
+    public function getProjectInfo(): ?ProjectRef
     {
         if (isset($this->data['ref:projects'][$this->data['project_id']])) {
             return $this->data['ref:projects'][$this->data['project_id']];
@@ -42,10 +37,7 @@ class UserProjectAccess extends ResourceWithReferences
         return null;
     }
 
-    /**
-     * @return OrganizationRef|null
-     */
-    public function getOrganizationInfo()
+    public function getOrganizationInfo(): ?OrganizationRef
     {
         if (isset($this->data['ref:organizations'][$this->data['organization_id']])) {
             return $this->data['ref:organizations'][$this->data['organization_id']];

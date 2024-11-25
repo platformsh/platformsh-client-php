@@ -10,11 +10,9 @@ namespace Platformsh\Client\Model\Filter;
 class BetweenFilter extends Filter implements FilterInterface
 {
     /**
-     * @param string $name
-     * @param string|int|float $value1
      * @param string|int|float $value2
      */
-    public function __construct($name, $value1, $value2)
+    public function __construct(string $name, float|int|string $value1, $value2)
     {
         parent::__construct($name, implode(',', [$value1, $value2]), FilterInterface::OP_BETWEEN);
     }

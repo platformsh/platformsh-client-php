@@ -18,36 +18,25 @@ use Platformsh\Client\Model\Ref\Resolver;
  */
 class Collection
 {
-    private $data;
+    private Resolver $resolver;
 
-    private $client;
-
-    private $baseUrl;
-
-    private $resolver;
-
-    public function __construct(array $data, ClientInterface $client, $baseUrl)
-    {
-        $this->data = $data;
-        $this->client = $client;
-        $this->baseUrl = $baseUrl;
+    public function __construct(
+        private array $data,
+        private readonly ClientInterface $client,
+        private readonly string $baseUrl
+    ) {
         $this->resolver = new Resolver($client, $baseUrl);
     }
 
-    /**
-     * @return array
-     */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
     /**
      * Returns the total count of items in a collection (across all pages), if available.
-     *
-     * @return int|null
      */
-    public function getTotalCount()
+    public function getTotalCount(): ?int
     {
         return isset($this->data['count']) ? (int) $this->data['count'] : null;
     }
@@ -55,23 +44,17 @@ class Collection
     /**
      * @internal
      */
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $this->data = $data;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasNextPage()
+    public function hasNextPage(): bool
     {
         return ! empty($this->data['_links']['next']['href']);
     }
 
-    /**
-     * @return static|null
-     */
-    public function fetchNextPage()
+    public function fetchNextPage(): null|static
     {
         if (empty($this->data['_links']['next']['href'])) {
             return null;
@@ -79,10 +62,7 @@ class Collection
         return $this->doFetchPage($this->data['_links']['next']['href']);
     }
 
-    /**
-     * @return string|null
-     */
-    public function getNextPageUrl()
+    public function getNextPageUrl(): ?string
     {
         if (empty($this->data['_links']['next']['href'])) {
             return null;
@@ -90,18 +70,12 @@ class Collection
         return $this->data['_links']['next']['href'];
     }
 
-    /**
-     * @return bool
-     */
-    public function hasPreviousPage()
+    public function hasPreviousPage(): bool
     {
         return ! empty($this->data['_links']['previous']['href']);
     }
 
-    /**
-     * @return static|null
-     */
-    public function fetchPreviousPage()
+    public function fetchPreviousPage(): null|static
     {
         if (empty($this->data['_links']['previous']['href'])) {
             return null;
@@ -109,10 +83,7 @@ class Collection
         return $this->doFetchPage($this->data['_links']['previous']['href']);
     }
 
-    /**
-     * @return string|null
-     */
-    public function getPreviousPageUrl()
+    public function getPreviousPageUrl(): ?string
     {
         if (empty($this->data['_links']['previous']['href'])) {
             return null;
@@ -120,12 +91,12 @@ class Collection
         return $this->data['_links']['previous']['href'];
     }
 
-    private function doFetchPage($url)
+    private function doFetchPage($url): static
     {
         $request = new Request('GET', $url);
         try {
             $response = $this->client->send($request);
-            $data = Utils::jsonDecode($response->getBody(), true);
+            $data = Utils::jsonDecode((string) $response->getBody(), true);
             $data = $this->resolver->resolveReferences($data);
 
             return new static($data, $this->client, $this->baseUrl);

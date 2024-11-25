@@ -8,9 +8,9 @@ use Platformsh\Client\Model\ApiResourceBase;
 
 class MockApiResource extends ApiResourceBase
 {
-    protected static $required = ['testProperty'];
+    protected static array $required = ['testProperty'];
 
-    protected static function checkProperty($property, $value): array
+    protected static function checkProperty(string $property, mixed $value): array
     {
         $errors = [];
         if ($property === 'testProperty' && $value !== '1') {

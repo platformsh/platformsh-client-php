@@ -15,10 +15,7 @@ use Platformsh\Client\Model\ResourceWithReferences;
  */
 class TeamMember extends ResourceWithReferences
 {
-    /**
-     * @return UserRef
-     */
-    public function getUserInfo()
+    public function getUserInfo(): UserRef
     {
         return $this->data['ref:users'][$this->user_id];
     }

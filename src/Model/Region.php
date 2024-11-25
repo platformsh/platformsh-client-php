@@ -17,9 +17,9 @@ namespace Platformsh\Client\Model;
  */
 class Region extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'regions';
+    protected static ?string $collectionItemsKey = 'regions';
 
-    public function operationAvailable($op, $refreshDuringCheck = false)
+    public function operationAvailable(string $op, bool $refreshDuringCheck = false): bool
     {
         if ($op === 'edit') {
             return true;
@@ -28,7 +28,7 @@ class Region extends ApiResourceBase
         return parent::operationAvailable($op, $refreshDuringCheck);
     }
 
-    public function getLink($rel, $absolute = false)
+    public function getLink(string $rel, bool $absolute = false): string
     {
         if ($rel === '#edit') {
             return $this->getUri($absolute);

@@ -8,48 +8,33 @@ use Platformsh\Client\Session\Storage\SessionStorageInterface;
 
 class Session implements SessionInterface
 {
-    /**
-     * @var string
-     */
-    private $id;
+    private string $id;
+
+    private array $data;
+
+    private array $original = [];
+
+    private bool $loaded = false;
+
+    private ?SessionStorageInterface $storage;
 
     /**
-     * @var array
-     */
-    private $data;
-
-    /**
-     * @var array
-     */
-    private $original = [];
-
-    /**
-     * @var bool
-     */
-    private $loaded = false;
-
-    /**
-     * @var SessionStorageInterface|null
-     */
-    private $storage;
-
-    /**
-     * @param string                  $id   A unique session ID.
+     * @param string $id   A unique session ID.
      * @param array                   $data Initial session data.
      */
-    public function __construct($id = 'default', array $data = [], SessionStorageInterface $storage = null)
+    public function __construct(string $id = 'default', array $data = [], SessionStorageInterface $storage = null)
     {
         $this->id = $id;
         $this->data = $data;
         $this->storage = $storage;
     }
 
-    public function setStorage(SessionStorageInterface $storage)
+    public function setStorage(SessionStorageInterface $storage): void
     {
         $this->storage = $storage;
     }
 
-    public function set($key, $value)
+    public function set(string $key, mixed $value): void
     {
         if (is_object($value) && ! $value instanceof \JsonSerializable) {
             throw new \InvalidArgumentException('Invalid session data type: object');
@@ -58,20 +43,20 @@ class Session implements SessionInterface
         $this->data[$key] = $value;
     }
 
-    public function get($key)
+    public function get(string $key): mixed
     {
         $this->lazyLoad();
 
         return $this->data[$key] ?? null;
     }
 
-    public function clear()
+    public function clear(): void
     {
         $this->lazyLoad();
         $this->data = [];
     }
 
-    public function save()
+    public function save(): void
     {
         if (! isset($this->storage)) {
             return;
@@ -87,7 +72,7 @@ class Session implements SessionInterface
     /**
      * Load session data, if storage is defined.
      */
-    private function lazyLoad()
+    private function lazyLoad(): void
     {
         if (! $this->loaded && isset($this->storage)) {
             $this->data = $this->storage->load($this->id);

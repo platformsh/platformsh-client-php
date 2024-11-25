@@ -27,10 +27,8 @@ class Address extends ApiResourceBase
      * Updates the address.
      *
      * This updates the resource's internal data with the API response.
-     *
-     * @return Result
      */
-    public function update(array $values)
+    public function update(array $values): Result
     {
         // @todo use getLink('#edit') when it is available
         $url = $this->getUri();
@@ -39,18 +37,18 @@ class Address extends ApiResourceBase
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
-        $data = Utils::jsonDecode($response->getBody(), true);
+        $data = Utils::jsonDecode($response->getBody()->__toString(), true);
         $this->setData($data);
 
         return new Result($data, $this->baseUrl, $this->client, static::class);
     }
 
-    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    public static function create(array $body, string $collectionUrl, ClientInterface $client): Result
     {
         throw new \BadMethodCallException('An address cannot be explicitly created');
     }
 
-    public function getLink($rel, $absolute = true)
+    public function getLink(string $rel, bool $absolute = true): string
     {
         if (! $this->hasLink($rel)) {
             // The address API does not expose HAL links yet.

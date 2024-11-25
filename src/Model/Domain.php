@@ -15,8 +15,5 @@ namespace Platformsh\Client\Model;
  */
 class Domain extends ApiResourceBase
 {
-    /**
-     * @var array
-     */
-    protected static $required = ['name'];
+    protected static array $required = ['name'];
 }

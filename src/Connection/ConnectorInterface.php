@@ -11,23 +11,19 @@ interface ConnectorInterface
 {
     /**
      * Get the session instance for this connection.
-     *
-     * @return SessionInterface
      */
-    public function getSession();
+    public function getSession(): SessionInterface;
 
     /**
      * Log in to Platform.sh.
      *
-     * @param string $username
-     * @param string $password
-     * @param bool   $force
+     * @param bool $force
      *   Whether to re-authenticate even if the session appears to be logged
      *   in already.
-     * @param string|int $totp
+     * @param int|string|null $totp
      *   Time-based one-time password (two-factor authentication).
      */
-    public function logIn($username, $password, $force = false, $totp = null);
+    public function logIn(string $username, string $password, bool $force = false, int|string $totp = null);
 
     /**
      * Log out.
@@ -36,19 +32,15 @@ interface ConnectorInterface
 
     /**
      * Check whether the user is logged in.
-     *
-     * @return bool
      */
-    public function isLoggedIn();
+    public function isLoggedIn(): bool;
 
     /**
      * Get an authenticated Guzzle client.
      *
      * This will fail if the user is not logged in.
-     *
-     * @return ClientInterface
      */
-    public function getClient();
+    public function getClient(): ClientInterface;
 
     /**
      * Set the API token to use for Platform.sh requests.
@@ -59,12 +51,10 @@ interface ConnectorInterface
      *   The token type: 'exchange' for an API token (recommended), or 'access'
      *   for an OAuth 2.0 access token.
      */
-    public function setApiToken($token, $type);
+    public function setApiToken(string $token, string $type);
 
     /**
      * Get the configured API gateway URL (without trailing slash).
-     *
-     * @return string
      */
-    public function getApiUrl();
+    public function getApiUrl(): string;
 }

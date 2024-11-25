@@ -16,17 +16,15 @@ class Catalog
     /**
      * Creates a catalog.
      *
-     * @param string $url
-     *
      * @return CatalogItem[]
      */
-    public static function create(array $data, $url, ClientInterface $client)
+    public static function create(array $data, string $url, ClientInterface $client): array
     {
         $request = new Request('post', $url, [
             'Content-Type' => 'application/json',
         ], \GuzzleHttp\json_encode($data));
         $response = $client->send($request);
-        $data = Utils::jsonDecode($response->getBody(), true);
+        $data = Utils::jsonDecode($response->getBody()->__toString(), true);
         $items = [];
         foreach ($data as $item) {
             $items[] = CatalogItem::fromData($item);

@@ -15,20 +15,15 @@ interface SessionInterface
 
     /**
      * Set a particular session value.
-     *
-     * @param string $key
-     * @param mixed  $value
      */
-    public function set($key, $value);
+    public function set(string $key, mixed $value);
 
     /**
      * Get a session value.
      *
-     * @param string $key
-     *
      * @return mixed|null
      */
-    public function get($key);
+    public function get(string $key): mixed;
 
     /**
      * Save the session, if storage is defined.

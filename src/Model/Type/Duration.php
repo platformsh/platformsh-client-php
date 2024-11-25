@@ -9,7 +9,7 @@ namespace Platformsh\Client\Model\Type;
  */
 class Duration
 {
-    public static $suffixes = [
+    public static array $suffixes = [
         's' => 1,
         'm' => 60,
         'h' => 60 * 60,
@@ -19,12 +19,9 @@ class Duration
         'y' => 365 * 24 * 60 * 60,
     ];
 
-    private $seconds;
+    private int|float $seconds;
 
-    /**
-     * @param int|string $duration
-     */
-    public function __construct($duration)
+    public function __construct(int|string $duration)
     {
         $this->seconds = self::stringToSeconds((string) $duration);
     }
@@ -47,10 +44,8 @@ class Duration
 
     /**
      * Returns the duration as a number of seconds.
-     *
-     * @return int|float
      */
-    public function getSeconds()
+    public function getSeconds(): float|int
     {
         return $this->seconds;
     }
@@ -62,19 +57,15 @@ class Duration
      *     0 if the durations are equal, 1 if the current duration is greater,
      *     and -1 if the $other duration is greater.
      */
-    public function compare(self $other)
+    public function compare(self $other): int
     {
         return $this->getSeconds() <=> $other->getSeconds();
     }
 
     /**
      * Converts a duration string to seconds.
-     *
-     * @param string $duration
-     *
-     * @return int|float
      */
-    private static function stringToSeconds($duration)
+    private static function stringToSeconds(string $duration): float|int
     {
         if (isset(self::$suffixes[substr($duration, -1)])) {
             $amount = substr($duration, 0, strlen($duration) - 1);

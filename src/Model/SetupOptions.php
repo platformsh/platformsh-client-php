@@ -24,32 +24,27 @@ class SetupOptions
      * Creates a setup options list.
      *
      * @param array           $body           array of the data to send in the post.
-     * @param string          $url           The URL of the setup options api.
+     * @param string $url           The URL of the setup options api.
      * @param ClientInterface $client        A suitably configured Guzzle
      *                                       client.
-     * @return self
      */
-    public static function create(array $body, $url, ClientInterface $client)
+    public static function create(array $body, string $url, ClientInterface $client): self
     {
         $request = new Request('post', $url, [
             'Content-Type' => 'application/json',
         ], \GuzzleHttp\json_encode($body));
         $response = $client->send($request);
-        $data = Utils::jsonDecode($response->getBody(), true);
+        $data = Utils::jsonDecode((string) $response->getBody(), true);
         return new self($data);
     }
 
     /**
      * Fetches a setup options list from a known URL.
-     *
-     * @param string $url
-     *
-     * @return SetupOptions
      */
-    public static function get($url, ClientInterface $client)
+    public static function get(string $url, ClientInterface $client): self
     {
         $response = $client->get($url);
-        $data = Utils::jsonDecode($response->getBody(), true);
+        $data = Utils::jsonDecode((string) $response->getBody(), true);
         return new self($data);
     }
 }

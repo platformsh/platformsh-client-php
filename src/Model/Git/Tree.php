@@ -20,13 +20,8 @@ class Tree extends ApiResourceBase
 {
     /**
      * Get the Tree object for an SHA hash.
-     *
-     * @param string          $sha
-     * @param string          $baseUrl
-     *
-     * @return static|false
      */
-    public static function fromSha($sha, $baseUrl, ClientInterface $client)
+    public static function fromSha(string $sha, string $baseUrl, ClientInterface $client): false|static
     {
         $url = Project::getProjectBaseFromUrl($baseUrl) . '/git/trees';
 
@@ -41,7 +36,7 @@ class Tree extends ApiResourceBase
      * @return Blob|Tree|false
      *   A Blob or Tree object, or false if the object does not exist.
      */
-    public function getObject($path)
+    public function getObject(string $path): self|false|Blob|static
     {
         if ($path === '' || $path === '.') {
             return $this;
@@ -63,14 +58,11 @@ class Tree extends ApiResourceBase
     /**
      * Get a Blob (file) inside this tree.
      *
-     * @param string $path
-     *
-     * @throws GitObjectTypeException if the path is a directory.
-     *
      * @return Blob|false
      *   A Blob object, or false if the blob is not found.
+     *@throws GitObjectTypeException if the path is a directory.
      */
-    public function getBlob($path)
+    public function getBlob(string $path): false|Blob
     {
         $object = $this->getObjectRecursive($path);
         if ($object === false) {
@@ -89,14 +81,11 @@ class Tree extends ApiResourceBase
     /**
      * Get a Tree (directory) inside this tree.
      *
-     * @param string $path
-     *
-     * @throws GitObjectTypeException if the path is not a directory.
-     *
      * @return Tree|false
      *   A Tree object or false if the tree is not found.
+     *@throws GitObjectTypeException if the path is not a directory.
      */
-    public function getTree($path)
+    public function getTree(string $path): self|false
     {
         $object = $this->getObjectRecursive($path);
         if ($object === false) {
@@ -110,12 +99,8 @@ class Tree extends ApiResourceBase
 
     /**
      * Find an object definition by its path.
-     *
-     * @param string $path
-     *
-     * @return array|false
      */
-    private function getObjectData($path)
+    private function getObjectData(string $path): false|array
     {
         foreach ($this->tree as $objectData) {
             if ($objectData['path'] === $path) {
@@ -128,12 +113,8 @@ class Tree extends ApiResourceBase
 
     /**
      * Get an object recursively in this tree.
-     *
-     * @param string $path
-     *
-     * @return Blob|Tree|false
      */
-    private function getObjectRecursive($path)
+    private function getObjectRecursive(string $path): self|false|Blob
     {
         $tree = $object = $this;
         foreach ($this->splitPath($path) as $part) {
@@ -150,11 +131,9 @@ class Tree extends ApiResourceBase
     /**
      * Split a tree path into parts.
      *
-     * @param string $path
-     *
      * @return string[]
      */
-    private function splitPath($path)
+    private function splitPath(string $path): array
     {
         $path = trim(str_replace('\\', '/', $path), '/');
 

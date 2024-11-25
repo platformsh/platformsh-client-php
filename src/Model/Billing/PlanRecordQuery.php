@@ -6,7 +6,7 @@ namespace Platformsh\Client\Model\Billing;
 
 class PlanRecordQuery
 {
-    private $filters = [];
+    private array $filters = [];
 
     /**
      * Restrict the query to a date/time period.
@@ -19,30 +19,24 @@ class PlanRecordQuery
 
     /**
      * Restrict the query to an owner's ID.
-     *
-     * @param array|string|null $owner
      */
-    public function setOwner($owner)
+    public function setOwner(array|string|null $owner): void
     {
         $this->filters['owner'] = $owner;
     }
 
     /**
      * Restrict the query to a plan type, e.g. 'development', 'medium', etc.
-     *
-     * @param array|string|null $plan
      */
-    public function setPlan($plan)
+    public function setPlan(array|string|null $plan): void
     {
         $this->filters['plan'] = $plan;
     }
 
     /**
      * Get the URL query parameters.
-     *
-     * @return array
      */
-    public function getParams()
+    public function getParams(): array
     {
         $filters = array_filter($this->filters, function ($value) {
             return $value !== null;

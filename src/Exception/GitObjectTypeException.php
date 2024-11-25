@@ -9,22 +9,18 @@ namespace Platformsh\Client\Exception;
  */
 class GitObjectTypeException extends \RuntimeException
 {
-    private $path;
+    private string $path;
 
     /**
-     * @param string $message
      * @param string $path
      */
-    public function __construct($message, $path)
+    public function __construct(string $message, $path)
     {
         parent::__construct($message);
         $this->path = $path;
     }
 
-    /**
-     * @return string
-     */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }

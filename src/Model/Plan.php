@@ -13,9 +13,9 @@ namespace Platformsh\Client\Model;
  */
 class Plan extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'plans';
+    protected static ?string $collectionItemsKey = 'plans';
 
-    public function __get($name)
+    public function __get(string $name)
     {
         if ($name === 'price') {
             return Price::fromData($this->data['price']);

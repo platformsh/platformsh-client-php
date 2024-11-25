@@ -20,17 +20,15 @@ class ApiResponseException extends RequestException
      *
      * @return GuzzleException
      */
-    public static function wrapGuzzleException(GuzzleException $e)
+    public static function wrapGuzzleException(GuzzleException $e): RequestException|GuzzleException
     {
         return $e instanceof RequestException ? self::alterMessage($e) : $e;
     }
 
     /**
      * Get more details from the response body, to add to error messages.
-     *
-     * @return string
      */
-    public static function getErrorDetails(ResponseInterface $response)
+    public static function getErrorDetails(ResponseInterface $response): string
     {
         $responseInfoProperties = [
             // Platform.sh API errors.
@@ -72,10 +70,8 @@ class ApiResponseException extends RequestException
 
     /**
      * Recreates the exception if necessary to alter the message.
-     *
-     * @return RequestException
      */
-    private static function alterMessage(RequestException $e)
+    private static function alterMessage(RequestException $e): RequestException
     {
         if ($e->getResponse() !== null) {
             $details = self::getErrorDetails($e->getResponse());

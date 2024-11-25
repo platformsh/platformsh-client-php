@@ -17,7 +17,7 @@ class ListFilter extends Filter implements FilterInterface
      * @param bool $in
      *   True for "IN", false for "NOT IN".
      */
-    public function __construct($name, array $values, $in = true)
+    public function __construct(string $name, array $values, $in = true)
     {
         parent::__construct($name, \implode(',', $values), $in ? FilterInterface::OP_IN : FilterInterface::OP_NOT_IN);
     }

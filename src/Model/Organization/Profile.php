@@ -23,10 +23,8 @@ class Profile extends ApiResourceBase
      * Updates the profile.
      *
      * This updates the resource's internal data with the API response.
-     *
-     * @return Result
      */
-    public function update(array $values)
+    public function update(array $values): Result
     {
         // @todo use getLink('#edit') when it is available
         $url = $this->getUri();
@@ -35,13 +33,13 @@ class Profile extends ApiResourceBase
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
-        $data = Utils::jsonDecode($response->getBody(), true);
+        $data = Utils::jsonDecode((string) $response->getBody(), true);
         $this->setData($data);
 
         return new Result($data, $this->baseUrl, $this->client, static::class);
     }
 
-    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    public static function create(array $body, string $collectionUrl, ClientInterface $client)
     {
         throw new \BadMethodCallException('A profile cannot be explicitly created');
     }

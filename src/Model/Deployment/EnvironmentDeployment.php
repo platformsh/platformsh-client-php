@@ -23,14 +23,14 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class EnvironmentDeployment extends ApiResourceBase
 {
-    private static $types = [
+    private static array $types = [
         'services' => Service::class,
         'routes' => Route::class,
         'webapps' => WebApp::class,
         'workers' => Worker::class,
     ];
 
-    public function __get($name)
+    public function __get(string $name)
     {
         if (isset(self::$types[$name])) {
             $className = self::$types[$name];
@@ -81,7 +81,7 @@ class EnvironmentDeployment extends ApiResourceBase
      * @return array<string, array<string, RuntimeOperation>>
      *     A list of runtime operations keyed by operation name and app name.
      */
-    public function getRuntimeOperations()
+    public function getRuntimeOperations(): array
     {
         $operations = [];
         foreach (['webapps', 'workers'] as $appType) {
@@ -96,18 +96,16 @@ class EnvironmentDeployment extends ApiResourceBase
     /**
      * Executes a runtime operation on this deployment.
      *
-     * @see RuntimeOperation
-     * @see AppBase::getRuntimeOperations()
-     * @see AppBase::getRuntimeOperation()
-     *
      * @param string $name
      *   The operation name.
      * @param string $service
      *   The name of the service or application to run the operation on.
      *
-     * @return \Platformsh\Client\Model\Result
+     *@see RuntimeOperation
+     * @see AppBase::getRuntimeOperations()
+     * @see AppBase::getRuntimeOperation()
      */
-    public function execRuntimeOperation($name, $service)
+    public function execRuntimeOperation(string $name, string $service): \Platformsh\Client\Model\Result
     {
         return $this->runOperation('operations', 'post', [
             'operation' => $name,

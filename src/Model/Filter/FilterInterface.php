@@ -32,8 +32,6 @@ interface FilterInterface
 
     /**
      * Returns query parameter(s) for the filter.
-     *
-     * @return array
      */
-    public function params();
+    public function params(): array;
 }

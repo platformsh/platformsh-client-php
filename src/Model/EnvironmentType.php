@@ -12,13 +12,8 @@ class EnvironmentType extends ApiResourceBase
 {
     /**
      * Add a user to this environment type.
-     *
-     * @param string $id
-     * @param string $role
-     *
-     * @return Result
      */
-    public function addUser($id, $role)
+    public function addUser(string $id, string $role): Result
     {
         return EnvironmentTypeAccess::create([
             'user' => $id,
@@ -28,12 +23,8 @@ class EnvironmentType extends ApiResourceBase
 
     /**
      * Get a user's access to this environment type.
-     *
-     * @param string $uuid
-     *
-     * @return EnvironmentTypeAccess|false
      */
-    public function getUser($uuid)
+    public function getUser(string $uuid): false|EnvironmentTypeAccess
     {
         return EnvironmentTypeAccess::get($uuid, $this->getLink('#access'), $this->client);
     }
@@ -43,7 +34,7 @@ class EnvironmentType extends ApiResourceBase
      *
      * @return EnvironmentTypeAccess[]
      */
-    public function getUsers()
+    public function getUsers(): array
     {
         return EnvironmentTypeAccess::getCollection($this->getLink('#access'), 0, [], $this->client);
     }

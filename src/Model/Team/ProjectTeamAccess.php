@@ -17,10 +17,7 @@ use Platformsh\Client\Model\ResourceWithReferences;
  */
 class ProjectTeamAccess extends ResourceWithReferences
 {
-    /**
-     * @return \Platformsh\Client\Model\Ref\TeamRef|null
-     */
-    public function getTeamInfo()
+    public function getTeamInfo(): ?\Platformsh\Client\Model\Ref\TeamRef
     {
         if (isset($this->data['ref:teams'][$this->data['team_id']])) {
             return $this->data['ref:teams'][$this->data['team_id']];

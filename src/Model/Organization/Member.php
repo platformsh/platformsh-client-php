@@ -18,10 +18,7 @@ use Platformsh\Client\Model\ResourceWithReferences;
  */
 class Member extends ResourceWithReferences
 {
-    /**
-     * @return UserRef|null
-     */
-    public function getUserInfo()
+    public function getUserInfo(): ?UserRef
     {
         if (isset($this->data['ref:users'][$this->data['user_id']])) {
             return $this->data['ref:users'][$this->data['user_id']];
@@ -29,7 +26,7 @@ class Member extends ResourceWithReferences
         return null;
     }
 
-    public function getLink($rel, $absolute = true)
+    public function getLink(string $rel, bool $absolute = true): string
     {
         if ($rel === '#edit') {
             return $this->getLink('self');
@@ -37,7 +34,7 @@ class Member extends ResourceWithReferences
         return parent::getLink($rel, $absolute);
     }
 
-    protected function isOperationAvailable($op)
+    protected function isOperationAvailable(string $op): bool
     {
         if ($op === 'edit') {
             return true;

@@ -9,9 +9,9 @@ namespace Platformsh\Client\Model\Invitation;
  */
 class Environment
 {
-    private $id;
+    private string $id;
 
-    private $role;
+    private string $role;
 
     public function __construct($id, $role)
     {
@@ -19,18 +19,12 @@ class Environment
         $this->role = $role;
     }
 
-    /**
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getRole()
+    public function getRole(): string
     {
         return $this->role;
     }
@@ -39,10 +33,8 @@ class Environment
      * Returns an array as expected by the invitations API.
      *
      * @param self[] $environments
-     *
-     * @return array
      */
-    public static function listForApi(array $environments)
+    public static function listForApi(array $environments): array
     {
         $maps = [];
         foreach ($environments as $environment) {

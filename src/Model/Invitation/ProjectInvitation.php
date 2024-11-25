@@ -23,7 +23,7 @@ class ProjectInvitation extends ApiResourceBase
      *
      * Returns environments as the correct object type.
      */
-    public function getProperty($property, $required = true, $lazyLoad = true)
+    public function getProperty(string $property, bool $required = true, bool $lazyLoad = true): mixed
     {
         $value = parent::getProperty($property, $required, $lazyLoad);
         if ($property === 'environments') {

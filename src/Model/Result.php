@@ -11,23 +11,18 @@ use GuzzleHttp\ClientInterface;
  */
 class Result extends ApiResourceBase
 {
-    protected $resourceClass;
+    protected string $resourceClass;
 
-    /**
-     * @param string $className
-     */
-    public function __construct(array $data, $baseUrl, ClientInterface $client, $className)
+    public function __construct(array $data, $baseUrl, ClientInterface $client, string $className)
     {
-        parent::__construct($data, $baseUrl, $client, true);
+        parent::__construct($data, $baseUrl, $client);
         $this->setResourceClass($className);
     }
 
     /**
-     * @param string $className
-     *
      * @internal
      */
-    public function setResourceClass($className)
+    public function setResourceClass(string $className): void
     {
         if (! class_exists($className)) {
             throw new \InvalidArgumentException("Class not found: {$className}");
@@ -38,10 +33,8 @@ class Result extends ApiResourceBase
 
     /**
      * Count the activities embedded in the result.
-     *
-     * @return int
      */
-    public function countActivities()
+    public function countActivities(): int
     {
         if (! isset($this->data['_embedded']['activities'])) {
             return 0;
@@ -57,7 +50,7 @@ class Result extends ApiResourceBase
      *
      * @return Activity[]
      */
-    public function getActivities()
+    public function getActivities(): array
     {
         if (! isset($this->data['_embedded']['activities'])) {
             return [];
@@ -80,7 +73,7 @@ class Result extends ApiResourceBase
      *   An instance of ApiResourceBase - the implementing class name was set
      *   when this Result was instantiated.
      */
-    public function getEntity()
+    public function getEntity(): ApiResourceBase
     {
         if (! isset($this->data['_embedded']['entity']) || ! isset($this->resourceClass)) {
             throw new \Exception('No entity found in result');
@@ -96,6 +89,7 @@ class Result extends ApiResourceBase
         throw new \BadMethodCallException('Cannot update() a Result instance directly. Perhaps use getEntity().');
     }
 
+    #[\ReturnTypeWillChange]
     public function delete()
     {
         throw new \BadMethodCallException('Cannot delete() a Result instance directly. Perhaps use getEntity().');

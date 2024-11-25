@@ -17,55 +17,25 @@ use Platformsh\Client\Model\Ref\OrganizationRef;
  */
 class BasicProjectInfo
 {
-    /**
-     * @var string
-     */
-    public $id;
+    public string $id;
 
-    /**
-     * @var string
-     */
-    public $title;
+    public string $title;
 
-    /**
-     * @var string|null
-     */
-    public $region;
+    public ?string $region;
 
-    /**
-     * @var string|null
-     */
-    public $subscription_id;
+    public ?string $subscription_id;
 
-    /**
-     * @var OrganizationRef|null
-     */
-    public $organization_ref;
+    public ?OrganizationRef $organization_ref;
 
-    /**
-     * @var string|null
-     */
-    public $created_at;
+    public ?string $created_at;
 
-    /**
-     * @var string|null
-     */
-    public $status;
+    public ?string $status;
 
-    /**
-     * @var string|null
-     */
-    public $organization_id;
+    public ?string $organization_id;
 
-    /**
-     * @var string|null
-     */
-    public $owner_id;
+    public ?string $owner_id;
 
-    /**
-     * @var string|null
-     */
-    public $vendor;
+    public ?string $vendor;
 
     private function __construct($id, $title)
     {
@@ -73,7 +43,7 @@ class BasicProjectInfo
         $this->title = $title;
     }
 
-    public static function fromStub(ProjectStub $stub)
+    public static function fromStub(ProjectStub $stub): static
     {
         $obj = new static($stub->id, $stub->title);
         $obj->subscription_id = $stub->subscription_id;
@@ -87,7 +57,7 @@ class BasicProjectInfo
         return $obj;
     }
 
-    public static function fromExtendedAccess(UserExtendedAccess $extendedAccess)
+    public static function fromExtendedAccess(UserExtendedAccess $extendedAccess): static
     {
         if ($extendedAccess->resource_type !== 'project') {
             throw new \InvalidArgumentException('Cannot resolve project information for resource type: ' . $extendedAccess->resource_type);

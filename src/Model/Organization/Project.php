@@ -20,5 +20,5 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class Project extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'items';
+    protected static ?string $collectionItemsKey = 'items';
 }

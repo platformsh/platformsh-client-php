@@ -11,15 +11,15 @@ namespace Platformsh\Client\SshCert;
  */
 class Metadata
 {
-    private $keyId;
+    private string $keyId;
 
-    private $keyType;
+    private string $keyType;
 
-    private $validAfter;
+    private int $validAfter;
 
-    private $validBefore;
+    private int $validBefore;
 
-    private $extensions;
+    private array $extensions;
 
     /**
      * @param string $string The certificate's contents.
@@ -95,10 +95,8 @@ class Metadata
      * Return's the certificate key type.
      *
      * This will be an identifier such as ssh-rsa-cert-v01@openssh.com or ssh-ed25519-cert-v01@openssh.com.
-     *
-     * @return string
      */
-    public function getKeyType()
+    public function getKeyType(): string
     {
         return $this->keyType;
     }

@@ -12,7 +12,7 @@ namespace Platformsh\Client\DataStructure;
  */
 trait ReadOnlyStructureTrait
 {
-    private $data = [];
+    private array $data = [];
 
     /**
      * Private constructor. Instantiate this object using self::fromData().
@@ -25,11 +25,9 @@ trait ReadOnlyStructureTrait
     /**
      * Magic getter.
      *
-     * @param string $name
-     *
      * @return mixed
      */
-    public function __get($name)
+    public function __get(string $name)
     {
         $this->checkExists($name);
 
@@ -39,11 +37,9 @@ trait ReadOnlyStructureTrait
     /**
      * Magic isset() support.
      *
-     * @param string $name
-     *
      * @return bool
      */
-    public function __isset($name)
+    public function __isset(string $name)
     {
         return isset($this->data[$name]);
     }
@@ -51,13 +47,10 @@ trait ReadOnlyStructureTrait
     /**
      * Magic setter.
      *
-     * @param string $name
-     * @param mixed  $value
-     *
      * @throws \InvalidArgumentException if the property is not found
      * @throws \BadMethodCallException if the property is found
      */
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value)
     {
         $this->checkExists($name);
         throw new \BadMethodCallException('Property not writable: ' . $name);
@@ -65,20 +58,16 @@ trait ReadOnlyStructureTrait
 
     /**
      * Construct from API data.
-     *
-     * @return static
      */
-    public static function fromData(array $data)
+    public static function fromData(array $data): static
     {
         return new static($data);
     }
 
     /**
      * Get all properties.
-     *
-     * @return array
      */
-    public function getProperties()
+    public function getProperties(): array
     {
         return $this->data;
     }
@@ -86,14 +75,11 @@ trait ReadOnlyStructureTrait
     /**
      * Gets a single property.
      *
-     * @param bool $required
-     *
-     * @throws \InvalidArgumentException if $required is true and the property is not set
-     *
      * @return mixed|null
      *   Returns the property value, or null if $required is false and the property is not set.
+     *@throws \InvalidArgumentException if $required is true and the property is not set
      */
-    public function getProperty($property, $required = true)
+    public function getProperty($property, bool $required = true): mixed
     {
         if (! array_key_exists($property, $this->data)) {
             if ($required) {
@@ -108,11 +94,9 @@ trait ReadOnlyStructureTrait
     /**
      * Check if a property exists.
      *
-     * @param string $property
-     *
      * @throws \InvalidArgumentException if the property is not found
      */
-    private function checkExists($property)
+    private function checkExists(string $property): void
     {
         if (! array_key_exists($property, $this->data)) {
             throw new \InvalidArgumentException('Property not found: ' . $property);

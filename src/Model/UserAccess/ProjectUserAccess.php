@@ -22,22 +22,16 @@ class ProjectUserAccess extends ResourceWithReferences
 
     public const ROLE_VIEWER = 'viewer';
 
-    public static $projectRoles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
+    public static array $projectRoles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
 
-    public static $environmentTypeRoles = ['admin', 'contributor', 'viewer'];
+    public static array $environmentTypeRoles = ['admin', 'contributor', 'viewer'];
 
-    /**
-     * @return UserRef
-     */
-    public function getUserInfo()
+    public function getUserInfo(): UserRef
     {
         return $this->data['ref:users'][$this->user_id];
     }
 
-    /**
-     * @return string
-     */
-    public function getProjectRole()
+    public function getProjectRole(): string
     {
         if (in_array('admin', $this->data['permissions'], true)) {
             return 'admin';
@@ -48,7 +42,7 @@ class ProjectUserAccess extends ResourceWithReferences
     /**
      * @return array<string, string>
      */
-    public function getEnvironmentTypeRoles()
+    public function getEnvironmentTypeRoles(): array
     {
         $roles = [];
         foreach ($this->data['permissions'] as $permission) {
@@ -60,7 +54,7 @@ class ProjectUserAccess extends ResourceWithReferences
         return $roles;
     }
 
-    public function update(array $values)
+    public function update(array $values): Result
     {
         // A successful PATCH on this resource returns an empty 204 result.
         $this->client->patch($this->getLink('update'), [

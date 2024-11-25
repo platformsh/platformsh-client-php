@@ -33,20 +33,17 @@ use Platformsh\Client\Model\User;
 
 class PlatformClient
 {
-    /**
-     * @var ConnectorInterface
-     */
-    protected $connector;
+    protected ConnectorInterface $connector;
 
     /**
      * @var array|null A per-client cache for account info
      */
-    protected $accountInfo;
+    protected ?array $accountInfo;
 
     /**
-     * @var string|null A per-client cache for the user ID
+     * @var string|false|null A per-client cache for the user ID
      */
-    protected $userId;
+    protected false|null|string $userId;
 
     public function __construct(ConnectorInterface $connector = null)
     {
@@ -56,21 +53,15 @@ class PlatformClient
     /**
      * @return ConnectorInterface
      */
-    public function getConnector()
+    public function getConnector(): ConnectorInterface|Connector
     {
         return $this->connector;
     }
 
     /**
      * Get a single project by its ID.
-     *
-     * @param string $id
-     * @param string $hostname
-     * @param bool   $https
-     *
-     * @return Project|false
      */
-    public function getProject($id, $hostname = null, $https = true)
+    public function getProject(string $id, string $hostname = null, bool $https = true): Project|false
     {
         // Look for a project directly if the hostname is known.
         if ($hostname !== null) {
@@ -102,13 +93,10 @@ class PlatformClient
     /**
      * Get the logged-in user's projects.
      *
-     * @deprecated replaced by getMyProjects()
-     *
-     * @param bool $reset
-     *
      * @return Project[]
+     *@deprecated replaced by getMyProjects()
      */
-    public function getProjects($reset = false)
+    public function getProjects(bool $reset = false): array
     {
         $data = $this->getAccountInfo($reset);
         $client = $this->connector->getClient();
@@ -129,13 +117,10 @@ class PlatformClient
     /**
      * Returns the logged-in user's project stubs.
      *
-     * @deprecated replaced by getMyProjects()
-     *
-     * @param bool $reset
-     *
      * @return ProjectStub[]
+     *@deprecated replaced by getMyProjects()
      */
-    public function getProjectStubs($reset = false)
+    public function getProjectStubs(bool $reset = false): array
     {
         return ProjectStub::wrapCollection($this->getAccountInfo($reset), $this->apiUrl(), $this->connector->getClient());
     }
@@ -143,12 +128,10 @@ class PlatformClient
     /**
      * Returns all the projects that the current user can access.
      *
-     * @param string|null $vendor
-     *
      * @return BasicProjectInfo[]
      *   A list of basic project information.
      */
-    public function getMyProjects($vendor = null)
+    public function getMyProjects(string $vendor = null): array
     {
         $projects = [];
         if (! empty($this->connector->getConfig()['centralized_permissions_enabled'])) {
@@ -196,13 +179,9 @@ class PlatformClient
      * For projects, getMyProjects() is recommended.
      * For purely user profile related information, getUser() is recommended.
      *
-     * @see PlatformClient::getUser()
-     *
-     * @param bool $reset
-     *
-     * @return array
+     *@see PlatformClient::getUser()
      */
-    public function getAccountInfo($reset = false)
+    public function getAccountInfo(bool $reset = false): ?array
     {
         if (! isset($this->accountInfo) || $reset) {
             $url = $this->apiUrl() . '/me';
@@ -222,14 +201,12 @@ class PlatformClient
      * @param string $id       The project ID.
      * @param string $hostname The hostname of the Platform.sh regional API,
      *                         e.g. 'eu.platform.sh' or 'us.platform.sh'.
-     * @param bool   $https    Whether to use HTTPS (default: true).
+     * @param bool $https    Whether to use HTTPS (default: true).
      *
-     * @internal It's now better to use getProject(). This method will be made
+     *@internal It's now better to use getProject(). This method will be made
      *           private in a future release.
-     *
-     * @return Project|false
      */
-    public function getProjectDirect($id, $hostname, $https = true)
+    public function getProjectDirect(string $id, string $hostname, bool $https = true): Project|false
     {
         $scheme = $https ? 'https' : 'http';
         $collection = "{$scheme}://{$hostname}/api/projects";
@@ -243,11 +220,9 @@ class PlatformClient
     /**
      * Get the logged-in user's SSH keys.
      *
-     * @param bool $reset
-     *
      * @return SshKey[]
      */
-    public function getSshKeys($reset = false)
+    public function getSshKeys(bool $reset = false): array
     {
         $data = $this->getAccountInfo($reset);
 
@@ -256,12 +231,8 @@ class PlatformClient
 
     /**
      * Get a single SSH key by its ID.
-     *
-     * @param string|int $id
-     *
-     * @return SshKey|false
      */
-    public function getSshKey($id)
+    public function getSshKey(int|string $id): false|SshKey
     {
         $url = $this->apiUrl() . '/ssh_keys';
 
@@ -272,11 +243,9 @@ class PlatformClient
      * Add an SSH public key to the logged-in user's account.
      *
      * @param string $value The SSH key value.
-     * @param string $title A title for the key (optional).
-     *
-     * @return Result
+     * @param string|null $title A title for the key (optional).
      */
-    public function addSshKey($value, $title = null)
+    public function addSshKey(string $value, string $title = null): Result
     {
         $values = $this->cleanRequest([
             'value' => $value,
@@ -290,15 +259,15 @@ class PlatformClient
     /**
      * Create a new Platform.sh subscription.
      *
-     * @param SubscriptionOptions|string $options
+     * @param string|SubscriptionOptions $options
      *   Subscription request options, which override the other arguments.
      *   If a string is passed, it will be used as the region ID (deprecated). See getRegions().
-     * @param string $plan                The plan. See getPlans(). @deprecated
-     * @param string $title               The project title. @deprecated
-     * @param int    $storage             The storage of each environment, in MiB. @deprecated
-     * @param int    $environments        The number of available environments. @deprecated
+     * @param string|null $plan                The plan. See getPlans(). @deprecated
+     * @param string|null $title               The project title. @deprecated
+     * @param int|null $storage             The storage of each environment, in MiB. @deprecated
+     * @param int|null $environments        The number of available environments. @deprecated
      * @param array  $activation_callback An activation callback for the subscription. @deprecated
-     * @param string $options_url         The catalog options URL. See getCatalog(). @deprecated
+     * @param string|null $options_url         The catalog options URL. See getCatalog(). @deprecated
      *
      * @return Subscription
      *   A subscription, representing a project. Use Subscription::wait() or
@@ -311,7 +280,7 @@ class PlatformClient
      *
      * @noinspection PhpTooManyParametersInspection
      */
-    public function createSubscription($options, $plan = null, $title = null, $storage = null, $environments = null, array $activation_callback = null, $options_url = null)
+    public function createSubscription(SubscriptionOptions|string $options, string $plan = null, string $title = null, int $storage = null, int $environments = null, array $activation_callback = null, string $options_url = null): Subscription
     {
         if ($options instanceof SubscriptionOptions) {
             $values = $options->toArray();
@@ -346,11 +315,9 @@ class PlatformClient
     /**
      * Get a list of your Platform.sh subscriptions.
      *
-     * @param string|null $organizationId
-     *
      * @return Subscription[]
      */
-    public function getSubscriptions($organizationId = null)
+    public function getSubscriptions(string $organizationId = null): array
     {
         if (isset($organizationId)) {
             $url = $this->apiUrl() . '/organizations/' . $organizationId . '/subscriptions';
@@ -362,12 +329,8 @@ class PlatformClient
 
     /**
      * Get a subscription by its ID.
-     *
-     * @param string|int $id
-     *
-     * @return Subscription|false
      */
-    public function getSubscription($id)
+    public function getSubscription(int|string $id): Subscription|false
     {
         $url = $this->apiUrl() . '/subscriptions';
         return Subscription::get($id, $url, $this->connector->getClient());
@@ -376,16 +339,16 @@ class PlatformClient
     /**
      * Estimate the cost of a subscription.
      *
-     * @param string      $plan         The plan machine name.
-     * @param int         $storage      The allowed storage per environment (MiB).
-     * @param int         $environments The number of environments.
-     * @param int         $users        The number of users.
+     * @param string $plan         The plan machine name.
+     * @param int $storage      The allowed storage per environment (MiB).
+     * @param int $environments The number of environments.
+     * @param int $users        The number of users.
      * @param string|null $countryCode  A two-letter country code.
      * @param string|null $organizationId An organization ID.
      *
      * @return array An array containing at least 'total' (a formatted price).
      */
-    public function getSubscriptionEstimate($plan, $storage, $environments, $users, $countryCode = null, $organizationId = null)
+    public function getSubscriptionEstimate(string $plan, int $storage, int $environments, int $users, string $countryCode = null, string $organizationId = null): array
     {
         $options = [];
         $options['query'] = [
@@ -412,7 +375,7 @@ class PlatformClient
      *
      * @return Plan[]
      */
-    public function getPlans()
+    public function getPlans(): array
     {
         return Plan::getCollection($this->apiUrl() . '/plans', 0, [], $this->getConnector()->getClient());
     }
@@ -422,7 +385,7 @@ class PlatformClient
      *
      * @return Region[]
      */
-    public function getRegions()
+    public function getRegions(): array
     {
         return Region::getCollection($this->apiUrl() . '/regions', 0, [], $this->getConnector()->getClient());
     }
@@ -434,7 +397,7 @@ class PlatformClient
      *
      * @return PlanRecord[]
      */
-    public function getPlanRecords(PlanRecordQuery $query = null)
+    public function getPlanRecords(PlanRecordQuery $query = null): array
     {
         $url = $this->apiUrl() . '/records/plan';
         $options = [];
@@ -476,7 +439,7 @@ class PlatformClient
      *
      * @return \Platformsh\Client\Model\CatalogItem[]
      */
-    public function getCatalog()
+    public function getCatalog(): array
     {
         return Catalog::create([], $this->apiUrl() . '/setup/catalog', $this->getConnector()->getClient());
     }
@@ -484,15 +447,13 @@ class PlatformClient
     /**
      * Get the setup options file for a user.
      *
-     * @param string $vendor             The query string containing the vendor machine name.
-     * @param string $plan               The machine name of the plan which has been selected during the project setup process.
-     * @param string $options_url        The URL of a project options file which has been selected as a setup template.
-     * @param string $username           The name of the account for which the project is to be created.
-     * @param string $organization       The name of the organization for which the project is to be created.
-     *
-     * @return SetupOptions
+     * @param string|null $vendor             The query string containing the vendor machine name.
+     * @param string|null $plan               The machine name of the plan which has been selected during the project setup process.
+     * @param string|null $options_url        The URL of a project options file which has been selected as a setup template.
+     * @param string|null $username           The name of the account for which the project is to be created.
+     * @param string|null $organization       The name of the organization for which the project is to be created.
      */
-    public function getSetupOptions($vendor = null, $plan = null, $options_url = null, $username = null, $organization = null)
+    public function getSetupOptions(string $vendor = null, string $plan = null, string $options_url = null, string $username = null, string $organization = null): SetupOptions
     {
         $url = $this->apiUrl() . '/setup/options';
         $options = $this->cleanRequest([
@@ -511,10 +472,8 @@ class PlatformClient
      *
      * @param string|null $id
      *   The user ID. Defaults to the current user.
-     *
-     * @return User|false
      */
-    public function getUser($id = null)
+    public function getUser(string $id = null): false|User
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -533,7 +492,7 @@ class PlatformClient
      * @return string|false
      *   The user ID, or false if the access token is not associated with a user.
      */
-    public function getMyUserId($reset = false)
+    public function getMyUserId(bool $reset = false): string|false
     {
         if (isset($this->userId) && ! $reset) {
             return $this->userId;
@@ -564,7 +523,7 @@ class PlatformClient
      *
      * @return Organization[]
      */
-    public function listOrganizations(array $filters = [])
+    public function listOrganizations(array $filters = []): array
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -583,11 +542,9 @@ class PlatformClient
     /**
      * Lists organizations of which the given user is a member.
      *
-     * @param string $userId
-     *
      * @return Organization[]
      */
-    public function listOrganizationsWithMember($userId)
+    public function listOrganizationsWithMember(string $userId): array
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -599,11 +556,9 @@ class PlatformClient
     /**
      * Lists organizations owned by the given user ID.
      *
-     * @param string $ownerId
-     *
      * @return Organization[]
      */
-    public function listOrganizationsByOwner($ownerId)
+    public function listOrganizationsByOwner(string $ownerId): array
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -613,24 +568,16 @@ class PlatformClient
 
     /**
      * Gets a single organization by name.
-     *
-     * @param string $name
-     *
-     * @return Organization|false
      */
-    public function getOrganizationByName($name)
+    public function getOrganizationByName(string $name): Organization|false
     {
         return $this->getOrganizationById('name=' . $name);
     }
 
     /**
      * Gets a single organization.
-     *
-     * @param string $id
-     *
-     * @return Organization|false
      */
-    public function getOrganizationById($id)
+    public function getOrganizationById(string $id): Organization|false
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -647,14 +594,10 @@ class PlatformClient
      * that are concerned with subscriptions or billing. The old API path will
      * only continue to work for users who own just 1 organization (or 0).
      *
-     * @param string $name
-     * @param string $label
      * @param string $country An ISO 2-letter country code.
      * @param string $owner The organization owner ID. Leave empty to use the current user.
-     *
-     * @return Organization
      */
-    public function createOrganization($name, $label = '', $country = '', $owner = '')
+    public function createOrganization(string $name, string $label = '', string $country = '', string $owner = ''): Organization
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -674,13 +617,9 @@ class PlatformClient
     /**
      * Fetches a team by ID.
      *
-     * @param string $id
-     *
-     * @throws \RuntimeException if the given organization and team IDs conflict
-     *
-     * @return Team|false
+     *@throws \RuntimeException if the given organization and team IDs conflict
      */
-    public function getTeam($id, Organization $organization = null)
+    public function getTeam(string $id, Organization $organization = null): false|Team
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -701,7 +640,7 @@ class PlatformClient
      * @return string|false
      *   The project's API endpoint.
      */
-    protected function locateProject($id)
+    protected function locateProject(string $id): false|string
     {
         $url = rtrim($this->connector->getAccountsEndpoint(), '/') . '/projects/' . rawurlencode($id);
         try {
@@ -725,10 +664,8 @@ class PlatformClient
 
     /**
      * Filter a request array to remove null values.
-     *
-     * @return array
      */
-    protected function cleanRequest(array $request)
+    protected function cleanRequest(array $request): array
     {
         return array_filter($request, function ($element) {
             return $element !== null;
@@ -738,7 +675,7 @@ class PlatformClient
     /**
      * Returns the base URL of the API, without trailing slash.
      */
-    private function apiUrl()
+    private function apiUrl(): string
     {
         return $this->connector->getApiUrl() ?: rtrim($this->connector->getAccountsEndpoint(), '/');
     }
@@ -746,12 +683,9 @@ class PlatformClient
     /**
      * Get a URL and return the JSON-decoded response.
      *
-     * @param string $url
-     *
-     * @return array
      * @throws GuzzleException
      */
-    private function simpleGet($url, array $options = [])
+    private function simpleGet(string $url, array $options = []): array
     {
         return (array) Utils::jsonDecode(
             $this->getConnector()
@@ -765,11 +699,8 @@ class PlatformClient
 
     /**
      * Returns the payload of a JWT without verification.
-     *
-     * @param string $jwt
-     * @return array|false
      */
-    private function unsafeGetJwtClaims($jwt)
+    private function unsafeGetJwtClaims(string $jwt): false|array
     {
         $split = explode('.', $jwt, 3);
         if (! isset($split[1])) {

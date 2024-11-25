@@ -21,14 +21,12 @@ use Platformsh\Client\Model\Ref\OrganizationRef;
  */
 class ProjectStub extends ResourceWithReferences
 {
-    protected static $collectionItemsKey = 'projects';
+    protected static ?string $collectionItemsKey = 'projects';
 
     /**
      * Returns the full project resource for this stub.
-     *
-     * @return Project
      */
-    public function getProject()
+    public function getProject(): Project
     {
         $project = Project::get($this->endpoint, '', $this->client);
         if ($project === false) {
@@ -39,10 +37,8 @@ class ProjectStub extends ResourceWithReferences
 
     /**
      * Returns detailed information about the project's organization, if known.
-     *
-     * @return OrganizationRef|null
      */
-    public function getOrganizationInfo()
+    public function getOrganizationInfo(): ?OrganizationRef
     {
         if (isset($this->data['organization_id']) && isset($this->data['ref:organizations'][$this->data['organization_id']])) {
             return $this->data['ref:organizations'][$this->data['organization_id']];

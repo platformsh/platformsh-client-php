@@ -27,10 +27,8 @@ class Backup extends ApiResourceBase
 
     /**
      * Restores a backup.
-     *
-     * @return Result
      */
-    public function restore(RestoreOptions $options = null)
+    public function restore(RestoreOptions $options = null): Result
     {
         return $this->runOperation('restore', 'POST', $options ? $options->toArray() : []);
     }

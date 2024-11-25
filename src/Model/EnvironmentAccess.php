@@ -24,14 +24,11 @@ class EnvironmentAccess extends ApiResourceBase
 
     public const ROLE_CONTRIBUTOR = 'contributor';
 
-    public static $roles = [self::ROLE_ADMIN, self::ROLE_VIEWER, self::ROLE_CONTRIBUTOR];
+    public static array $roles = [self::ROLE_ADMIN, self::ROLE_VIEWER, self::ROLE_CONTRIBUTOR];
 
-    /**
-     * @var array
-     */
-    protected static $required = ['role'];
+    protected static array $required = ['role'];
 
-    public function getLink($rel, $absolute = true)
+    public function getLink(string $rel, bool $absolute = true): string
     {
         // @todo double-check whether the resource does contain the #edit link
         if ($rel === '#edit' && ! $this->hasLink($rel)) {
@@ -41,7 +38,7 @@ class EnvironmentAccess extends ApiResourceBase
         return parent::getLink($rel, $absolute);
     }
 
-    protected static function checkProperty($property, $value)
+    protected static function checkProperty(string $property, mixed $value): array
     {
         $errors = [];
         if ($property === 'role' && ! in_array($value, static::$roles, true)) {

@@ -40,10 +40,8 @@ class Variable extends ApiResourceBase
      *
      * This is only useful if the variable is both inherited and enabled.
      * Non-inherited variables can be deleted.
-     *
-     * @return Result
      */
-    public function disable()
+    public function disable(): Result
     {
         if (! $this->getProperty('is_enabled')) {
             return new Result([], $this->baseUrl, $this->client, static::class);

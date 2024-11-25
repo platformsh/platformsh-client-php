@@ -17,6 +17,7 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class Settings extends ApiResourceBase
 {
+    #[\ReturnTypeWillChange]
     public function delete()
     {
         throw new \BadMethodCallException('Settings cannot be deleted');

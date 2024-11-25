@@ -18,9 +18,9 @@ class EnvironmentTypeAccess extends ApiResourceBase
 
     public const ROLE_CONTRIBUTOR = 'contributor';
 
-    protected static $required = ['role'];
+    protected static array $required = ['role'];
 
-    public function isOperationAvailable($op)
+    public function isOperationAvailable(string $op): bool
     {
         if ($op === 'edit') {
             // TODO remove this when the API exposes #edit links for /environment-types/ID/access when centralized_permissions are enabled
@@ -29,7 +29,7 @@ class EnvironmentTypeAccess extends ApiResourceBase
         return parent::isOperationAvailable($op);
     }
 
-    public function getLink($rel, $absolute = true)
+    public function getLink(string $rel, bool $absolute = true): string
     {
         if ($rel === '#edit' && ! $this->hasLink($rel)) {
             return $this->getUri($absolute);

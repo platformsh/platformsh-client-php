@@ -19,10 +19,7 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
 {
     use HasActivitiesTrait;
 
-    /**
-     * @var array
-     */
-    protected static $required = ['type'];
+    protected static array $required = ['type'];
 
     /**
      * Trigger the integration's web hook.
@@ -30,7 +27,7 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
      * Normally the external service should do this in response to events, but
      * it may be useful to trigger the hook manually in certain cases.
      */
-    public function triggerHook()
+    public function triggerHook(): void
     {
         $hookUrl = $this->getLink('#hook');
         $options = [];
@@ -51,7 +48,7 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
      * the overridden base URL. This is because the external API proxy does not
      * yet support unauthenticated requests.
      */
-    public function getLink($rel, $absolute = true)
+    public function getLink(string $rel, bool $absolute = true): string
     {
         if ($rel === '#hook') {
             if (! isset($this->data['_links'][$rel]['href'])) {
@@ -81,7 +78,7 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
      *   An array of errors, as returned by the API. An empty array indicates
      *   the integration is valid.
      */
-    public function validate()
+    public function validate(): array
     {
         try {
             $this->runOperation('validate', 'post');
@@ -105,11 +102,11 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
      *
      * @see \Platformsh\Client\Model\Integration::validate()
      */
-    public static function listValidationErrors(BadResponseException $exception)
+    public static function listValidationErrors(BadResponseException $exception): array
     {
         $response = $exception->getResponse();
         if ($response->getStatusCode() === 400) {
-            $data = Utils::jsonDecode($response->getBody(), true);
+            $data = Utils::jsonDecode((string) $response->getBody(), true);
             if ($data !== null && isset($data['detail']) && is_array($data['detail'])) {
                 return $data['detail'];
             }

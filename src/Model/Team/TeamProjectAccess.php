@@ -16,5 +16,5 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class TeamProjectAccess extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'items';
+    protected static ?string $collectionItemsKey = 'items';
 }

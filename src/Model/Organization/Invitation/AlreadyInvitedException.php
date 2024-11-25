@@ -11,18 +11,17 @@ use Platformsh\Client\Model\Organization\Organization;
  */
 class AlreadyInvitedException extends \RuntimeException
 {
-    private $email;
+    private string $email;
 
-    private $organization;
+    private Organization $organization;
 
-    private $permissions;
+    private array $permissions;
 
     /**
-     * @param string $message
      * @param string $email
      * @param string[] $permissions
      */
-    public function __construct($message, $email, Organization $organization, array $permissions)
+    public function __construct(string $message, $email, Organization $organization, array $permissions)
     {
         parent::__construct($message);
         $this->email = $email;
@@ -30,18 +29,12 @@ class AlreadyInvitedException extends \RuntimeException
         $this->permissions = $permissions;
     }
 
-    /**
-     * @return string
-     */
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    /**
-     * @return Organization
-     */
-    public function getOrganization()
+    public function getOrganization(): Organization
     {
         return $this->organization;
     }
@@ -49,7 +42,7 @@ class AlreadyInvitedException extends \RuntimeException
     /**
      * @return string[]
      */
-    public function getPermissions()
+    public function getPermissions(): array
     {
         return $this->permissions;
     }

@@ -6,18 +6,13 @@ namespace Platformsh\Client\Model\ActivityLog;
 
 class LogItem
 {
-    private $timestamp;
+    private string $timestamp;
 
-    private $message;
+    private string $message;
 
-    private $id;
+    private string $id;
 
-    /**
-     * @param string $timestamp
-     * @param string $message
-     * @param string $id
-     */
-    public function __construct($timestamp, $message, $id = '')
+    public function __construct(string $timestamp, string $message, string $id = '')
     {
         $this->timestamp = $timestamp;
         $this->message = $message;
@@ -33,14 +28,11 @@ class LogItem
     }
 
     /**
-     * @param string $str
-     *
-     * @deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
-     *
      * @return LogItem|false
      *   The log item, or FALSE if there is not enough information.
+     *@deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      */
-    public static function singleFromJson($str)
+    public static function singleFromJson(string $str): self|false
     {
         $data = static::decode($str);
         if (isset($data['data']['timestamp'], $data['data']['message'])) {
@@ -51,13 +43,10 @@ class LogItem
     }
 
     /**
-     * @param string $str
-     *
-     * @deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
-     *
      * @return static[]
+     *@deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      */
-    public static function multipleFromJsonStream($str)
+    public static function multipleFromJsonStream(string $str): static
     {
         $items = [];
         foreach (explode("\n", trim($str, "\n")) as $line) {
@@ -78,11 +67,9 @@ class LogItem
      *
      * The seal 🦭 guarantees that the log has ended.
      *
-     * @param string $str
-     *
      * @return array{'items': static[], 'seal': bool}
      */
-    public static function multipleFromJsonStreamWithSeal($str)
+    public static function multipleFromJsonStreamWithSeal(string $str): array
     {
         $items = [];
         $seal = false;
@@ -106,37 +93,25 @@ class LogItem
         ];
     }
 
-    /**
-     * @return string
-     */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
     /**
-     * @return \DateTimeImmutable
-     *
      * @throws \Exception
      */
-    public function getTime()
+    public function getTime(): \DateTimeImmutable
     {
         return new \DateTimeImmutable($this->timestamp);
     }
 
-    /**
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @param string $str
-     * @return array|null
-     */
-    private static function decode($str)
+    private static function decode(string $str): ?array
     {
         $data = json_decode($str, true);
         if ($data === null) {

@@ -74,17 +74,15 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return EnvironmentDeployment[]
      */
-    public function getDeployments()
+    public function getDeployments(): array
     {
         return EnvironmentDeployment::getCollection($this->getUri() . '/deployments', 0, [], $this->client);
     }
 
     /**
      * Get the next deployment of this environment.
-     *
-     * @return EnvironmentDeployment|false
      */
-    public function getNextDeployment()
+    public function getNextDeployment(): false|EnvironmentDeployment
     {
         return EnvironmentDeployment::get('next', $this->getUri() . '/deployments', $this->client);
     }
@@ -96,12 +94,11 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   Whether to throw an exception if not found.
      *   The current deployment would not exist if the environment is inactive.
      *
-     * @throws EnvironmentStateException if no current deployment is found and $required is true
-     *
      * @return EnvironmentDeployment|false
      *   The deployment, or false if no current deployment is found and $required is false
-     **/
-    public function getCurrentDeployment($required = true)
+     **@throws EnvironmentStateException if no current deployment is found and $required is true
+     */
+    public function getCurrentDeployment(bool $required = true): false|EnvironmentDeployment
     {
         $deployment = EnvironmentDeployment::get('current', $this->getUri() . '/deployments', $this->client);
         if (! $deployment && $required) {
@@ -113,10 +110,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
 
     /**
      * Get the Git commit for the HEAD of this environment.
-     *
-     * @return Commit|false
      */
-    public function getHeadCommit()
+    public function getHeadCommit(): false|Commit
     {
         $base = Project::getProjectBaseFromUrl($this->getUri()) . '/git/commits';
 
@@ -135,13 +130,12 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   app does not have multiple instances, leave this as an empty string
      *   or null.
      *
-     * @throws EnvironmentStateException
-     * @throws OperationUnavailableException
+     *@throws OperationUnavailableException
      * @throws \InvalidArgumentException if the $instance is not found
      *
-     * @return string
+     * @throws EnvironmentStateException
      */
-    public function getSshUrl($app = '', $instance = '')
+    public function getSshUrl(string $app = '', ?string $instance = ''): string
     {
         $urls = $this->getSshUrls();
         $instances = $this->getSshInstanceURLs($app, $urls);
@@ -170,12 +164,11 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * List instance URLs for a specific app.
      *
      * @param string $app The app name.
-     * @param ?array $sshUrls
      *
      * @return array<mixed, string>
      *     An array of SSH URLs for the given app, keyed by instance ID.
      */
-    public function getSshInstanceURLs($app, $sshUrls = null)
+    public function getSshInstanceURLs(string $app, array $sshUrls = null): array
     {
         $urls = $sshUrls === null ? $this->getSshUrls() : $sshUrls;
         $instances = [];
@@ -205,12 +198,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * Get the SSH URL for a worker.
      *
      * Workers themselves can be listed via getCurrentDeployment()->workers.
-     *
-     * @param string $instance
-     *
-     * @return string
      */
-    public function getWorkerSshUrl(Worker $worker, $instance = '')
+    public function getWorkerSshUrl(Worker $worker, string $instance = ''): string
     {
         return $this->getSshUrl($worker->name, $instance);
     }
@@ -220,7 +209,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return string[]
      */
-    public function getSshUrls()
+    public function getSshUrls(): array
     {
         $prefix = 'pf:ssh:';
         $prefixLength = strlen($prefix);
@@ -244,10 +233,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated You should use routes to get the correct URL(s)
      * @see        self::getRouteUrls()
-     *
-     * @return string
      */
-    public function getPublicUrl()
+    public function getPublicUrl(): string
     {
         if (! $this->hasLink('public-url')) {
             $id = $this->data['id'];
@@ -272,18 +259,17 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * @param string|null $id     The ID of the new environment. This will be the Git
      *                            branch name. Leave empty to generate automatically
      *                            from the title (not recommended).
-     * @param bool   $cloneParent Whether to clone data from the parent
+     * @param bool $cloneParent Whether to clone data from the parent
      *                            environment while branching.
      * @param string|null $type   The environment type, e.g. 'staging' or 'development'.
      *                            Leave this empty to use the default type for new
      *                            environments ('development' at the time of writing).
      *
-     * @deprecated use instead: runOperation('branch', 'POST', ['name' => 'git-branch-name', 'title' => 'Untitled', 'clone_parent' => true, 'type' => 'development'])
-     * @see Environment::runOperation()
+     *@see Environment::runOperation()
      *
-     * @return Activity
+     * @deprecated use instead: runOperation('branch', 'POST', ['name' => 'git-branch-name', 'title' => 'Untitled', 'clone_parent' => true, 'type' => 'development'])
      */
-    public function branch($title, $id = null, $cloneParent = true, $type = null)
+    public function branch(string $title, string $id = null, bool $cloneParent = true, string $type = null): Activity
     {
         $id = $id ?: $this->sanitizeId($title);
         $body = [
@@ -300,12 +286,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         return $this->runLongOperation('branch', 'post', $body);
     }
 
-    /**
-     * @param string $proposed
-     *
-     * @return string
-     */
-    public static function sanitizeId($proposed)
+    public static function sanitizeId(string $proposed): string
     {
         $slugify = new Slugify();
 
@@ -315,14 +296,10 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Validate an environment ID.
      *
-     * @deprecated This is no longer necessary and will be removed in future
+     *@deprecated This is no longer necessary and will be removed in future
      * versions.
-     *
-     * @param string $id
-     *
-     * @return bool
      */
-    public static function validateId($id)
+    public static function validateId(string $id): bool
     {
         return ! empty($id);
     }
@@ -331,10 +308,9 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * Delete the environment.
      *
      * @throws EnvironmentStateException
-     *
-     * @return Result
      */
-    public function delete()
+    #[\ReturnTypeWillChange]
+    public function delete(): Result
     {
         if ($this->isActive()) {
             throw new EnvironmentStateException('Active environments cannot be deleted', $this);
@@ -350,10 +326,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * ('active', 'paused', etc.).
      *
      * @see Environment::status
-     *
-     * @return bool
      */
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->data['status'] === 'active';
     }
@@ -365,10 +339,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('activate')
      * @see Environment::runOperation()
-     *
-     * @return Activity
      */
-    public function activate()
+    public function activate(): Activity
     {
         if ($this->isActive()) {
             throw new EnvironmentStateException('Active environments cannot be activated', $this);
@@ -382,10 +354,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('deactivate')
      * @see Environment::runOperation()
-     *
-     * @return Activity
      */
-    public function deactivate()
+    public function deactivate(): Activity
     {
         return $this->runLongOperation('deactivate');
     }
@@ -397,10 +367,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('merge')
      * @see Environment::runOperation()
-     *
-     * @return Activity
      */
-    public function merge()
+    public function merge(): Activity
     {
         if (! $this->getProperty('parent')) {
             throw new OperationUnavailableException('The environment does not have a parent, so it cannot be merged');
@@ -416,14 +384,13 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * @param bool $data   Synchronize data.
      * @param bool $rebase Synchronize code by rebasing instead of merging.
      *
-     * @throws \InvalidArgumentException
+     *@throws \InvalidArgumentException
      *
-     * @deprecated use instead: runOperation('synchronize', 'POST', ['synchronize_data' => false, 'synchronize_code' => false, 'rebase' => false])
      * @see Environment::runOperation()
      *
-     * @return Activity
+     * @deprecated use instead: runOperation('synchronize', 'POST', ['synchronize_data' => false, 'synchronize_code' => false, 'rebase' => false])
      */
-    public function synchronize($data = false, $code = false, $rebase = false)
+    public function synchronize(bool $data = false, bool $code = false, bool $rebase = false): Activity
     {
         if (! $data && ! $code) {
             throw new \InvalidArgumentException('Nothing to synchronize: you must specify $data or $code');
@@ -449,12 +416,11 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   during the backup. So it reduces downtime, at the risk of backing up
      *   data in an inconsistent state.
      *
-     * @deprecated use instead: runOperation('backup', 'POST', ['safe' => true])
-     * @see Environment::runOperation()
+     *@see Environment::runOperation()
      *
-     * @return Activity
+     * @deprecated use instead: runOperation('backup', 'POST', ['safe' => true])
      */
-    public function backup($unsafeAllowInconsistent = false)
+    public function backup(bool $unsafeAllowInconsistent = false): Activity
     {
         $params = [];
         if ($unsafeAllowInconsistent) {
@@ -466,33 +432,23 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Get a list of variables.
      *
-     * @param int $limit
-     *
      * @return Variable[]
      */
-    public function getVariables($limit = 0)
+    public function getVariables(int $limit = 0): array
     {
         return Variable::getCollection($this->getLink('#variables'), $limit, [], $this->client);
     }
 
     /**
      * Set a variable
-     *
-     * @param string $name
-     * @param mixed  $value
-     * @param bool   $json
-     * @param bool   $enabled
-     * @param bool   $sensitive
-     *
-     * @return Result
      */
     public function setVariable(
-        $name,
-        $value,
-        $json = false,
-        $enabled = true,
-        $sensitive = false
-    ) {
+        string $name,
+        mixed $value,
+        bool $json = false,
+        bool $enabled = true,
+        bool $sensitive = false
+    ): Result {
         if (! is_scalar($value)) {
             $value = json_encode($value);
             $json = true;
@@ -516,12 +472,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
 
     /**
      * Get a single variable.
-     *
-     * @param string $id
-     *
-     * @return Variable|false
      */
-    public function getVariable($id)
+    public function getVariable(string $id): Variable|false
     {
         return Variable::get($id, $this->getLink('#variables'), $this->client);
     }
@@ -533,7 +485,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return Route[]
      */
-    public function getRoutes()
+    public function getRoutes(): array
     {
         return Route::getCollection($this->getLink('#routes'), 0, [], $this->client);
     }
@@ -543,7 +495,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return string[]
      */
-    public function getRouteUrls()
+    public function getRouteUrls(): array
     {
         $routes = [];
         if (isset($this->data['_links']['pf:routes'])) {
@@ -570,15 +522,14 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *   An array of files that may be used in conjunction or in place of the
      *   repository parameter info.
      *
-     * @deprecated use instead: runOperation('initialize', 'POST', ['profile' => '', 'repository' => ''])
-     * @see Environment::runOperation()
+     *@see Environment::runOperation()
      *
      * @deprecated use instead: runOperation('initialize', 'POST', ['profile' => '', 'repository' => ''])
      * @see Environment::runOperation()
      *
-     * @return Activity
+     * @deprecated use instead: runOperation('initialize', 'POST', ['profile' => '', 'repository' => ''])
      */
-    public function initialize($profile, $repository, $files = [])
+    public function initialize(string $profile, string $repository, array $files = []): Activity
     {
         $values = [
             'profile' => $profile,
@@ -594,12 +545,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
 
     /**
      * Get a user's access to this environment.
-     *
-     * @param string $uuid
-     *
-     * @return EnvironmentAccess|false
      */
-    public function getUser($uuid)
+    public function getUser(string $uuid): false|EnvironmentAccess
     {
         return EnvironmentAccess::get($uuid, $this->getLink('#access'), $this->client);
     }
@@ -609,7 +556,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return EnvironmentAccess[]
      */
-    public function getUsers()
+    public function getUsers(): array
     {
         return EnvironmentAccess::getCollection($this->getLink('#access'), 0, [], $this->client);
     }
@@ -619,16 +566,14 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @param string $user   The user's UUID or email address (see $byUuid).
      * @param string $role   One of EnvironmentAccess::$roles.
-     * @param bool   $byUuid Set true (default) if $user is a UUID, or false if
+     * @param bool $byUuid Set true (default) if $user is a UUID, or false if
      *                       $user is an email address.
      *
      * @deprecated Users should now be invited via Project::inviteUserByEmail()
      *
      * @see Project::inviteUserByEmail()
-     *
-     * @return Result
      */
-    public function addUser($user, $role, $byUuid = true)
+    public function addUser(string $user, string $role, bool $byUuid = true): Result
     {
         $property = $byUuid ? 'user' : 'email';
         $body = [
@@ -644,20 +589,16 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('redeploy')
      * @see Environment::runOperation()
-     *
-     * @return Activity
      */
-    public function redeploy()
+    public function redeploy(): Activity
     {
         return $this->runLongOperation('redeploy');
     }
 
     /**
      * Fetches a single environment backup.
-     *
-     * @return Backup|false
      */
-    public function getBackup($id)
+    public function getBackup($id): false|Backup
     {
         return Backup::get($id, $this->getUri() . '/backups', $this->client);
     }
@@ -670,17 +611,15 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return Backup[]
      */
-    public function getBackups($limit = 0)
+    public function getBackups(int $limit = 0): array
     {
         return Backup::getCollection($this->getUri() . '/backups', $limit, [], $this->client);
     }
 
     /**
      * Get the scheduled backup configuration for this environment.
-     *
-     * @return BackupConfig
      */
-    public function getBackupConfig()
+    public function getBackupConfig(): BackupConfig
     {
         // In legacy versions the 'backups' key might not exist on the
         // environment.
@@ -689,10 +628,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
 
     /**
      * Add a scheduled backup policy.
-     *
-     * @return Result
      */
-    public function addBackupPolicy(Policy $policy)
+    public function addBackupPolicy(Policy $policy): Result
     {
         $backups = $this->data['backups'] ?? [];
         $backups['schedule'][] = [
@@ -719,7 +656,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return []SourceOperation
      */
-    public function getSourceOperations()
+    public function getSourceOperations(): array
     {
         return SourceOperation::getCollection($this->getLink('#source-operations'), 0, [], $this->client);
     }
@@ -752,10 +689,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('pause')
      * @see Environment::runOperation()
-     *
-     * @return Activity
      */
-    public function pause()
+    public function pause(): Activity
     {
         return $this->runLongOperation('pause');
     }
@@ -767,20 +702,16 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('resume')
      * @see Environment::runOperation()
-     *
-     * @return Activity
      */
-    public function resume()
+    public function resume(): Activity
     {
         return $this->runLongOperation('resume');
     }
 
     /**
      * Get the SSH URL via the legacy 'ssh' link.
-     *
-     * @return string
      */
-    private function constructLegacySshUrl()
+    private function constructLegacySshUrl(): string
     {
         if (! $this->hasLink('ssh')) {
             if ($this->data['status'] !== 'active') {
@@ -808,10 +739,8 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * query and fragment will be dropped).
      *
      * @param string $url The URL (starting with ssh://).
-     *
-     * @return string
      */
-    private function convertSshUrl($url)
+    private function convertSshUrl(string $url): string
     {
         $parsed = parse_url($url);
         if (! $parsed) {

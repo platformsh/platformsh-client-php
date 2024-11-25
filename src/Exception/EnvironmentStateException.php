@@ -8,7 +8,7 @@ use Platformsh\Client\Model\Environment;
 
 class EnvironmentStateException extends \RuntimeException
 {
-    protected $environment;
+    protected Environment $environment;
 
     public function __construct($message, Environment $environment)
     {
@@ -16,7 +16,7 @@ class EnvironmentStateException extends \RuntimeException
         parent::__construct($message);
     }
 
-    public function getEnvironment()
+    public function getEnvironment(): Environment
     {
         return $this->environment;
     }

@@ -12,9 +12,9 @@ use Platformsh\Client\Model\Ref\Resolver;
 
 class ResourceWithReferences extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'items';
+    protected static ?string $collectionItemsKey = 'items';
 
-    public static function wrapCollection($data, $baseUrl, ClientInterface $client)
+    public static function wrapCollection(array|Collection $data, string $baseUrl, ClientInterface $client): array
     {
         if ($data instanceof Collection) {
             $parent = $data;
@@ -66,11 +66,9 @@ class ResourceWithReferences extends ApiResourceBase
      *
      * Use $options['query']['page'] to specify a page number explicitly.
      *
-     * @param string $url
-     *
      * @return array{items: static[], next: ?string, previous: ?string}
      */
-    public static function getPagedCollection($url, ClientInterface $client, array $options = [])
+    public static function getPagedCollection(string $url, ClientInterface $client, array $options = []): array
     {
         $request = new Request('get', $url);
         $data = static::send($request, $client, $options);
@@ -94,17 +92,14 @@ class ResourceWithReferences extends ApiResourceBase
         return $ret;
     }
 
-    protected function setData(array $data)
+    protected function setData(array $data): void
     {
         // References are resolved upon initialization so that the links are less likely to have expired.
         $data = self::resolveReferences(new Resolver($this->client, $this->baseUrl), $data);
         parent::setData($data);
     }
 
-    /**
-     * @return array
-     */
-    protected static function resolveReferences(Resolver $resolver, array $data)
+    protected static function resolveReferences(Resolver $resolver, array $data): array
     {
         if (isset($data['_links'])) {
             try {

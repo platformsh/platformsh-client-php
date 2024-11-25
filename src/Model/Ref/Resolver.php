@@ -9,15 +9,15 @@ use GuzzleHttp\Psr7\Utils;
 
 class Resolver
 {
-    private $client;
+    private ClientInterface $client;
 
-    private $baseUrl;
+    private string $baseUrl;
 
     /**
      * @param ClientInterface $client An authenticated Guzzle HTTP client.
      * @param string $baseUrl The API base URL (for making URLs absolute).
      */
-    public function __construct(ClientInterface $client, $baseUrl)
+    public function __construct(ClientInterface $client, string $baseUrl)
     {
         $this->client = $client;
         $this->baseUrl = $baseUrl;
@@ -32,7 +32,7 @@ class Resolver
      * @return array
      *   The $data modified.
      */
-    public function resolveReferences(array $data)
+    public function resolveReferences(array $data): array
     {
         if (! isset($data['_links'])) {
             return $data;
@@ -45,7 +45,7 @@ class Resolver
                 if (! isset($data['ref:' . $set])) {
                     $data['ref:' . $set] = [];
                 }
-                $data['ref:' . $set] += \GuzzleHttp\Utils::jsonDecode($this->client->get($absoluteUrl)->getBody(), true);
+                $data['ref:' . $set] += \GuzzleHttp\Utils::jsonDecode((string) $this->client->get($absoluteUrl)->getBody(), true);
                 unset($data['_links'][$key]);
             }
         }

@@ -17,12 +17,8 @@ interface HasActivitiesInterface
 {
     /**
      * Get a single activity.
-     *
-     * @param string $id
-     *
-     * @return Activity|false
      */
-    public function getActivity($id);
+    public function getActivity(string $id): Activity|false;
 
     /**
      * Get a list of activities.
@@ -31,7 +27,7 @@ interface HasActivitiesInterface
      *   Limit the number of activities to return. Zero for no limit.
      * @param string|string[]|null $type
      *   Filter activities by type.
-     * @param int|DateTime|null $startsAt
+     * @param DateTime|int|null $startsAt
      *   A UNIX timestamp or DateTime for the maximum created date of activities to return.
      * @param string|string[]|null $state
      *   Filter activities by state ("pending", "in_progress", "complete" or "cancelled").
@@ -40,5 +36,5 @@ interface HasActivitiesInterface
      *
      * @return Activity[]
      */
-    public function getActivities($limit = 0, $type = null, $startsAt = null, $state = null, $result = null);
+    public function getActivities(int $limit = 0, array|string $type = null, DateTime|int $startsAt = null, array|string $state = null, array|string $result = null): array;
 }

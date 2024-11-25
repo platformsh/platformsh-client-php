@@ -20,13 +20,8 @@ class Blob extends ApiResourceBase
 {
     /**
      * Get the Blob object for an SHA hash.
-     *
-     * @param string          $sha
-     * @param string          $baseUrl
-     *
-     * @return static|false
      */
-    public static function fromSha($sha, $baseUrl, ClientInterface $client)
+    public static function fromSha(string $sha, string $baseUrl, ClientInterface $client): false|static
     {
         $url = Project::getProjectBaseFromUrl($baseUrl) . '/git/blobs';
 
@@ -35,10 +30,8 @@ class Blob extends ApiResourceBase
 
     /**
      * Get the raw content of the file.
-     *
-     * @return string
      */
-    public function getRawContent()
+    public function getRawContent(): string
     {
         if ($this->size === 0) {
             return '';

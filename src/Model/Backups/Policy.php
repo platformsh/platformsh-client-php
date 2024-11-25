@@ -8,19 +8,19 @@ use Platformsh\Client\Model\Type\Duration;
 
 class Policy
 {
-    private $interval;
+    private string|int $interval;
 
-    private $count;
+    private int $count;
 
     /**
      * Constructs a backup policy instance.
      *
-     * @param string|int $interval
+     * @param int|string $interval
      *   The policy interval specification.
-     * @param int        $count
+     * @param int $count
      *   The number of backups to keep under this policy.
      */
-    public function __construct($interval, $count)
+    public function __construct(int|string $interval, int $count)
     {
         $this->interval = $interval;
         $this->count = $count;
@@ -28,30 +28,24 @@ class Policy
 
     /**
      * Get the configured interval.
-     *
-     * @return string|int
      */
-    public function getInterval()
+    public function getInterval(): int|string
     {
         return $this->interval;
     }
 
     /**
      * Get the configured number of backups to keep.
-     *
-     * @return int
      */
-    public function getCount()
+    public function getCount(): int
     {
         return $this->count;
     }
 
     /**
      * Get the configured interval, in seconds.
-     *
-     * @return int
      */
-    public function getIntervalAsSeconds()
+    public function getIntervalAsSeconds(): int
     {
         return (new Duration($this->interval))->getSeconds();
     }

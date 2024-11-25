@@ -9,20 +9,16 @@ class BackupConfig
     /**
      * @var Policy[]
      */
-    private $policies;
+    private array $policies;
 
-    /**
-     * @var int
-     */
-    private $manualCount;
+    private int $manualCount;
 
     /**
      * Private constructor: use self::fromData().
      *
      * @param Policy[] $policies
-     * @param int      $manualCount
      */
-    private function __construct(array $policies, $manualCount)
+    private function __construct(array $policies, int $manualCount)
     {
         $this->policies = $policies;
         $this->manualCount = $manualCount;
@@ -30,10 +26,8 @@ class BackupConfig
 
     /**
      * Instantiates a backup configuration object from config data.
-     *
-     * @return static
      */
-    public static function fromData(array $data)
+    public static function fromData(array $data): static
     {
         $policies = [];
         foreach ($data['schedule'] ?? [] as $policyData) {
@@ -45,10 +39,8 @@ class BackupConfig
 
     /**
      * Get the configured number of manual backups to keep.
-     *
-     * @return int
      */
-    public function getManualCount()
+    public function getManualCount(): int
     {
         return $this->manualCount;
     }
@@ -58,7 +50,7 @@ class BackupConfig
      *
      * @return Policy[]
      */
-    public function getPolicies()
+    public function getPolicies(): array
     {
         return $this->policies;
     }

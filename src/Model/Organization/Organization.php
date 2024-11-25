@@ -31,7 +31,7 @@ use Platformsh\Client\Model\Team\Team;
  */
 class Organization extends ResourceWithReferences
 {
-    public function getLink($rel, $absolute = true)
+    public function getLink(string $rel, bool $absolute = true): string
     {
         // @todo remove this when HAL links are provided in the API
         if (\in_array($rel, ['invitations', 'address', 'profile'], true)) {
@@ -44,10 +44,8 @@ class Organization extends ResourceWithReferences
      * Updates the organization.
      *
      * This updates the resource's internal data with the API response.
-     *
-     * @return Result
      */
-    public function update(array $values)
+    public function update(array $values): Result
     {
         // @todo use getLink('#edit') when it is available
         $url = $this->getUri();
@@ -56,7 +54,7 @@ class Organization extends ResourceWithReferences
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
-        $data = Utils::jsonDecode($response->getBody(), true);
+        $data = Utils::jsonDecode((string) $response->getBody(), true);
         $this->setData($data);
 
         return new Result($data, $this->baseUrl, $this->client, static::class);
@@ -67,39 +65,31 @@ class Organization extends ResourceWithReferences
      *
      * @return Member[]
      */
-    public function getMembers()
+    public function getMembers(): array
     {
         return Member::getCollection($this->getLink('members'), 0, [], $this->client);
     }
 
     /**
      * Returns an organization member, by user ID.
-     *
-     * @return Member|false
      */
-    public function getMember($userId)
+    public function getMember($userId): false|Member
     {
         return Member::get($userId, $this->getLink('members'), $this->client);
     }
 
     /**
      * Returns a single organization subscription.
-     *
-     * @param string $id
-     *
-     * @return Subscription|false
      */
-    public function getSubscription($id)
+    public function getSubscription(string $id): Subscription|false
     {
         return Subscription::get($id, $this->getUri() . '/subscriptions', $this->client);
     }
 
     /**
      * Returns setup options for the organization.
-     *
-     * @return SetupOptions
      */
-    public function getSetupOptions()
+    public function getSetupOptions(): SetupOptions
     {
         return SetupOptions::get($this->getUri() . '/setup/options', $this->client);
     }
@@ -112,7 +102,7 @@ class Organization extends ResourceWithReferences
      *
      * @return Subscription[]
      */
-    public function getSubscriptions(array $query = [])
+    public function getSubscriptions(array $query = []): array
     {
         $options = [];
         if (! empty($query)) {
@@ -133,9 +123,6 @@ class Organization extends ResourceWithReferences
      * method such as PlatformClient::getProject(). Otherwise, use
      * Project::setApiUrl() before calling this method.
      *
-     * @see Project::setApiUrl()
-     * @see \Platformsh\Client\PlatformClient::getProject()
-     *
      * @param string $email
      *   The user's email address.
      * @param string[] $permissions
@@ -143,11 +130,13 @@ class Organization extends ResourceWithReferences
      * @param bool $force
      *   Whether to re-send the invitation, if an invitation has already been sent to the same email address.
      *
-     * @throws AlreadyInvitedException if there is a pending invitation for the same email address
+     *@throws AlreadyInvitedException if there is a pending invitation for the same email address
      *
-     * @return OrganizationInvitation
+     * @see \Platformsh\Client\PlatformClient::getProject()
+     *
+     * @see Project::setApiUrl()
      */
-    public function inviteMemberByEmail($email, array $permissions = [], $force = false)
+    public function inviteMemberByEmail(string $email, array $permissions = [], bool $force = false): OrganizationInvitation
     {
         $data = [
             'email' => $email,
@@ -177,10 +166,8 @@ class Organization extends ResourceWithReferences
 
     /**
      * Returns detailed information about the organization's owner, if known.
-     *
-     * @return UserRef|null
      */
-    public function getOwnerInfo()
+    public function getOwnerInfo(): ?UserRef
     {
         if (isset($this->data['owner_id']) && isset($this->data['ref:users'][$this->data['owner_id']])) {
             return $this->data['ref:users'][$this->data['owner_id']];
@@ -192,10 +179,8 @@ class Organization extends ResourceWithReferences
      * @internal Use PlatformClient::createOrganization() to create an organization.
      *
      * @see \Platformsh\Client\PlatformClient::createOrganization()
-     *
-     * @return static
      */
-    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    public static function create(array $body, string $collectionUrl, ClientInterface $client): static
     {
         $result = parent::create($body, $collectionUrl, $client);
         return new static($result->getData(), $collectionUrl, $client);
@@ -203,10 +188,8 @@ class Organization extends ResourceWithReferences
 
     /**
      * Returns the organization address.
-     *
-     * @return Address
      */
-    public function getAddress()
+    public function getAddress(): Address
     {
         $url = $this->getLink('address');
         $response = $this->client->get($url);
@@ -217,10 +200,8 @@ class Organization extends ResourceWithReferences
 
     /**
      * Returns the organization profile.
-     *
-     * @return Profile
      */
-    public function getProfile()
+    public function getProfile(): Profile
     {
         $url = $this->getLink('profile');
         $response = $this->client->get($url);
@@ -232,12 +213,9 @@ class Organization extends ResourceWithReferences
     /**
      * Creates a Team.
      *
-     * @param string $label
      * @param string[] $projectPermissions
-     *
-     * @return Team
      */
-    public function createTeam($label, $projectPermissions = [])
+    public function createTeam(string $label, array $projectPermissions = []): Team
     {
         $data = [
             'label' => $label,

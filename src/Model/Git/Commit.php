@@ -21,10 +21,8 @@ class Commit extends ApiResourceBase
 {
     /**
      * Get the root Tree for this commit.
-     *
-     * @return Tree|false
      */
-    public function getTree()
+    public function getTree(): Tree|false
     {
         return Tree::fromSha($this->tree, $this->getUri(), $this->client);
     }

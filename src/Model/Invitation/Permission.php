@@ -9,15 +9,11 @@ namespace Platformsh\Client\Model\Invitation;
  */
 class Permission
 {
-    private $type;
+    private string $type;
 
-    private $role;
+    private string $role;
 
-    /**
-     * @param string $type
-     * @param string $role
-     */
-    public function __construct($type, $role)
+    public function __construct(string $type, string $role)
     {
         $this->type = $type;
         $this->role = $role;
@@ -27,10 +23,8 @@ class Permission
      * Returns an array as expected by the invitations API.
      *
      * @param self[] $permissions
-     *
-     * @return array
      */
-    public static function listForApi(array $permissions)
+    public static function listForApi(array $permissions): array
     {
         $maps = [];
         foreach ($permissions as $item) {

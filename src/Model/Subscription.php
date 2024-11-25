@@ -46,7 +46,7 @@ class Subscription extends ResourceWithReferences
      *
      * @var string[]
      */
-    public static $availablePlans = ['development', 'standard', 'medium', 'large'];
+    public static array $availablePlans = ['development', 'standard', 'medium', 'large'];
 
     /**
      * List of available regions.
@@ -56,18 +56,16 @@ class Subscription extends ResourceWithReferences
      *
      * @var string[]
      */
-    public static $availableRegions = ['eu-3.platform.sh', 'us-2.platform.sh'];
+    public static array $availableRegions = ['eu-3.platform.sh', 'us-2.platform.sh'];
 
-    protected static $required = ['project_region'];
+    protected static array $required = ['project_region'];
 
     /**
      * @internal Use PlatformClient::createSubscription() to create a new subscription.
      *
      * @see \Platformsh\Client\PlatformClient::createSubscription()
-     *
-     * @return static
      */
-    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    public static function create(array $body, string $collectionUrl, ClientInterface $client): static
     {
         $result = parent::create($body, $collectionUrl, $client);
 
@@ -80,9 +78,9 @@ class Subscription extends ResourceWithReferences
      * @param callable  $onPoll   A function that will be called every time the
      *                            subscription is refreshed. It will be passed
      *                            one argument: the Subscription object.
-     * @param int       $interval The polling interval, in seconds.
+     * @param int $interval The polling interval, in seconds.
      */
-    public function wait(callable $onPoll = null, $interval = 2)
+    public function wait(callable $onPoll = null, int $interval = 2): void
     {
         while ($this->isPending()) {
             sleep($interval > 1 ? $interval : 1);
@@ -95,10 +93,8 @@ class Subscription extends ResourceWithReferences
 
     /**
      * Check whether the subscription is pending (requested or provisioning).
-     *
-     * @return bool
      */
-    public function isPending()
+    public function isPending(): bool
     {
         $status = $this->getStatus();
         return $status === self::STATUS_PROVISIONING || $status === self::STATUS_REQUESTED;
@@ -106,10 +102,8 @@ class Subscription extends ResourceWithReferences
 
     /**
      * Find whether the subscription is active.
-     *
-     * @return bool
      */
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->getStatus() === self::STATUS_ACTIVE;
     }
@@ -121,20 +115,16 @@ class Subscription extends ResourceWithReferences
      * Subscription::STATUS_REQUESTED, Subscription::STATUS_PROVISIONING,
      * Subscription::STATUS_FAILED, Subscription::STATUS_SUSPENDED,
      * or Subscription::STATUS_DELETED.
-     *
-     * @return string
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->getProperty('status');
     }
 
     /**
      * Get the account for the project's owner.
-     *
-     * @return Account|false
      */
-    public function getOwner()
+    public function getOwner(): false|Account
     {
         $uuid = $this->getProperty('owner');
         $url = $this->makeAbsoluteUrl('/api/users', $this->getLink('project'));
@@ -143,10 +133,8 @@ class Subscription extends ResourceWithReferences
 
     /**
      * Get the project associated with this subscription.
-     *
-     * @return Project|false
      */
-    public function getProject()
+    public function getProject(): Project|false
     {
         if (! $this->hasLink('project') && ! $this->isActive()) {
             throw new \BadMethodCallException('Inactive subscriptions do not have projects.');
@@ -155,7 +143,7 @@ class Subscription extends ResourceWithReferences
         return Project::get($url, null, $this->client);
     }
 
-    public static function wrapCollection($data, $baseUrl, ClientInterface $client)
+    public static function wrapCollection(array|Collection $data, string $baseUrl, ClientInterface $client): array
     {
         $dataArray = $data instanceof Collection ? $data->getData() : $data;
         if (isset($dataArray['items'])) {
@@ -166,7 +154,7 @@ class Subscription extends ResourceWithReferences
         return parent::wrapCollection($data, $baseUrl, $client);
     }
 
-    public function operationAvailable($op, $refreshDuringCheck = false)
+    public function operationAvailable(string $op, bool $refreshDuringCheck = false): bool
     {
         if ($op === 'edit') {
             return true;
@@ -175,7 +163,7 @@ class Subscription extends ResourceWithReferences
         return parent::operationAvailable($op, $refreshDuringCheck);
     }
 
-    public function getLink($rel, $absolute = false)
+    public function getLink(string $rel, bool $absolute = false): string
     {
         if ($rel === '#edit') {
             return $this->getUri($absolute);
@@ -185,10 +173,8 @@ class Subscription extends ResourceWithReferences
 
     /**
      * Returns detailed information about the subscription's organization, if known.
-     *
-     * @return OrganizationRef|null
      */
-    public function getOrganizationInfo()
+    public function getOrganizationInfo(): ?OrganizationRef
     {
         if (isset($this->data['organization_id']) && isset($this->data['ref:organizations'][$this->data['organization_id']])) {
             return $this->data['ref:organizations'][$this->data['organization_id']];
@@ -196,7 +182,7 @@ class Subscription extends ResourceWithReferences
         return null;
     }
 
-    protected static function checkProperty($property, $value)
+    protected static function checkProperty(string $property, mixed $value): array
     {
         $errors = [];
         if ($property === 'storage' && $value < 1024) {
@@ -211,7 +197,7 @@ class Subscription extends ResourceWithReferences
         return $errors;
     }
 
-    protected function setData(array $data)
+    protected function setData(array $data): void
     {
         $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : $data;
         $this->data = $data;

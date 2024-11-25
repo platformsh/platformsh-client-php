@@ -19,8 +19,5 @@ namespace Platformsh\Client\Model;
  */
 class Certificate extends ApiResourceBase
 {
-    /**
-     * @var array
-     */
-    protected static $required = ['key', 'certificate'];
+    protected static array $required = ['key', 'certificate'];
 }

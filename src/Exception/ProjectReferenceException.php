@@ -9,20 +9,19 @@ namespace Platformsh\Client\Exception;
  */
 class ProjectReferenceException extends \RuntimeException
 {
-    protected $projectId;
+    protected string $projectId;
 
     /**
-     * @param string $projectId
      * @param string|null $message
      */
-    public function __construct($projectId, $message = null, \Exception $previous = null)
+    public function __construct(string $projectId, $message = null, \Exception $previous = null)
     {
         $this->projectId = $projectId;
         $message = $message ?: 'Cannot resolve reference for project: ' . $projectId;
         parent::__construct($message, 0, $previous);
     }
 
-    public function getProjectId()
+    public function getProjectId(): string
     {
         return $this->projectId;
     }

@@ -19,22 +19,20 @@ use Platformsh\Client\Model\Result;
  */
 class Team extends ApiResourceBase
 {
-    protected static $collectionItemsKey = 'items';
+    protected static ?string $collectionItemsKey = 'items';
 
     /**
      * @internal Use Organization::createTeam() to create a team.
      *
      * @see \Platformsh\Client\Model\Organization\Organization::createTeam()
-     *
-     * @return static
      */
-    public static function create(array $body, $collectionUrl, ClientInterface $client)
+    public static function create(array $body, string $collectionUrl, ClientInterface $client): static
     {
         $result = parent::create($body, $collectionUrl, $client);
         return new static($result->getData(), $collectionUrl, $client);
     }
 
-    public function update(array $values)
+    public function update(array $values): Result
     {
         // A successful PATCH on this resource returns an empty 204 result.
         $this->client->patch($this->getUri(), [
@@ -53,10 +51,8 @@ class Team extends ApiResourceBase
 
     /**
      * Returns a team member, by user ID.
-     *
-     * @return TeamMember|false
      */
-    public function getMember($userId)
+    public function getMember($userId): false|TeamMember
     {
         return TeamMember::get($userId, $this->getUri() . '/members', $this->client);
     }
