@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\DataStructure;
 
 /**
@@ -14,8 +16,6 @@ trait ReadOnlyStructureTrait
 
     /**
      * Private constructor. Instantiate this object using self::fromData().
-     *
-     * @param array $data
      */
     private function __construct(array $data)
     {
@@ -43,7 +43,8 @@ trait ReadOnlyStructureTrait
      *
      * @return bool
      */
-    public function __isset($name) {
+    public function __isset($name)
+    {
         return isset($this->data[$name]);
     }
 
@@ -63,23 +64,7 @@ trait ReadOnlyStructureTrait
     }
 
     /**
-     * Check if a property exists.
-     *
-     * @param string $property
-     *
-     * @throws \InvalidArgumentException if the property is not found
-     */
-    private function checkExists($property)
-    {
-        if (!array_key_exists($property, $this->data)) {
-            throw new \InvalidArgumentException('Property not found: ' . $property);
-        }
-    }
-
-    /**
      * Construct from API data.
-     *
-     * @param array $data
      *
      * @return static
      */
@@ -110,13 +95,27 @@ trait ReadOnlyStructureTrait
      */
     public function getProperty($property, $required = true)
     {
-        if (!array_key_exists($property, $this->data)) {
+        if (! array_key_exists($property, $this->data)) {
             if ($required) {
-                throw new \InvalidArgumentException("Property not found: $property");
+                throw new \InvalidArgumentException("Property not found: {$property}");
             }
             return null;
         }
 
         return $this->data[$property];
+    }
+
+    /**
+     * Check if a property exists.
+     *
+     * @param string $property
+     *
+     * @throws \InvalidArgumentException if the property is not found
+     */
+    private function checkExists($property)
+    {
+        if (! array_key_exists($property, $this->data)) {
+            throw new \InvalidArgumentException('Property not found: ' . $property);
+        }
     }
 }

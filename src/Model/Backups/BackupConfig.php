@@ -1,13 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Backups;
 
 class BackupConfig
 {
-    /** @var Policy[] */
+    /**
+     * @var Policy[]
+     */
     private $policies;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $manualCount;
 
     /**
@@ -24,8 +30,6 @@ class BackupConfig
 
     /**
      * Instantiates a backup configuration object from config data.
-     *
-     * @param array $data
      *
      * @return static
      */

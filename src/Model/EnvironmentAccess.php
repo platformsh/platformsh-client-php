@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -16,39 +18,36 @@ namespace Platformsh\Client\Model;
  */
 class EnvironmentAccess extends ApiResourceBase
 {
+    public const ROLE_ADMIN = 'admin';
 
-    /** @var array */
-    protected static $required = ['role'];
+    public const ROLE_VIEWER = 'viewer';
 
-    const ROLE_ADMIN = 'admin';
-    const ROLE_VIEWER = 'viewer';
-    const ROLE_CONTRIBUTOR = 'contributor';
+    public const ROLE_CONTRIBUTOR = 'contributor';
 
     public static $roles = [self::ROLE_ADMIN, self::ROLE_VIEWER, self::ROLE_CONTRIBUTOR];
 
     /**
-     * @inheritdoc
+     * @var array
      */
-    protected static function checkProperty($property, $value)
-    {
-        $errors = [];
-        if ($property === 'role' && !in_array($value, static::$roles)) {
-            $errors[] = "Invalid environment role: '$value'";
-        }
+    protected static $required = ['role'];
 
-        return $errors;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getLink($rel, $absolute = true)
     {
         // @todo double-check whether the resource does contain the #edit link
-        if ($rel === "#edit" && !$this->hasLink($rel)) {
+        if ($rel === '#edit' && ! $this->hasLink($rel)) {
             return $this->getUri($absolute);
         }
 
         return parent::getLink($rel, $absolute);
+    }
+
+    protected static function checkProperty($property, $value)
+    {
+        $errors = [];
+        if ($property === 'role' && ! in_array($value, static::$roles, true)) {
+            $errors[] = "Invalid environment role: '{$value}'";
+        }
+
+        return $errors;
     }
 }

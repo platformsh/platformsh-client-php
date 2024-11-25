@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\Exception\BadResponseException;
@@ -17,7 +19,9 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
 {
     use HasActivitiesTrait;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected static $required = ['type'];
 
     /**
@@ -50,12 +54,12 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
     public function getLink($rel, $absolute = true)
     {
         if ($rel === '#hook') {
-            if (!isset($this->data['_links'][$rel]['href'])) {
-                throw new \InvalidArgumentException("Link not found: $rel");
+            if (! isset($this->data['_links'][$rel]['href'])) {
+                throw new \InvalidArgumentException("Link not found: {$rel}");
             }
             $relativeUrl = $this->data['_links'][$rel]['href'];
             if ($absolute) {
-                if (!isset($this->data['_links']['self']['href'])) {
+                if (! isset($this->data['_links']['self']['href'])) {
                     throw new \RuntimeException('Failed to find integration base URL ("self" link)');
                 }
                 $base = $this->data['_links']['self']['href'];
@@ -100,7 +104,6 @@ class Integration extends ApiResourceBase implements HasActivitiesInterface
      *   cannot be found.
      *
      * @see \Platformsh\Client\Model\Integration::validate()
-     *
      */
     public static function listValidationErrors(BadResponseException $exception)
     {

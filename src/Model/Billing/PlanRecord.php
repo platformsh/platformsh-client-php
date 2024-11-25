@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Billing;
 
 use Platformsh\Client\Model\ApiResourceBase;

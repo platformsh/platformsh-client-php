@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use Platformsh\Client\Exception\ProjectReferenceException;
@@ -15,25 +17,54 @@ use Platformsh\Client\Model\Ref\OrganizationRef;
  */
 class BasicProjectInfo
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     public $id;
-    /** @var string */
+
+    /**
+     * @var string
+     */
     public $title;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $region;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $subscription_id;
-    /** @var OrganizationRef|null */
+
+    /**
+     * @var OrganizationRef|null
+     */
     public $organization_ref;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $created_at;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $status;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $organization_id;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $owner_id;
-    /** @var string|null */
+
+    /**
+     * @var string|null
+     */
     public $vendor;
 
     private function __construct($id, $title)

@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\ActivityLog;
 
-class LogItem {
+class LogItem
+{
     private $timestamp;
+
     private $message;
+
     private $id;
 
     /**
-     * LogItem constructor.
-     *
      * @param string $timestamp
      * @param string $message
      * @param string $id
@@ -22,11 +25,19 @@ class LogItem {
     }
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->message;
+    }
+
+    /**
      * @param string $str
      *
      * @deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      *
-     * @return LogItem|FALSE
+     * @return LogItem|false
      *   The log item, or FALSE if there is not enough information.
      */
     public static function singleFromJson($str)
@@ -54,25 +65,12 @@ class LogItem {
                 continue;
             }
             $item = static::singleFromJson($line);
-            if ($item !== FALSE) {
+            if ($item !== false) {
                 $items[] = $item;
             }
         }
 
         return $items;
-    }
-
-    /**
-     * @param string $str
-     * @return array|null
-     */
-    private static function decode($str)
-    {
-        $data = json_decode($str, true);
-        if ($data === null) {
-            trigger_error(sprintf('Failed to decode JSON line with message: %s: %s', json_last_error_msg(), $str), E_USER_WARNING);
-        }
-        return $data;
     }
 
     /**
@@ -93,7 +91,7 @@ class LogItem {
                 continue;
             }
             $data = static::decode($line);
-            if (!empty($data['seal'])) {
+            if (! empty($data['seal'])) {
                 $seal = true;
             }
             if (isset($data['data']['timestamp'], $data['data']['message'])) {
@@ -102,15 +100,10 @@ class LogItem {
             }
         }
 
-        return ['items' => $items, 'seal' => $seal];
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->message;
+        return [
+            'items' => $items,
+            'seal' => $seal,
+        ];
     }
 
     /**
@@ -137,5 +130,18 @@ class LogItem {
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param string $str
+     * @return array|null
+     */
+    private static function decode($str)
+    {
+        $data = json_decode($str, true);
+        if ($data === null) {
+            trigger_error(sprintf('Failed to decode JSON line with message: %s: %s', json_last_error_msg(), $str), E_USER_WARNING);
+        }
+        return $data;
     }
 }

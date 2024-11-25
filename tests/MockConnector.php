@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Tests;
 
 use GuzzleHttp\ClientInterface;
@@ -7,8 +9,8 @@ use Platformsh\Client\Connection\Connector;
 
 class MockConnector extends Connector
 {
-
     protected array $mockValues = [];
+
     protected int $mockStatus = 200;
 
     /**
@@ -25,9 +27,6 @@ class MockConnector extends Connector
         $this->client = null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isLoggedIn(): bool
     {
         $this->session->set('refreshToken', 'test');

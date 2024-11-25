@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
@@ -14,15 +16,15 @@ class Catalog
     /**
      * Creates a catalog.
      *
-     * @param array $data
      * @param string $url
-     * @param ClientInterface $client
      *
      * @return CatalogItem[]
      */
     public static function create(array $data, $url, ClientInterface $client)
     {
-        $request = new Request('post', $url, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($data));
+        $request = new Request('post', $url, [
+            'Content-Type' => 'application/json',
+        ], \GuzzleHttp\json_encode($data));
         $response = $client->send($request);
         $data = Utils::jsonDecode($response->getBody(), true);
         $items = [];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -11,4 +13,6 @@ namespace Platformsh\Client\Model;
  * @property-read string $operation
  * @property-read string $command
  */
-class SourceOperation extends ApiResourceBase {}
+class SourceOperation extends ApiResourceBase
+{
+}

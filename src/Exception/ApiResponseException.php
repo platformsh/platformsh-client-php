@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Exception;
 
 use GuzzleHttp\Exception\GuzzleException;
@@ -13,11 +15,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 class ApiResponseException extends RequestException
 {
-
     /**
      * Wraps a GuzzleException.
-     *
-     * @param GuzzleException $e
      *
      * @return GuzzleException
      */
@@ -27,29 +26,7 @@ class ApiResponseException extends RequestException
     }
 
     /**
-     * Recreates the exception if necessary to alter the message.
-     *
-     * @param RequestException $e
-     *
-     * @return RequestException
-     */
-    private static function alterMessage(RequestException $e)
-    {
-        if ($e->getResponse() !== null) {
-            $details = self::getErrorDetails($e->getResponse());
-            if (!empty($details)) {
-                $class = \get_class($e);
-                return new $class($e->getMessage() . $details, $e->getRequest(), $e->getResponse());
-            }
-        }
-
-        return $e;
-    }
-
-    /**
      * Get more details from the response body, to add to error messages.
-     *
-     * @param ResponseInterface $response
      *
      * @return string
      */
@@ -75,22 +52,39 @@ class ApiResponseException extends RequestException
         try {
             $json = Utils::jsonDecode($contents, true);
             foreach ($responseInfoProperties as $property) {
-                if (!empty($json[$property])) {
+                if (! empty($json[$property])) {
                     $value = $json[$property];
-                    $details .= " [$property] " . (is_scalar($value) ? $value : json_encode($value));
+                    $details .= " [{$property}] " . (is_scalar($value) ? $value : json_encode($value));
                 }
             }
         } catch (\InvalidArgumentException) {
             // Occasionally the response body may not be JSON.
             if ($contents) {
-                $details .= " [extra] Non-JSON response body";
-                $details .= " [body] " . $contents;
-            }
-            else {
-                $details .= " [extra] Empty response body";
+                $details .= ' [extra] Non-JSON response body';
+                $details .= ' [body] ' . $contents;
+            } else {
+                $details .= ' [extra] Empty response body';
             }
         }
 
         return $details;
+    }
+
+    /**
+     * Recreates the exception if necessary to alter the message.
+     *
+     * @return RequestException
+     */
+    private static function alterMessage(RequestException $e)
+    {
+        if ($e->getResponse() !== null) {
+            $details = self::getErrorDetails($e->getResponse());
+            if (! empty($details)) {
+                $class = \get_class($e);
+                return new $class($e->getMessage() . $details, $e->getRequest(), $e->getResponse());
+            }
+        }
+
+        return $e;
     }
 }

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Git;
 
 use GuzzleHttp\ClientInterface;
 use Platformsh\Client\Exception\GitObjectTypeException;
-use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\ApiResourceBase;
+use Platformsh\Client\Model\Project;
 
 /**
  * Git tree resource.
@@ -21,7 +23,6 @@ class Tree extends ApiResourceBase
      *
      * @param string          $sha
      * @param string          $baseUrl
-     * @param ClientInterface $client
      *
      * @return static|false
      */
@@ -53,10 +54,58 @@ class Tree extends ApiResourceBase
         if ($data['type'] === 'blob') {
             return Blob::fromSha($data['sha'], $this->getUri(), $this->client);
         } elseif ($data['type'] === 'tree') {
-            return Tree::fromSha($data['sha'], $this->getUri(), $this->client);
+            return self::fromSha($data['sha'], $this->getUri(), $this->client);
         }
 
         throw new \RuntimeException('Unrecognised object type: ' . $data['type']);
+    }
+
+    /**
+     * Get a Blob (file) inside this tree.
+     *
+     * @param string $path
+     *
+     * @throws GitObjectTypeException if the path is a directory.
+     *
+     * @return Blob|false
+     *   A Blob object, or false if the blob is not found.
+     */
+    public function getBlob($path)
+    {
+        $object = $this->getObjectRecursive($path);
+        if ($object === false) {
+            return false;
+        }
+        if ($object instanceof Blob) {
+            return $object;
+        }
+        if ($object instanceof self) {
+            throw new GitObjectTypeException('The requested file is a directory', $path);
+        }
+
+        return false;
+    }
+
+    /**
+     * Get a Tree (directory) inside this tree.
+     *
+     * @param string $path
+     *
+     * @throws GitObjectTypeException if the path is not a directory.
+     *
+     * @return Tree|false
+     *   A Tree object or false if the tree is not found.
+     */
+    public function getTree($path)
+    {
+        $object = $this->getObjectRecursive($path);
+        if ($object === false) {
+            return false;
+        }
+        if ($object instanceof self) {
+            return $object;
+        }
+        throw new GitObjectTypeException('Not a directory', $path);
     }
 
     /**
@@ -89,7 +138,7 @@ class Tree extends ApiResourceBase
         $tree = $object = $this;
         foreach ($this->splitPath($path) as $part) {
             $object = $tree->getObject($part);
-            if (!$object instanceof Tree) {
+            if (! $object instanceof self) {
                 return $object;
             }
             $tree = $object;
@@ -110,53 +159,5 @@ class Tree extends ApiResourceBase
         $path = trim(str_replace('\\', '/', $path), '/');
 
         return explode('/', $path);
-    }
-
-    /**
-     * Get a Blob (file) inside this tree.
-     *
-     * @param string $path
-     *
-     * @throws GitObjectTypeException if the path is a directory.
-     *
-     * @return Blob|false
-     *   A Blob object, or false if the blob is not found.
-     */
-    public function getBlob($path)
-    {
-        $object = $this->getObjectRecursive($path);
-        if ($object === false) {
-            return false;
-        }
-        if ($object instanceof Blob) {
-            return $object;
-        }
-        if ($object instanceof Tree) {
-            throw new GitObjectTypeException('The requested file is a directory', $path);
-        }
-
-        return false;
-    }
-
-    /**
-     * Get a Tree (directory) inside this tree.
-     *
-     * @param string $path
-     *
-     * @throws GitObjectTypeException if the path is not a directory.
-     *
-     * @return Tree|false
-     *   A Tree object or false if the tree is not found.
-     */
-    public function getTree($path)
-    {
-        $object = $this->getObjectRecursive($path);
-        if ($object === false) {
-            return false;
-        }
-        if ($object instanceof Tree) {
-            return $object;
-        }
-        throw new GitObjectTypeException('Not a directory', $path);
     }
 }

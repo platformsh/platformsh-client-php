@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Organization;
 
 use GuzzleHttp\ClientInterface;
@@ -32,7 +34,7 @@ class Organization extends ResourceWithReferences
     public function getLink($rel, $absolute = true)
     {
         // @todo remove this when HAL links are provided in the API
-        if (\in_array($rel, ['invitations', 'address', 'profile'])) {
+        if (\in_array($rel, ['invitations', 'address', 'profile'], true)) {
             return $this->getUri($absolute) . '/' . $rel;
         }
         return parent::getLink($rel, $absolute);
@@ -43,8 +45,6 @@ class Organization extends ResourceWithReferences
      *
      * This updates the resource's internal data with the API response.
      *
-     * @param array $values
-     *
      * @return Result
      */
     public function update(array $values)
@@ -52,14 +52,14 @@ class Organization extends ResourceWithReferences
         // @todo use getLink('#edit') when it is available
         $url = $this->getUri();
         $options = [];
-        if (!empty($values)) {
+        if (! empty($values)) {
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
         $data = Utils::jsonDecode($response->getBody(), true);
         $this->setData($data);
 
-        return new Result($data, $this->baseUrl, $this->client, get_called_class());
+        return new Result($data, $this->baseUrl, $this->client, static::class);
     }
 
     /**
@@ -115,7 +115,7 @@ class Organization extends ResourceWithReferences
     public function getSubscriptions(array $query = [])
     {
         $options = [];
-        if (!empty($query)) {
+        if (! empty($query)) {
             $options['query'] = $query;
         } else {
             $options['query']['filter']['status']['value'][] = 'active';
@@ -155,7 +155,9 @@ class Organization extends ResourceWithReferences
             'force' => $force,
         ];
 
-        $request = new Request('POST', $this->getLink('invitations'), ['Content-Type' => 'application/json'], \json_encode($data));
+        $request = new Request('POST', $this->getLink('invitations'), [
+            'Content-Type' => 'application/json',
+        ], \json_encode($data));
         try {
             $data = self::send($request, $this->client);
         } catch (BadResponseException $e) {
@@ -187,8 +189,6 @@ class Organization extends ResourceWithReferences
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @internal Use PlatformClient::createOrganization() to create an organization.
      *
      * @see \Platformsh\Client\PlatformClient::createOrganization()
@@ -239,7 +239,10 @@ class Organization extends ResourceWithReferences
      */
     public function createTeam($label, $projectPermissions = [])
     {
-        $data = ['label' => $label, 'organization_id' => $this->id];
+        $data = [
+            'label' => $label,
+            'organization_id' => $this->id,
+        ];
         if ($projectPermissions !== []) {
             $data['project_permissions'] = $projectPermissions;
         }

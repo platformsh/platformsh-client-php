@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Invitation;
 
 use Platformsh\Client\Model\Project;
@@ -10,15 +12,18 @@ use Platformsh\Client\Model\Project;
 class AlreadyInvitedException extends \RuntimeException
 {
     private $email;
+
     private $project;
+
     private $role;
+
     private $environments;
+
     private $permissions;
 
     /**
      * @param string $message
      * @param string $email
-     * @param Project $project
      * @param string $role
      * @param Environment[] $environments
      * @param Permission[] $permissions

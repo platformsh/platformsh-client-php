@@ -11,10 +11,11 @@ use GuzzleHttp\Utils;
 use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\Connection\ConnectorInterface;
 use Platformsh\Client\Exception\ApiResponseException;
-use Platformsh\Client\Model\Billing\PlanRecord;
-use Platformsh\Client\Model\Billing\PlanRecordQuery;
 use Platformsh\Client\Exception\ProjectReferenceException;
 use Platformsh\Client\Model\BasicProjectInfo;
+use Platformsh\Client\Model\Billing\PlanRecord;
+use Platformsh\Client\Model\Billing\PlanRecordQuery;
+use Platformsh\Client\Model\Catalog;
 use Platformsh\Client\Model\CentralizedPermissions\UserExtendedAccess;
 use Platformsh\Client\Model\Filter\Filter;
 use Platformsh\Client\Model\Organization\Organization;
@@ -22,7 +23,6 @@ use Platformsh\Client\Model\Plan;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\ProjectStub;
 use Platformsh\Client\Model\Region;
-use Platformsh\Client\Model\Catalog;
 use Platformsh\Client\Model\Result;
 use Platformsh\Client\Model\SetupOptions;
 use Platformsh\Client\Model\SshKey;
@@ -33,19 +33,21 @@ use Platformsh\Client\Model\User;
 
 class PlatformClient
 {
-
-    /** @var ConnectorInterface */
+    /**
+     * @var ConnectorInterface
+     */
     protected $connector;
 
-    /** @var array|null A per-client cache for account info */
+    /**
+     * @var array|null A per-client cache for account info
+     */
     protected $accountInfo;
 
-    /** @var string|null A per-client cache for the user ID */
+    /**
+     * @var string|null A per-client cache for the user ID
+     */
     protected $userId;
 
-    /**
-     * @param ConnectorInterface $connector
-     */
     public function __construct(ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
@@ -57,14 +59,6 @@ class PlatformClient
     public function getConnector()
     {
         return $this->connector;
-    }
-
-    /**
-     * Returns the base URL of the API, without trailing slash.
-     */
-    private function apiUrl()
-    {
-        return $this->connector->getApiUrl() ?: rtrim($this->connector->getAccountsEndpoint(), '/');
     }
 
     /**
@@ -157,13 +151,17 @@ class PlatformClient
     public function getMyProjects($vendor = null)
     {
         $projects = [];
-        if (!empty($this->connector->getConfig()['centralized_permissions_enabled'])) {
+        if (! empty($this->connector->getConfig()['centralized_permissions_enabled'])) {
             $userId = $this->getMyUserId();
             if ($userId === false) {
                 throw new \InvalidArgumentException('No user ID specified');
             }
-            $strict = !empty($this->connector->getConfig()['strict_project_references']);
-            $extendedAccesses = UserExtendedAccess::byUser($userId, ['query' => ['filter[resource_type]' => 'project']], $this->connector->getClient());
+            $strict = ! empty($this->connector->getConfig()['strict_project_references']);
+            $extendedAccesses = UserExtendedAccess::byUser($userId, [
+                'query' => [
+                    'filter[resource_type]' => 'project',
+                ],
+            ], $this->connector->getClient());
             foreach ($extendedAccesses as $extendedAccess) {
                 try {
                     $project = BasicProjectInfo::fromExtendedAccess($extendedAccess);
@@ -206,38 +204,16 @@ class PlatformClient
      */
     public function getAccountInfo($reset = false)
     {
-        if (!isset($this->accountInfo) || $reset) {
+        if (! isset($this->accountInfo) || $reset) {
             $url = $this->apiUrl() . '/me';
             try {
                 $this->accountInfo = $this->simpleGet($url);
-            }
-            catch (GuzzleException $e) {
+            } catch (GuzzleException $e) {
                 throw ApiResponseException::wrapGuzzleException($e);
             }
         }
 
         return $this->accountInfo;
-    }
-
-    /**
-     * Get a URL and return the JSON-decoded response.
-     *
-     * @param string $url
-     * @param array  $options
-     *
-     * @return array
-     * @throws GuzzleException
-     */
-    private function simpleGet($url, array $options = [])
-    {
-        return (array) Utils::jsonDecode(
-          $this->getConnector()
-               ->getClient()
-               ->request('get', $url, $options)
-               ->getBody()
-               ->getContents(),
-          true
-        );
     }
 
     /**
@@ -256,44 +232,12 @@ class PlatformClient
     public function getProjectDirect($id, $hostname, $https = true)
     {
         $scheme = $https ? 'https' : 'http';
-        $collection = "$scheme://$hostname/api/projects";
+        $collection = "{$scheme}://{$hostname}/api/projects";
         $project = Project::get($id, $collection, $this->connector->getClient());
         if ($project && ($apiUrl = $this->connector->getApiUrl())) {
             $project->setApiUrl($apiUrl);
         }
         return $project;
-    }
-
-    /**
-     * Locate a project by ID.
-     *
-     * @param string $id
-     *   The project ID.
-     *
-     * @return string|false
-     *   The project's API endpoint.
-     */
-    protected function locateProject($id)
-    {
-        $url = rtrim($this->connector->getAccountsEndpoint(), '/') . '/projects/' . rawurlencode($id);
-        try {
-            $result = $this->simpleGet($url);
-        }
-        catch (BadResponseException $e) {
-            $ignoredErrorCodes = [403, 404];
-            if (in_array($e->getResponse()->getStatusCode(), $ignoredErrorCodes)) {
-                return false;
-            }
-            throw ApiResponseException::wrapGuzzleException($e);
-        }
-
-        if (isset($result['endpoint'])) {
-            return $result['endpoint'];
-        }
-        if (isset($result['_links']['self']['href'])) {
-            return $result['_links']['self']['href'];
-        }
-        return false;
     }
 
     /**
@@ -334,24 +278,13 @@ class PlatformClient
      */
     public function addSshKey($value, $title = null)
     {
-        $values = $this->cleanRequest(['value' => $value, 'title' => $title]);
+        $values = $this->cleanRequest([
+            'value' => $value,
+            'title' => $title,
+        ]);
         $url = $this->apiUrl() . '/ssh_keys';
 
         return SshKey::create($values, $url, $this->connector->getClient());
-    }
-
-    /**
-     * Filter a request array to remove null values.
-     *
-     * @param array $request
-     *
-     * @return array
-     */
-    protected function cleanRequest(array $request)
-    {
-        return array_filter($request, function ($element) {
-            return $element !== null;
-        });
     }
 
     /**
@@ -444,7 +377,6 @@ class PlatformClient
      * Estimate the cost of a subscription.
      *
      * @param string      $plan         The plan machine name.
-
      * @param int         $storage      The allowed storage per environment (MiB).
      * @param int         $environments The number of environments.
      * @param int         $users        The number of users.
@@ -529,7 +461,11 @@ class PlatformClient
     {
         $response = $this->connector->getClient()->post(
             Psr7Utils::uriFor($this->connector->getConfig()['certifier_url'])->withPath('/ssh'),
-            ['json' => ['key' => $publicKey]]
+            [
+                'json' => [
+                    'key' => $publicKey,
+                ],
+            ]
         );
 
         return Utils::jsonDecode((string) $response->getBody(), true)['certificate'];
@@ -556,15 +492,15 @@ class PlatformClient
      *
      * @return SetupOptions
      */
-    public function getSetupOptions($vendor = NULL, $plan = NULL, $options_url = NULL, $username = NULL, $organization = NULL)
+    public function getSetupOptions($vendor = null, $plan = null, $options_url = null, $username = null, $organization = null)
     {
         $url = $this->apiUrl() . '/setup/options';
         $options = $this->cleanRequest([
-          'vendor' => $vendor,
-          'plan' => $plan,
-          'options_url' => $options_url,
-          'username' => $username,
-          'organization' => $organization
+            'vendor' => $vendor,
+            'plan' => $plan,
+            'options_url' => $options_url,
+            'username' => $username,
+            'organization' => $organization,
         ]);
 
         return SetupOptions::create($options, $url, $this->connector->getClient());
@@ -580,7 +516,7 @@ class PlatformClient
      */
     public function getUser($id = null)
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         if ($id === null) {
@@ -599,13 +535,13 @@ class PlatformClient
      */
     public function getMyUserId($reset = false)
     {
-        if (isset($this->userId) && !$reset) {
+        if (isset($this->userId) && ! $reset) {
             return $this->userId;
         }
 
         $accessToken = $this->connector->getAccessToken();
         if ($accessToken && ($claims = $this->unsafeGetJwtClaims($accessToken))) {
-            if (!empty($claims['sub']) && preg_match('/^[a-zA-Z0-9-]+$/', $claims['sub']) === 1) {
+            if (! empty($claims['sub']) && preg_match('/^[a-zA-Z0-9-]+$/', $claims['sub']) === 1) {
                 return $this->userId = $claims['sub'];
             }
             return $this->userId = false;
@@ -622,25 +558,6 @@ class PlatformClient
     }
 
     /**
-     * Returns the payload of a JWT without verification.
-     *
-     * @param string $jwt
-     * @return array|false
-     */
-    private function unsafeGetJwtClaims($jwt)
-    {
-        $split = explode('.', $jwt, 3);
-        if (!isset($split[1])) {
-            return false;
-        }
-        $json = base64_decode($split[1], true);
-        if (!$json) {
-            return false;
-        }
-        return json_decode($json, true) ?: false;
-    }
-
-    /**
      * Lists all available organizations.
      *
      * @param \Platformsh\Client\Model\Filter\FilterInterface[] $filters
@@ -649,12 +566,12 @@ class PlatformClient
      */
     public function listOrganizations(array $filters = [])
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         $path = '/organizations';
         $options = [];
-        if (!empty($filters)) {
+        if (! empty($filters)) {
             $options['query'] = [];
             foreach ($filters as $filter) {
                 $options['query'] += $filter->params();
@@ -672,7 +589,7 @@ class PlatformClient
      */
     public function listOrganizationsWithMember($userId)
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         $path = '/users/' . \rawurlencode($userId) . '/organizations';
@@ -688,7 +605,7 @@ class PlatformClient
      */
     public function listOrganizationsByOwner($ownerId)
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         return $this->listOrganizations([new Filter('owner_id', $ownerId)]);
@@ -715,7 +632,7 @@ class PlatformClient
      */
     public function getOrganizationById($id)
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         return Organization::get($id, '/organizations', $this->connector->getClient());
@@ -739,11 +656,15 @@ class PlatformClient
      */
     public function createOrganization($name, $label = '', $country = '', $owner = '')
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         $url = '/organizations';
-        $values = ['name' => $name, 'label' => $label, 'country' => $country];
+        $values = [
+            'name' => $name,
+            'label' => $label,
+            'country' => $country,
+        ];
         if ($owner !== '') {
             $values['owner_id'] = $owner;
         }
@@ -754,7 +675,6 @@ class PlatformClient
      * Fetches a team by ID.
      *
      * @param string $id
-     * @param Organization|null $organization
      *
      * @throws \RuntimeException if the given organization and team IDs conflict
      *
@@ -762,7 +682,7 @@ class PlatformClient
      */
     public function getTeam($id, Organization $organization = null)
     {
-        if (!$this->connector->getApiUrl()) {
+        if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
         }
         $team = Team::get($id, '/teams', $this->connector->getClient());
@@ -770,5 +690,95 @@ class PlatformClient
             throw new \RuntimeException(sprintf('Found team %s, but it is not part of the specified organization %s', $team->id, $organization->id));
         }
         return $team;
+    }
+
+    /**
+     * Locate a project by ID.
+     *
+     * @param string $id
+     *   The project ID.
+     *
+     * @return string|false
+     *   The project's API endpoint.
+     */
+    protected function locateProject($id)
+    {
+        $url = rtrim($this->connector->getAccountsEndpoint(), '/') . '/projects/' . rawurlencode($id);
+        try {
+            $result = $this->simpleGet($url);
+        } catch (BadResponseException $e) {
+            $ignoredErrorCodes = [403, 404];
+            if (in_array($e->getResponse()->getStatusCode(), $ignoredErrorCodes, true)) {
+                return false;
+            }
+            throw ApiResponseException::wrapGuzzleException($e);
+        }
+
+        if (isset($result['endpoint'])) {
+            return $result['endpoint'];
+        }
+        if (isset($result['_links']['self']['href'])) {
+            return $result['_links']['self']['href'];
+        }
+        return false;
+    }
+
+    /**
+     * Filter a request array to remove null values.
+     *
+     * @return array
+     */
+    protected function cleanRequest(array $request)
+    {
+        return array_filter($request, function ($element) {
+            return $element !== null;
+        });
+    }
+
+    /**
+     * Returns the base URL of the API, without trailing slash.
+     */
+    private function apiUrl()
+    {
+        return $this->connector->getApiUrl() ?: rtrim($this->connector->getAccountsEndpoint(), '/');
+    }
+
+    /**
+     * Get a URL and return the JSON-decoded response.
+     *
+     * @param string $url
+     *
+     * @return array
+     * @throws GuzzleException
+     */
+    private function simpleGet($url, array $options = [])
+    {
+        return (array) Utils::jsonDecode(
+            $this->getConnector()
+                ->getClient()
+                ->request('get', $url, $options)
+                ->getBody()
+                ->getContents(),
+            true
+        );
+    }
+
+    /**
+     * Returns the payload of a JWT without verification.
+     *
+     * @param string $jwt
+     * @return array|false
+     */
+    private function unsafeGetJwtClaims($jwt)
+    {
+        $split = explode('.', $jwt, 3);
+        if (! isset($split[1])) {
+            return false;
+        }
+        $json = base64_decode($split[1], true);
+        if (! $json) {
+            return false;
+        }
+        return json_decode($json, true) ?: false;
     }
 }

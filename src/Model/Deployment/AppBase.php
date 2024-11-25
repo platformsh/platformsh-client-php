@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Deployment;
 
 use Platformsh\Client\DataStructure\ReadOnlyStructureTrait;
@@ -47,7 +49,7 @@ abstract class AppBase
      */
     public function getRuntimeOperation($name)
     {
-        if (!isset($this->data['operations'][$name])) {
+        if (! isset($this->data['operations'][$name])) {
             throw new \InvalidArgumentException(sprintf('Operation not found: %s', $name));
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Filter;
 
 /**
@@ -8,7 +10,9 @@ namespace Platformsh\Client\Model\Filter;
 class Filter implements FilterInterface
 {
     private $name;
+
     private $operator;
+
     private $value;
 
     /**
@@ -27,7 +31,7 @@ class Filter implements FilterInterface
         $this->operator = $operator;
     }
 
-    public final function params()
+    final public function params()
     {
         return [
             \sprintf('filter[%s][%s]', $this->name, $this->operator) => $this->value,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Organization\Invitation;
 
 use Platformsh\Client\Model\Organization\Organization;
@@ -10,13 +12,14 @@ use Platformsh\Client\Model\Organization\Organization;
 class AlreadyInvitedException extends \RuntimeException
 {
     private $email;
+
     private $organization;
+
     private $permissions;
 
     /**
      * @param string $message
      * @param string $email
-     * @param Organization $organization
      * @param string[] $permissions
      */
     public function __construct($message, $email, Organization $organization, array $permissions)

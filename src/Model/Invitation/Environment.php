@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Invitation;
 
 /**
@@ -8,6 +10,7 @@ namespace Platformsh\Client\Model\Invitation;
 class Environment
 {
     private $id;
+
     private $role;
 
     public function __construct($id, $role)
@@ -43,7 +46,10 @@ class Environment
     {
         $maps = [];
         foreach ($environments as $environment) {
-            $maps[] = ['id' => $environment->id, 'role' => $environment->role];
+            $maps[] = [
+                'id' => $environment->id,
+                'role' => $environment->role,
+            ];
         }
         return $maps;
     }

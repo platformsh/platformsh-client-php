@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -33,7 +35,6 @@ namespace Platformsh\Client\Model;
  */
 class Variable extends ApiResourceBase
 {
-
     /**
      * Disable the variable.
      *
@@ -44,10 +45,12 @@ class Variable extends ApiResourceBase
      */
     public function disable()
     {
-        if (!$this->getProperty('is_enabled')) {
-            return new Result([], $this->baseUrl, $this->client, get_called_class());
+        if (! $this->getProperty('is_enabled')) {
+            return new Result([], $this->baseUrl, $this->client, static::class);
         }
 
-        return $this->update(['is_enabled' => false]);
+        return $this->update([
+            'is_enabled' => false,
+        ]);
     }
 }

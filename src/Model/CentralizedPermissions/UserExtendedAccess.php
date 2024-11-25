@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\CentralizedPermissions;
 
 use GuzzleHttp\ClientInterface;
@@ -24,17 +26,17 @@ class UserExtendedAccess extends ResourceWithReferences
 {
     /**
      * @param string $userId
-     * @param array $options
-     * @param ClientInterface $client
      *
      * @return static[]
      */
     public static function byUser($userId, array $options, ClientInterface $client)
     {
-        return UserExtendedAccess::getCollection('/users/' . rawurlencode($userId) . '/extended-access', 0, $options, $client);
+        return self::getCollection('/users/' . rawurlencode($userId) . '/extended-access', 0, $options, $client);
     }
 
-    /** @return ProjectRef|null */
+    /**
+     * @return ProjectRef|null
+     */
     public function getProjectInfo()
     {
         if (isset($this->data['ref:projects'][$this->data['resource_id']])) {
@@ -43,7 +45,9 @@ class UserExtendedAccess extends ResourceWithReferences
         return null;
     }
 
-    /** @return OrganizationRef|null */
+    /**
+     * @return OrganizationRef|null
+     */
     public function getOrganizationInfo()
     {
         if (isset($this->data['ref:organizations'][$this->data['organization_id']])) {

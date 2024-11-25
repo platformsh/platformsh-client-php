@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /** @noinspection PhpDocMissingThrowsInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
 
@@ -11,39 +13,51 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
-use Psr\Http\Message\RequestInterface;
 use Platformsh\Client\Exception\ApiResponseException;
 use Platformsh\Client\Exception\OperationUnavailableException;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * The base class for API resources.
  */
 abstract class ApiResourceBase implements \ArrayAccess
 {
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     protected static $collectionItemsKey;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected static $required = [];
 
-    /** @var ClientInterface */
+    /**
+     * @var ClientInterface
+     */
     protected $client;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $baseUrl;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $data;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     protected $isFull = false;
 
-    /** @var Collection|null */
+    /**
+     * @var Collection|null
+     */
     protected $parentCollection;
 
     /**
-     * Resource constructor.
-     *
      * @param array           $data    The raw data for the resource
      *                                 (as deserialized from JSON).
      * @param string          $baseUrl The absolute URL to the resource or its
@@ -58,22 +72,6 @@ abstract class ApiResourceBase implements \ArrayAccess
         $this->baseUrl = (string) $baseUrl;
         $this->isFull = $full;
         $this->setData($data);
-    }
-
-    /**
-     * @param string $baseUrl
-     */
-    public function setBaseUrl($baseUrl)
-    {
-        $this->baseUrl = $baseUrl;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function offsetExists(mixed $offset): bool
-    {
-        return $this->hasProperty($offset);
     }
 
     /**
@@ -95,16 +93,9 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @return bool
      */
-    public function __isset($name) {
-        return $this->hasProperty($name);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function offsetGet(mixed $offset): mixed
+    public function __isset($name)
     {
-        return $this->getProperty($offset, false);
+        return $this->hasProperty($name);
     }
 
     /**
@@ -121,8 +112,24 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * @inheritdoc
-     *
+     * @param string $baseUrl
+     */
+    public function setBaseUrl($baseUrl)
+    {
+        $this->baseUrl = $baseUrl;
+    }
+
+    public function offsetExists(mixed $offset): bool
+    {
+        return $this->hasProperty($offset);
+    }
+
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->getProperty($offset, false);
+    }
+
+    /**
      * @throws \BadMethodCallException
      */
     public function offsetSet(mixed $offset, $value): void
@@ -131,8 +138,6 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * @inheritdoc
-     *
      * @throws \BadMethodCallException
      */
     public function offsetUnset(mixed $offset): void
@@ -155,7 +160,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public function ensureFull()
     {
-        if (!$this->isFull) {
+        if (! $this->isFull) {
             $this->refresh();
         }
     }
@@ -197,33 +202,29 @@ abstract class ApiResourceBase implements \ArrayAccess
     /**
      * Create a resource.
      *
-     * @param array           $body
      * @param string          $collectionUrl
-     * @param ClientInterface $client
      *
      * @return Result
      */
     public static function create(array $body, $collectionUrl, ClientInterface $client)
     {
         if ($errors = static::checkNew($body)) {
-            $message = "Cannot create resource due to validation error(s): " . implode('; ', $errors);
+            $message = 'Cannot create resource due to validation error(s): ' . implode('; ', $errors);
             throw new \InvalidArgumentException($message);
         }
 
-        $request = new Request('post', $collectionUrl, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($body));
+        $request = new Request('post', $collectionUrl, [
+            'Content-Type' => 'application/json',
+        ], \GuzzleHttp\json_encode($body));
         $data = self::send($request, $client);
 
-        return new Result($data, $collectionUrl, $client, get_called_class());
+        return new Result($data, $collectionUrl, $client, static::class);
     }
 
     /**
      * Send a Guzzle request.
      *
      * Using this method allows exceptions to be standardized.
-     *
-     * @param RequestInterface $request
-     * @param ClientInterface  $client
-     * @param array            $options
      *
      * @internal
      *
@@ -248,24 +249,6 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * A simple helper function to send an HTTP request.
-     *
-     * @param string $url
-     * @param string $method
-     * @param array  $options
-     *
-     * @return array
-     */
-    protected function sendRequest($url, $method = 'get', array $options = [])
-    {
-        return $this->send(
-          new Request($method, $url),
-          $this->client,
-          $options
-        );
-    }
-
-    /**
      * Get the required properties for creating a new resource.
      *
      * @return array
@@ -273,38 +256,6 @@ abstract class ApiResourceBase implements \ArrayAccess
     public static function getRequired()
     {
         return static::$required;
-    }
-
-    /**
-     * Validate a new resource.
-     *
-     * @param array $data
-     *
-     * @return string[] An array of validation errors.
-     */
-    protected static function checkNew(array $data)
-    {
-        $errors = [];
-        if ($missing = array_diff(static::getRequired(), array_keys($data))) {
-            $errors[] = 'Missing: ' . implode(', ', $missing);
-        }
-        foreach ($data as $key => $value) {
-            $errors += static::checkProperty($key, $value);
-        }
-        return $errors;
-    }
-
-    /**
-     * Validate a property of the resource, for creating or updating.
-     *
-     * @param string $property
-     * @param mixed  $value
-     *
-     * @return string[] An array of validation errors.
-     */
-    protected static function checkProperty($property, $value)
-    {
-        return [];
     }
 
     /**
@@ -323,7 +274,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     {
         $items = static::getCollectionWithParent($url, $client, $options)['items'];
 
-        if (!empty($limit) && count($items) > $limit) {
+        if (! empty($limit) && count($items) > $limit) {
             $items = array_slice($items, 0, $limit);
         }
 
@@ -345,7 +296,10 @@ abstract class ApiResourceBase implements \ArrayAccess
         $request = new Request('GET', $url);
         $data = self::send($request, $client, $options);
         $collection = new Collection($data, $client, $url);
-        return ['items' => static::wrapCollection($collection, $url, $client), 'collection' => $collection];
+        return [
+            'items' => static::wrapCollection($collection, $url, $client),
+            'collection' => $collection,
+        ];
     }
 
     /**
@@ -386,43 +340,20 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * @param string $op
      * @param string $method
-     * @param array  $body
      *
      * @return Result
      */
     public function runOperation($op, $method = 'POST', array $body = [])
     {
-        if (!$this->operationAvailable($op, true)) {
-            throw new OperationUnavailableException("Operation not available: $op");
+        if (! $this->operationAvailable($op, true)) {
+            throw new OperationUnavailableException("Operation not available: {$op}");
         }
-        $request = new Request($method, $this->getLink("#$op"), ['Content-Type' => 'application/json'], $body ? \json_encode($body) : null);
+        $request = new Request($method, $this->getLink("#{$op}"), [
+            'Content-Type' => 'application/json',
+        ], $body ? \json_encode($body) : null);
         $data = $this->send($request, $this->client);
 
-        return new Result($data, $this->baseUrl, $this->client, get_called_class());
-    }
-
-    /**
-     * Run a long-running operation.
-     *
-     * @deprecated use runOperation() instead
-     * @see Resource::runOperation()
-     *
-     * @param string $op
-     * @param string $method
-     * @param array  $body
-     *
-     * @return Activity
-     */
-    protected function runLongOperation($op, $method = 'post', array $body = [])
-    {
-        @trigger_error('This method is deprecated as actions may return multiple activities. Use runOperation() if possible.', E_USER_DEPRECATED);
-        $result = $this->runOperation($op, $method, $body);
-        $activities = $result->getActivities();
-        if (count($activities) !== 1) {
-            trigger_error(sprintf("Expected one activity, found %d", count($activities)), E_USER_WARNING);
-        }
-
-        return reset($activities);
+        return new Result($data, $this->baseUrl, $this->client, static::class);
     }
 
     /**
@@ -435,10 +366,10 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public function hasProperty($property, $lazyLoad = true)
     {
-        if (!$this->isProperty($property)) {
+        if (! $this->isProperty($property)) {
             return false;
         }
-        if (!array_key_exists($property, $this->data) && $lazyLoad) {
+        if (! array_key_exists($property, $this->data) && $lazyLoad) {
             $this->ensureFull();
         }
 
@@ -461,9 +392,9 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public function getProperty($property, $required = true, $lazyLoad = true)
     {
-        if (!$this->hasProperty($property, $lazyLoad)) {
+        if (! $this->hasProperty($property, $lazyLoad)) {
             if ($required) {
-                throw new \InvalidArgumentException("Property not found: $property");
+                throw new \InvalidArgumentException("Property not found: {$property}");
             }
             return null;
         }
@@ -480,7 +411,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     {
         $data = $this->sendRequest($this->getUri(), 'delete');
 
-        return new Result($data, $this->getUri(), $this->client, get_called_class());
+        return new Result($data, $this->getUri(), $this->client, static::class);
     }
 
     /**
@@ -488,14 +419,12 @@ abstract class ApiResourceBase implements \ArrayAccess
      *
      * This updates the resource's internal data with the API response.
      *
-     * @param array $values
-     *
      * @return Result
      */
     public function update(array $values)
     {
         if ($errors = $this->checkUpdate($values)) {
-            $message = "Cannot update resource due to validation error(s): " . implode('; ', $errors);
+            $message = 'Cannot update resource due to validation error(s): ' . implode('; ', $errors);
             throw new \InvalidArgumentException($message);
         }
         $data = $this->runOperation('edit', 'patch', $values)->getData();
@@ -504,23 +433,7 @@ abstract class ApiResourceBase implements \ArrayAccess
             $this->isFull = true;
         }
 
-        return new Result($data, $this->baseUrl, $this->client, get_called_class());
-    }
-
-    /**
-     * Validate values for update.
-     *
-     * @param array $values
-     *
-     * @return string[] An array of validation errors.
-     */
-    protected static function checkUpdate(array $values)
-    {
-        $errors = [];
-        foreach ($values as $key => $value) {
-            $errors += static::checkProperty($key, $value);
-        }
-        return $errors;
+        return new Result($data, $this->baseUrl, $this->client, static::class);
     }
 
     /**
@@ -537,22 +450,12 @@ abstract class ApiResourceBase implements \ArrayAccess
 
     /**
      * Refresh the resource.
-     *
-     * @param array $options
      */
     public function refresh(array $options = [])
     {
         $request = new Request('get', $this->getUri());
         $this->setData(self::send($request, $this->client, $options));
         $this->isFull = true;
-    }
-
-    /**
-     * @param array $data
-     */
-    protected function setData(array $data)
-    {
-        $this->data = $data;
     }
 
     /**
@@ -566,7 +469,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     public function operationAvailable($op, $refreshDuringCheck = false)
     {
         // Ensure this resource is a full representation.
-        if (!$this->isFull) {
+        if (! $this->isFull) {
             $this->refresh();
             $refreshDuringCheck = false;
         }
@@ -587,21 +490,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * Internal: check whether an operation is available on the resource.
-     *
-     * @param string $op
-     *
-     * @return bool
-     */
-    protected function isOperationAvailable($op)
-    {
-        return isset($this->data['_links']["#$op"]['href']);
-    }
-
-    /**
      * Check whether the resource has a link.
-     *
-     * @param $rel
      *
      * @return bool
      */
@@ -620,37 +509,14 @@ abstract class ApiResourceBase implements \ArrayAccess
      */
     public function getLink($rel, $absolute = true)
     {
-        if (!$this->hasLink($rel)) {
-            throw new \InvalidArgumentException("Link not found: $rel");
+        if (! $this->hasLink($rel)) {
+            throw new \InvalidArgumentException("Link not found: {$rel}");
         }
         $url = $this->data['_links'][$rel]['href'];
         if ($absolute || str_contains($url, '//')) {
             $url = $this->makeAbsoluteUrl($url);
         }
         return $url;
-    }
-
-    /**
-     * Make a URL absolute, based on the base URL.
-     *
-     * @param string $relativeUrl
-     * @param string $baseUrl
-     *
-     * @return string
-     */
-    protected function makeAbsoluteUrl($relativeUrl, $baseUrl = null)
-    {
-        $baseUrl = $baseUrl ?: $this->baseUrl;
-        if (empty($baseUrl)) {
-            throw new \RuntimeException('No base URL');
-        }
-        $base = Utils::uriFor($baseUrl);
-        $target = Utils::uriFor($relativeUrl);
-        // Ensure an absolute base URL overrides an absolute target URL.
-        if ($base->getScheme() != '' && \in_array($target->getScheme(), ['http', 'https'])) {
-            return (string) $base->withPath($target->getPath());
-        }
-        return (string) $base->withPath((string) $target);
     }
 
     /**
@@ -681,16 +547,6 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    protected function isProperty($key)
-    {
-        return $key !== '_links' && $key !== '_embedded';
-    }
-
-    /**
      * Returns the wrapping collection, if this resource's data was fetched via one.
      *
      * Useful for pagination.
@@ -703,10 +559,141 @@ abstract class ApiResourceBase implements \ArrayAccess
     }
 
     /**
-     * Sets a parent collection for this resource.
+     * A simple helper function to send an HTTP request.
      *
-     * @param Collection $parent
-     * @return void
+     * @param string $url
+     * @param string $method
+     *
+     * @return array
+     */
+    protected function sendRequest($url, $method = 'get', array $options = [])
+    {
+        return $this->send(
+            new Request($method, $url),
+            $this->client,
+            $options
+        );
+    }
+
+    /**
+     * Validate a new resource.
+     *
+     * @return string[] An array of validation errors.
+     */
+    protected static function checkNew(array $data)
+    {
+        $errors = [];
+        if ($missing = array_diff(static::getRequired(), array_keys($data))) {
+            $errors[] = 'Missing: ' . implode(', ', $missing);
+        }
+        foreach ($data as $key => $value) {
+            $errors += static::checkProperty($key, $value);
+        }
+        return $errors;
+    }
+
+    /**
+     * Validate a property of the resource, for creating or updating.
+     *
+     * @param string $property
+     * @param mixed  $value
+     *
+     * @return string[] An array of validation errors.
+     */
+    protected static function checkProperty($property, $value)
+    {
+        return [];
+    }
+
+    /**
+     * Run a long-running operation.
+     *
+     * @deprecated use runOperation() instead
+     * @see Resource::runOperation()
+     *
+     * @param string $op
+     * @param string $method
+     *
+     * @return Activity
+     */
+    protected function runLongOperation($op, $method = 'post', array $body = [])
+    {
+        @trigger_error('This method is deprecated as actions may return multiple activities. Use runOperation() if possible.', E_USER_DEPRECATED);
+        $result = $this->runOperation($op, $method, $body);
+        $activities = $result->getActivities();
+        if (count($activities) !== 1) {
+            trigger_error(sprintf('Expected one activity, found %d', count($activities)), E_USER_WARNING);
+        }
+
+        return reset($activities);
+    }
+
+    /**
+     * Validate values for update.
+     *
+     * @return string[] An array of validation errors.
+     */
+    protected static function checkUpdate(array $values)
+    {
+        $errors = [];
+        foreach ($values as $key => $value) {
+            $errors += static::checkProperty($key, $value);
+        }
+        return $errors;
+    }
+
+    protected function setData(array $data)
+    {
+        $this->data = $data;
+    }
+
+    /**
+     * Internal: check whether an operation is available on the resource.
+     *
+     * @param string $op
+     *
+     * @return bool
+     */
+    protected function isOperationAvailable($op)
+    {
+        return isset($this->data['_links']["#{$op}"]['href']);
+    }
+
+    /**
+     * Make a URL absolute, based on the base URL.
+     *
+     * @param string $relativeUrl
+     * @param string $baseUrl
+     *
+     * @return string
+     */
+    protected function makeAbsoluteUrl($relativeUrl, $baseUrl = null)
+    {
+        $baseUrl = $baseUrl ?: $this->baseUrl;
+        if (empty($baseUrl)) {
+            throw new \RuntimeException('No base URL');
+        }
+        $base = Utils::uriFor($baseUrl);
+        $target = Utils::uriFor($relativeUrl);
+        // Ensure an absolute base URL overrides an absolute target URL.
+        if ($base->getScheme() !== '' && \in_array($target->getScheme(), ['http', 'https'], true)) {
+            return (string) $base->withPath($target->getPath());
+        }
+        return (string) $base->withPath((string) $target);
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    protected function isProperty($key)
+    {
+        return $key !== '_links' && $key !== '_embedded';
+    }
+
+    /**
+     * Sets a parent collection for this resource.
      */
     protected function setParentCollection(Collection $parent)
     {

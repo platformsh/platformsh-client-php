@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\Client;
@@ -15,30 +17,40 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Token\AccessTokenInterface;
 use Platformsh\Client\Session\Session;
 use Platformsh\Client\Session\SessionInterface;
-use Platformsh\OAuth2\Client\Provider\Platformsh;
+use Platformsh\Client\Session\Storage\File;
 use Platformsh\OAuth2\Client\Grant\ApiToken;
 use Platformsh\OAuth2\Client\GuzzleMiddleware;
-use Platformsh\Client\Session\Storage\File;
+use Platformsh\OAuth2\Client\Provider\Platformsh;
 
 class Connector implements ConnectorInterface
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $config = [];
 
-    /** @var ClientInterface|null */
+    /**
+     * @var ClientInterface|null
+     */
     protected $client;
 
-    /** @var callable|null */
+    /**
+     * @var callable|null
+     */
     protected $oauthMiddleware;
 
-    /** @var AbstractProvider|null */
+    /**
+     * @var AbstractProvider|null
+     */
     protected $provider;
 
-    /** @var SessionInterface */
+    /**
+     * @var SessionInterface
+     */
     protected $session;
 
     /**
-     * @var array $storageKeys
+     * @var array
      *
      * These keys are used for token storage for backwards compatibility with
      * the commerceguys/guzzle-oauth2-plugin package. The left-hand side is
@@ -52,7 +64,7 @@ class Connector implements ConnectorInterface
         'scope' => 'scope',
         'expires' => 'expires',
         'expires_in' => 'expiresIn',
-        'resource_owner_id' => 'resourceOwnerId,'
+        'resource_owner_id' => 'resourceOwnerId,',
     ];
 
     /**
@@ -89,7 +101,6 @@ class Connector implements ConnectorInterface
      *     - on_step_up_auth_response: A callback to run when a refresh token error is
      *       received. It will be passed a Guzzle ResponseInterface, and
      *       should return an AccessToken or null.
-     * @param SessionInterface $session
      */
     public function __construct(array $config = [], SessionInterface $session = null)
     {
@@ -98,40 +109,40 @@ class Connector implements ConnectorInterface
         }
 
         $defaults = [
-          'api_url' => 'https://api.platform.sh',
-          'accounts' => 'https://api.platform.sh/',
-          'client_id' => 'platformsh-client-php',
-          'client_secret' => '',
-          'debug' => false,
-          'verify' => true,
-          'user_agent' => null,
-          'headers' => [],
-          'subscribers' => [],
-          'cache' => false,
-          'auth_url' => 'https://auth.api.platform.sh',
-          'revoke_url' => '',
-          'token_url' => '',
-          'certifier_url' => '',
-          'centralized_permissions_enabled' => false,
-          'strict_project_references' => false,
-          'proxy' => null,
-          'timeout' => 60.0,
-          'connect_timeout' => 60.0,
-          'api_token' => null,
-          'api_token_type' => 'exchange',
-          'gzip' => extension_loaded('zlib'),
-          'on_refresh_start' => null,
-          'on_refresh_end' => null,
-          'on_refresh_error' => null,
-          'on_step_up_auth_response' => null,
+            'api_url' => 'https://api.platform.sh',
+            'accounts' => 'https://api.platform.sh/',
+            'client_id' => 'platformsh-client-php',
+            'client_secret' => '',
+            'debug' => false,
+            'verify' => true,
+            'user_agent' => null,
+            'headers' => [],
+            'subscribers' => [],
+            'cache' => false,
+            'auth_url' => 'https://auth.api.platform.sh',
+            'revoke_url' => '',
+            'token_url' => '',
+            'certifier_url' => '',
+            'centralized_permissions_enabled' => false,
+            'strict_project_references' => false,
+            'proxy' => null,
+            'timeout' => 60.0,
+            'connect_timeout' => 60.0,
+            'api_token' => null,
+            'api_token_type' => 'exchange',
+            'gzip' => extension_loaded('zlib'),
+            'on_refresh_start' => null,
+            'on_refresh_end' => null,
+            'on_refresh_error' => null,
+            'on_step_up_auth_response' => null,
         ];
         $this->config = $config + $defaults;
 
-        if (!isset($this->config['user_agent'])) {
+        if (! isset($this->config['user_agent'])) {
             $this->config['user_agent'] = $this->defaultUserAgent();
         }
 
-        if (!empty($this->config['auth_url'])) {
+        if (! empty($this->config['auth_url'])) {
             if (empty($this->config['token_url'])) {
                 $this->config['token_url'] = rtrim($this->config['auth_url'], '/') . '/oauth2/token';
             }
@@ -168,23 +179,6 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * @return string
-     */
-    private function defaultUserAgent()
-    {
-        $version = trim(file_get_contents(__DIR__ . '/../../version.txt')) ?: '2.0.x';
-
-        return sprintf(
-            '%s/%s (%s; %s; PHP %s)',
-            'Platform.sh-Client-PHP',
-            $version,
-            php_uname('s'),
-            php_uname('r'),
-            PHP_VERSION
-        );
-    }
-
-    /**
      * Get the configured accounts endpoint URL.
      *
      * @deprecated Use Connector::getApiUrl() instead
@@ -207,8 +201,6 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * @inheritdoc
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException if tokens cannot be revoked.
      */
     public function logOut()
@@ -219,7 +211,7 @@ class Connector implements ConnectorInterface
         } catch (RequestException $e) {
             // Retry the request once, if we received a retry status.
             $retryStatuses = [408, 429, 502, 503, 504];
-            if ($e->getResponse() && in_array($e->getResponse()->getStatusCode(), $retryStatuses)) {
+            if ($e->getResponse() && in_array($e->getResponse()->getStatusCode(), $retryStatuses, true)) {
                 $this->revokeTokens();
             } else {
                 trigger_error($e->getMessage());
@@ -230,58 +222,6 @@ class Connector implements ConnectorInterface
         }
     }
 
-    /**
-     * Get a configured OAuth 2.0 URL.
-     *
-     * @param string $key Either 'token_url' or 'revoke_url'
-     *
-     * @return string
-     */
-    private function getOAuthUrl($key)
-    {
-        $url = $this->config[$key];
-
-        // Backwards compatibility.
-        if (!str_contains($url, '//')) {
-            $url = Utils::uriFor($this->config['accounts'])
-                ->withPath($this->config[$key])
-                ->__toString();
-        }
-
-        return $url;
-    }
-
-    /**
-     * Revokes the access and refresh tokens saved in the session.
-     *
-     * @see Connector::logOut()
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    private function revokeTokens()
-    {
-        $revocations = array_filter([
-            'refresh_token' => $this->session->get('refreshToken'),
-            'access_token' => $this->session->get('accessToken'),
-        ]);
-        $url = $this->getOAuthUrl('revoke_url');
-        foreach ($revocations as $type => $token) {
-            $options = [
-                'form_params' => [
-                    'client_id' => $this->config['client_id'],
-                    'client_secret' => $this->config['client_secret'],
-                    'token' => $token,
-                    'token_type_hint' => $type,
-                ],
-                'auth' => false,
-            ];
-            $this->getClient()->request('post', $url, $options);
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getSession()
     {
         return $this->session;
@@ -298,14 +238,12 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
      */
     public function logIn($username, $password, $force = false, $totp = null)
     {
-        if (!$force && $this->isLoggedIn() && $this->session->get('username') === $username) {
+        if (! $force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;
         }
         if ($this->isLoggedIn()) {
@@ -320,23 +258,8 @@ class Connector implements ConnectorInterface
         $this->saveToken($token);
     }
 
-    private function getProvider()
-    {
-        return $this->provider ?: new Platformsh([
-          'clientId' => $this->config['client_id'],
-          'clientSecret' => $this->config['client_secret'],
-          'token_url' => $this->config['token_url'],
-          'api_url' => $this->config['api_url'],
-          'debug' => $this->config['debug'],
-          'verify' => $this->config['verify'],
-          'proxy' => $this->config['proxy'],
-        ]);
-    }
-
     /**
      * Save an access token to the session.
-     *
-     * @param AccessTokenInterface $token
      */
     public function saveToken(AccessTokenInterface $token)
     {
@@ -349,6 +272,67 @@ class Connector implements ConnectorInterface
             }
         }
         $this->session->save();
+    }
+
+    public function isLoggedIn()
+    {
+        return $this->session->get($this->storageKeys['access_token']) || $this->config['api_token'];
+    }
+
+    public function setApiToken($token, $type)
+    {
+        $this->config['api_token'] = $token;
+        if (! in_array($type, ['access', 'exchange'], true)) {
+            throw new \InvalidArgumentException('Invalid API token type: ' . $type);
+        }
+        $this->config['api_token_type'] = $type;
+        if (isset($this->oauthMiddleware)) {
+            $this->oauthMiddleware = null;
+        }
+    }
+
+    public function getClient(): ClientInterface
+    {
+        if (! isset($this->client)) {
+            $stack = HandlerStack::create();
+            $stack->push($this->getOauthMiddleware());
+
+            $config = [
+                'handler' => $stack,
+                RequestOptions::HEADERS => [
+                    'User-Agent' => $this->config['user_agent'],
+                ],
+                RequestOptions::DEBUG => $this->config['debug'],
+                RequestOptions::VERIFY => $this->config['verify'],
+                RequestOptions::PROXY => $this->config['proxy'],
+                RequestOptions::TIMEOUT => $this->config['timeout'],
+                RequestOptions::CONNECT_TIMEOUT => $this->config['connect_timeout'],
+                'auth' => 'oauth2',
+            ];
+
+            if (! empty($this->config['middlewares'])) {
+                foreach ($this->config['middlewares'] as $middleware) {
+                    $stack->push($middleware);
+                }
+            }
+
+            if (! empty($this->config['headers'])) {
+                $config[RequestOptions::HEADERS] += $this->config['headers'];
+            }
+
+            if ($this->config['gzip']) {
+                $config[RequestOptions::DECODE_CONTENT] = true;
+                $config[RequestOptions::HEADERS]['Accept-Encoding'] = 'gzip';
+            }
+
+            if ($url = $this->getApiUrl()) {
+                $config['base_uri'] = $url;
+            }
+
+            $this->client = new Client($config);
+        }
+
+        return $this->client;
     }
 
     /**
@@ -365,7 +349,7 @@ class Connector implements ConnectorInterface
                 'expires' => 2147483647,
             ]);
         }
-        if (!$this->session->get($this->storageKeys['access_token'])) {
+        if (! $this->session->get($this->storageKeys['access_token'])) {
             return null;
         }
 
@@ -383,14 +367,6 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function isLoggedIn()
-    {
-        return $this->session->get($this->storageKeys['access_token']) || $this->config['api_token'];
-    }
-
-    /**
      * Get an OAuth2 middleware to add to Guzzle clients.
      *
      * @throws \RuntimeException
@@ -399,8 +375,8 @@ class Connector implements ConnectorInterface
      */
     protected function getOauthMiddleware()
     {
-        if (!$this->oauthMiddleware) {
-            if (!$this->isLoggedIn()) {
+        if (! $this->oauthMiddleware) {
+            if (! $this->isLoggedIn()) {
                 throw new \RuntimeException('Not logged in');
             }
 
@@ -442,62 +418,81 @@ class Connector implements ConnectorInterface
     }
 
     /**
-     * @inheritdoc
+     * @return string
      */
-    public function setApiToken($token, $type)
+    private function defaultUserAgent()
     {
-        $this->config['api_token'] = $token;
-        if (!in_array($type, ['access', 'exchange'])) {
-            throw new \InvalidArgumentException('Invalid API token type: ' . $type);
-        }
-        $this->config['api_token_type'] = $type;
-        if (isset($this->oauthMiddleware)) {
-            $this->oauthMiddleware = null;
-        }
+        $version = trim(file_get_contents(__DIR__ . '/../../version.txt')) ?: '2.0.x';
+
+        return sprintf(
+            '%s/%s (%s; %s; PHP %s)',
+            'Platform.sh-Client-PHP',
+            $version,
+            php_uname('s'),
+            php_uname('r'),
+            PHP_VERSION
+        );
     }
 
     /**
-     * @inheritdoc
+     * Get a configured OAuth 2.0 URL.
+     *
+     * @param string $key Either 'token_url' or 'revoke_url'
+     *
+     * @return string
      */
-    public function getClient(): ClientInterface
+    private function getOAuthUrl($key)
     {
-        if (!isset($this->client)) {
-            $stack = HandlerStack::create();
-            $stack->push($this->getOauthMiddleware());
+        $url = $this->config[$key];
 
-            $config = [
-                'handler' => $stack,
-                RequestOptions::HEADERS => ['User-Agent' => $this->config['user_agent']],
-                RequestOptions::DEBUG => $this->config['debug'],
-                RequestOptions::VERIFY => $this->config['verify'],
-                RequestOptions::PROXY => $this->config['proxy'],
-                RequestOptions::TIMEOUT => $this->config['timeout'],
-                RequestOptions::CONNECT_TIMEOUT => $this->config['connect_timeout'],
-                'auth' => 'oauth2',
-            ];
-
-            if (!empty($this->config['middlewares'])) {
-                foreach ($this->config['middlewares'] as $middleware) {
-                    $stack->push($middleware);
-                }
-            }
-
-            if (!empty($this->config['headers'])) {
-                $config[RequestOptions::HEADERS] += $this->config['headers'];
-            }
-
-            if ($this->config['gzip']) {
-                $config[RequestOptions::DECODE_CONTENT] = true;
-                $config[RequestOptions::HEADERS]['Accept-Encoding'] = 'gzip';
-            }
-
-            if ($url = $this->getApiUrl()) {
-                $config['base_uri'] = $url;
-            }
-
-            $this->client = new Client($config);
+        // Backwards compatibility.
+        if (! str_contains($url, '//')) {
+            $url = Utils::uriFor($this->config['accounts'])
+                ->withPath($this->config[$key])
+                ->__toString();
         }
 
-        return $this->client;
+        return $url;
+    }
+
+    /**
+     * Revokes the access and refresh tokens saved in the session.
+     *
+     * @see Connector::logOut()
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function revokeTokens()
+    {
+        $revocations = array_filter([
+            'refresh_token' => $this->session->get('refreshToken'),
+            'access_token' => $this->session->get('accessToken'),
+        ]);
+        $url = $this->getOAuthUrl('revoke_url');
+        foreach ($revocations as $type => $token) {
+            $options = [
+                'form_params' => [
+                    'client_id' => $this->config['client_id'],
+                    'client_secret' => $this->config['client_secret'],
+                    'token' => $token,
+                    'token_type_hint' => $type,
+                ],
+                'auth' => false,
+            ];
+            $this->getClient()->request('post', $url, $options);
+        }
+    }
+
+    private function getProvider()
+    {
+        return $this->provider ?: new Platformsh([
+            'clientId' => $this->config['client_id'],
+            'clientSecret' => $this->config['client_secret'],
+            'token_url' => $this->config['token_url'],
+            'api_url' => $this->config['api_url'],
+            'debug' => $this->config['debug'],
+            'verify' => $this->config['verify'],
+            'proxy' => $this->config['proxy'],
+        ]);
     }
 }

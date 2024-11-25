@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -13,9 +15,6 @@ class Plan extends ApiResourceBase
 {
     protected static $collectionItemsKey = 'plans';
 
-    /**
-     * {@inheritdoc}
-     */
     public function __get($name)
     {
         if ($name === 'price') {
@@ -25,9 +24,6 @@ class Plan extends ApiResourceBase
         return parent::__get($name);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function update(array $values)
     {
         throw new \BadMethodCallException('Update is not available for plans');

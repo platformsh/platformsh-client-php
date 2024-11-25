@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use Platformsh\Client\Model\Backups\RestoreOptions;
@@ -19,13 +21,12 @@ use Platformsh\Client\Model\Backups\RestoreOptions;
  */
 class Backup extends ApiResourceBase
 {
-    const STATUS_CREATED = 'CREATED';
-    const STATUS_DELETED = 'DELETED';
+    public const STATUS_CREATED = 'CREATED';
+
+    public const STATUS_DELETED = 'DELETED';
 
     /**
      * Restores a backup.
-     *
-     * @param RestoreOptions|null $options
      *
      * @return Result
      */

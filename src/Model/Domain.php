@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -13,8 +15,8 @@ namespace Platformsh\Client\Model;
  */
 class Domain extends ApiResourceBase
 {
-
-    /** @var array */
+    /**
+     * @var array
+     */
     protected static $required = ['name'];
-
 }

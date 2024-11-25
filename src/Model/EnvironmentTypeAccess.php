@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -10,11 +12,13 @@ namespace Platformsh\Client\Model;
  */
 class EnvironmentTypeAccess extends ApiResourceBase
 {
-    protected static $required = ['role'];
+    public const ROLE_ADMIN = 'admin';
 
-    const ROLE_ADMIN = 'admin';
-    const ROLE_VIEWER = 'viewer';
-    const ROLE_CONTRIBUTOR = 'contributor';
+    public const ROLE_VIEWER = 'viewer';
+
+    public const ROLE_CONTRIBUTOR = 'contributor';
+
+    protected static $required = ['role'];
 
     public function isOperationAvailable($op)
     {
@@ -25,12 +29,9 @@ class EnvironmentTypeAccess extends ApiResourceBase
         return parent::isOperationAvailable($op);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getLink($rel, $absolute = true)
     {
-        if ($rel === "#edit" && !$this->hasLink($rel)) {
+        if ($rel === '#edit' && ! $this->hasLink($rel)) {
             return $this->getUri($absolute);
         }
 

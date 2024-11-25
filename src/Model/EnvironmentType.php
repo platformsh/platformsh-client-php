@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -18,7 +20,10 @@ class EnvironmentType extends ApiResourceBase
      */
     public function addUser($id, $role)
     {
-        return EnvironmentTypeAccess::create(['user' => $id, 'role' => $role], $this->getLink('#access'), $this->client);
+        return EnvironmentTypeAccess::create([
+            'user' => $id,
+            'role' => $role,
+        ], $this->getLink('#access'), $this->client);
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Invitation;
 
 /**
@@ -8,11 +10,10 @@ namespace Platformsh\Client\Model\Invitation;
 class Permission
 {
     private $type;
+
     private $role;
 
     /**
-     * Constructor.
-     *
      * @param string $type
      * @param string $role
      */
@@ -33,7 +34,10 @@ class Permission
     {
         $maps = [];
         foreach ($permissions as $item) {
-            $maps[] = ['type' => $item->type, 'role' => $item->role];
+            $maps[] = [
+                'type' => $item->type,
+                'role' => $item->role,
+            ];
         }
         return $maps;
     }

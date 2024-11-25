@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
@@ -29,7 +31,9 @@ class SetupOptions
      */
     public static function create(array $body, $url, ClientInterface $client)
     {
-        $request = new Request('post', $url, ['Content-Type' => 'application/json'], \GuzzleHttp\json_encode($body));
+        $request = new Request('post', $url, [
+            'Content-Type' => 'application/json',
+        ], \GuzzleHttp\json_encode($body));
         $response = $client->send($request);
         $data = Utils::jsonDecode($response->getBody(), true);
         return new self($data);
@@ -39,7 +43,6 @@ class SetupOptions
      * Fetches a setup options list from a known URL.
      *
      * @param string $url
-     * @param ClientInterface $client
      *
      * @return SetupOptions
      */

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Billing;
 
 class PlanRecordQuery
@@ -8,9 +10,6 @@ class PlanRecordQuery
 
     /**
      * Restrict the query to a date/time period.
-     *
-     * @param \DateTime|null $start
-     * @param \DateTime|null $end
      */
     public function setPeriod(\DateTime $start = null, \DateTime $end = null): void
     {
@@ -50,9 +49,14 @@ class PlanRecordQuery
         });
 
         $filters = array_map(function ($value) {
-            return is_array($value) ? ['value' => $value, 'operator' => 'IN'] : $value;
+            return is_array($value) ? [
+                'value' => $value,
+                'operator' => 'IN',
+            ] : $value;
         }, $filters);
 
-        return count($filters) ? ['filter' => $filters] : [];
+        return count($filters) ? [
+            'filter' => $filters,
+        ] : [];
     }
 }

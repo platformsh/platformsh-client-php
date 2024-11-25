@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -22,4 +24,6 @@ namespace Platformsh\Client\Model;
  * @property-read string $created_at
  * @property-read string $updated_at
  */
-class User extends ApiResourceBase {}
+class User extends ApiResourceBase
+{
+}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -14,14 +16,16 @@ namespace Platformsh\Client\Model;
  */
 class ProjectAccess extends ApiResourceBase
 {
+    public const ROLE_ADMIN = 'admin';
 
-    /** @var array */
-    protected static $required = ['role'];
-
-    const ROLE_ADMIN = 'admin';
-    const ROLE_VIEWER = 'viewer';
+    public const ROLE_VIEWER = 'viewer';
 
     public static $roles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
+
+    /**
+     * @var array
+     */
+    protected static $required = ['role'];
 
     /**
      * Get the account information for this user.
@@ -35,16 +39,14 @@ class ProjectAccess extends ApiResourceBase
         $uuid = $this->getProperty('id');
         $url = $this->makeAbsoluteUrl('/api/users');
         $account = Account::get($uuid, $url, $this->client);
-        if (!$account) {
-            throw new \Exception("Account not found for user: " . $uuid);
+        if (! $account) {
+            throw new \Exception('Account not found for user: ' . $uuid);
         }
         return $account;
     }
 
     /**
      * Get the user's role on an environment.
-     *
-     * @param Environment $environment
      *
      * @deprecated use Environment::getUser() instead
      *
@@ -61,7 +63,6 @@ class ProjectAccess extends ApiResourceBase
     /**
      * Change the user's environment-level role.
      *
-     * @param Environment $environment
      * @param string $newRole The new role (see EnvironmentAccess::$roles).
      *
      * @return Result
@@ -71,28 +72,15 @@ class ProjectAccess extends ApiResourceBase
         $access = $environment->getUser($this->id);
         if ($access) {
             if ($access->role === $newRole) {
-                throw new \InvalidArgumentException("There is nothing to change");
+                throw new \InvalidArgumentException('There is nothing to change');
             }
 
-            return $access->update(['role' => $newRole]);
+            return $access->update([
+                'role' => $newRole,
+            ]);
         }
 
         return $environment->addUser($this->id, $newRole);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected static function checkProperty($property, $value)
-    {
-        $errors = [];
-        if ($property === 'email' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Invalid email address: '$value'";
-        }
-        elseif ($property === 'role' && !in_array($value, static::$roles)) {
-            $errors[] = "Invalid role: '$value'";
-        }
-        return $errors;
     }
 
     /**
@@ -103,5 +91,16 @@ class ProjectAccess extends ApiResourceBase
     public function isEditable()
     {
         return $this->operationAvailable('edit');
+    }
+
+    protected static function checkProperty($property, $value)
+    {
+        $errors = [];
+        if ($property === 'email' && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email address: '{$value}'";
+        } elseif ($property === 'role' && ! in_array($value, static::$roles, true)) {
+            $errors[] = "Invalid role: '{$value}'";
+        }
+        return $errors;
     }
 }

@@ -1,22 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Backups;
 
 class RestoreOptions
 {
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     private $environmentName;
 
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     private $branchFrom;
 
-    /** @var bool|null */
+    /**
+     * @var bool|null
+     */
     private $restoreCode;
 
-    /** @var bool|null */
+    /**
+     * @var bool|null
+     */
     private $restoreResources;
 
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     private $resourcesInit;
 
     /**

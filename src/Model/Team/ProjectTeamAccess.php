@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Team;
 
 use Platformsh\Client\Model\ResourceWithReferences;

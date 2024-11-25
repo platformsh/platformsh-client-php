@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\UserAccess;
 
 use Platformsh\Client\Model\Ref\UserRef;
@@ -16,10 +18,12 @@ use Platformsh\Client\Model\Result;
  */
 class ProjectUserAccess extends ResourceWithReferences
 {
-    const ROLE_ADMIN = 'admin';
-    const ROLE_VIEWER = 'viewer';
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_VIEWER = 'viewer';
 
     public static $projectRoles = [self::ROLE_ADMIN, self::ROLE_VIEWER];
+
     public static $environmentTypeRoles = ['admin', 'contributor', 'viewer'];
 
     /**
@@ -35,7 +39,7 @@ class ProjectUserAccess extends ResourceWithReferences
      */
     public function getProjectRole()
     {
-        if (in_array('admin', $this->data['permissions'])) {
+        if (in_array('admin', $this->data['permissions'], true)) {
             return 'admin';
         }
         return 'viewer';
@@ -59,7 +63,9 @@ class ProjectUserAccess extends ResourceWithReferences
     public function update(array $values)
     {
         // A successful PATCH on this resource returns an empty 204 result.
-        $this->client->patch($this->getLink('update'), ['json' => $values]);
+        $this->client->patch($this->getLink('update'), [
+            'json' => $values,
+        ]);
 
         // TODO this may not be exactly the right merge semantics in general, but it works in this case as this resource only has one writable key
         $this->data = array_replace_recursive($this->data, $values);

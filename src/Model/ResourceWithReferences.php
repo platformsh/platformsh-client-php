@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
@@ -11,35 +13,6 @@ use Platformsh\Client\Model\Ref\Resolver;
 class ResourceWithReferences extends ApiResourceBase
 {
     protected static $collectionItemsKey = 'items';
-
-    protected function setData(array $data)
-    {
-        // References are resolved upon initialization so that the links are less likely to have expired.
-        $data = self::resolveReferences(new Resolver($this->client, $this->baseUrl), $data);
-        parent::setData($data);
-    }
-
-    /**
-     * @param Resolver $resolver
-     * @param array $data
-     *
-     * @return array
-     */
-    protected static function resolveReferences(Resolver $resolver, array $data)
-    {
-        if (isset($data['_links'])) {
-            try {
-                $data = $resolver->resolveReferences($data);
-            } catch (\Exception $e) {
-                $message = $e->getMessage();
-                if ($e instanceof BadResponseException && $e->getResponse()) {
-                    $message = \sprintf('status code %d', $e->getResponse()->getStatusCode());
-                }
-                \trigger_error('Unable to resolve references: ' . $message, E_USER_WARNING);
-            }
-        }
-        return $data;
-    }
 
     public static function wrapCollection($data, $baseUrl, ClientInterface $client)
     {
@@ -94,8 +67,6 @@ class ResourceWithReferences extends ApiResourceBase
      * Use $options['query']['page'] to specify a page number explicitly.
      *
      * @param string $url
-     * @param ClientInterface $client
-     * @param array $options
      *
      * @return array{items: static[], next: ?string, previous: ?string}
      */
@@ -105,7 +76,11 @@ class ResourceWithReferences extends ApiResourceBase
         $data = static::send($request, $client, $options);
         $items = static::wrapCollection($data, $url, $client);
 
-        $ret = ['items' => $items, 'next' => null, 'previous' => null];
+        $ret = [
+            'items' => $items,
+            'next' => null,
+            'previous' => null,
+        ];
 
         $base = new Uri($url);
         foreach (['previous', 'next'] as $rel) {
@@ -117,5 +92,31 @@ class ResourceWithReferences extends ApiResourceBase
         }
 
         return $ret;
+    }
+
+    protected function setData(array $data)
+    {
+        // References are resolved upon initialization so that the links are less likely to have expired.
+        $data = self::resolveReferences(new Resolver($this->client, $this->baseUrl), $data);
+        parent::setData($data);
+    }
+
+    /**
+     * @return array
+     */
+    protected static function resolveReferences(Resolver $resolver, array $data)
+    {
+        if (isset($data['_links'])) {
+            try {
+                $data = $resolver->resolveReferences($data);
+            } catch (\Exception $e) {
+                $message = $e->getMessage();
+                if ($e instanceof BadResponseException && $e->getResponse()) {
+                    $message = \sprintf('status code %d', $e->getResponse()->getStatusCode());
+                }
+                \trigger_error('Unable to resolve references: ' . $message, E_USER_WARNING);
+            }
+        }
+        return $data;
     }
 }

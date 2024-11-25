@@ -1,39 +1,69 @@
-<?php /** @noinspection PhpUnusedPrivateFieldInspection */
+<?php
+
+declare(strict_types=1);
+/** @noinspection PhpUnusedPrivateFieldInspection */
 
 namespace Platformsh\Client\Model\Subscription;
 
-final class SubscriptionOptions {
-    /** @var string|NULL */
+final class SubscriptionOptions
+{
+    /**
+     * @var string|null
+     */
     private $project_region;
-    /** @var string|NULL */
+
+    /**
+     * @var string|null
+     */
     private $project_title;
-    /** @var string|NULL */
+
+    /**
+     * @var string|null
+     */
     private $default_branch;
-    /** @var string|NULL */
+
+    /**
+     * @var string|null
+     */
     private $options_url;
-    /** @var array|NULL */
+
+    /**
+     * @var array|null
+     */
     private $options_custom;
-    /** @var string|NULL */
+
+    /**
+     * @var string|null
+     */
     private $plan;
-    /** @var int|NULL */
+
+    /**
+     * @var int|null
+     */
     private $environments;
-    /** @var int|NULL */
+
+    /**
+     * @var int|null
+     */
     private $storage;
-    /** @var string|NULL */
+
+    /**
+     * @var string|null
+     */
     private $owner;
 
     /**
-     * @var array|NULL
+     * @var array|null
      * @deprecated This is no longer supported. Poll the subscription instead of submitting a callback.
      */
     private $activation_callback;
 
-    /** @var string|NULL */
+    /**
+     * @var string|null
+     */
     private $organization_id;
 
     /**
-     * @param array $options
-     *
      * @return SubscriptionOptions
      */
     public static function fromArray(array $options)
@@ -41,7 +71,7 @@ final class SubscriptionOptions {
         $obj = new self();
         foreach ($options as $key => $value) {
             if (\property_exists($obj, $key)) {
-                $obj->$key = $value;
+                $obj->{$key} = $value;
             } else {
                 throw new \InvalidArgumentException('Unknown property: ' . $key);
             }
@@ -49,8 +79,11 @@ final class SubscriptionOptions {
         return $obj;
     }
 
-    /** @return array */
-    public function toArray() {
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
         $arr = [];
         foreach ($this as $key => $value) {
             if ($value !== null && $value !== 'organization_id') {
@@ -60,8 +93,11 @@ final class SubscriptionOptions {
         return $arr;
     }
 
-    /** @return string|NULL */
-    public function organizationId() {
+    /**
+     * @return string|null
+     */
+    public function organizationId()
+    {
         return $this->organization_id;
     }
 }

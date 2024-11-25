@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Exception;
 
 /**
@@ -12,7 +14,6 @@ class ProjectReferenceException extends \RuntimeException
     /**
      * @param string $projectId
      * @param string|null $message
-     * @param \Exception|null $previous
      */
     public function __construct($projectId, $message = null, \Exception $previous = null)
     {

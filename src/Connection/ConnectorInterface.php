@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Connection;
 
 use GuzzleHttp\ClientInterface;
@@ -7,7 +9,6 @@ use Platformsh\Client\Session\SessionInterface;
 
 interface ConnectorInterface
 {
-
     /**
      * Get the session instance for this connection.
      *

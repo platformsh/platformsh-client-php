@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Tests\Model\Type;
 
 use PHPUnit\Framework\TestCase;
@@ -7,7 +9,6 @@ use Platformsh\Client\Model\Type\Duration;
 
 class DurationTest extends TestCase
 {
-
     public function testStringToSeconds()
     {
         $expected = [
@@ -66,7 +67,7 @@ class DurationTest extends TestCase
         foreach ($expected as $key => $expectation) {
             list($a, $b) = $expectation;
             $actual[$key] = [
-                $a, $b, (new Duration($a))->compare(new Duration($b))
+                $a, $b, (new Duration($a))->compare(new Duration($b)),
             ];
         }
         $this->assertEquals($expected, $actual);

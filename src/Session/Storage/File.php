@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Session\Storage;
 
 class File implements SessionStorageInterface
 {
+    public const FILE_MODE = 0600;
 
-    const FILE_MODE = 0600;
-    const DIR_MODE = 0700;
+    public const DIR_MODE = 0700;
 
     protected $directory;
 
@@ -18,6 +20,40 @@ class File implements SessionStorageInterface
     public function __construct($directory = null)
     {
         $this->directory = $directory ?: $this->getDefaultDirectory();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function save($sessionId, array $data)
+    {
+        $filename = $this->getFilename($sessionId);
+        if (empty($data)) {
+            if (file_exists($filename)) {
+                unlink($filename);
+            }
+            return;
+        }
+        $this->mkDir(dirname($filename));
+        $result = file_put_contents($filename, json_encode($data), LOCK_EX);
+        if ($result === false) {
+            throw new \Exception("Failed to save session to file: {$filename}");
+        }
+        chmod($filename, self::FILE_MODE);
+    }
+
+    public function load($sessionId)
+    {
+        $data = [];
+        $filename = $this->getFilename($sessionId);
+        if (is_readable($filename)) {
+            $raw = file_get_contents($filename);
+            if ($raw !== false) {
+                $data = json_decode($raw, true);
+            }
+        }
+
+        return is_array($data) ? $data : [];
     }
 
     /**
@@ -58,7 +94,7 @@ class File implements SessionStorageInterface
         }
 
         $current = $path;
-        while (!file_exists($current) && ($parent = dirname($current)) && $parent !== $current) {
+        while (! file_exists($current) && ($parent = dirname($current)) && $parent !== $current) {
             if (is_writable($parent)) {
                 return true;
             }
@@ -76,35 +112,14 @@ class File implements SessionStorageInterface
     protected function getHomeDirectory()
     {
         $home = getenv('HOME');
-        if (!$home && ($userProfile = getenv('USERPROFILE'))) {
+        if (! $home && ($userProfile = getenv('USERPROFILE'))) {
             $home = $userProfile;
         }
-        if (!$home || !is_dir($home)) {
+        if (! $home || ! is_dir($home)) {
             return null;
         }
 
         return $home;
-    }
-
-    /**
-     * @inheritdoc
-     * @throws \Exception
-     */
-    public function save($sessionId, array $data)
-    {
-        $filename = $this->getFilename($sessionId);
-        if (empty($data)) {
-            if (file_exists($filename)) {
-                unlink($filename);
-            }
-            return;
-        }
-        $this->mkDir(dirname($filename));
-        $result = file_put_contents($filename, json_encode($data), LOCK_EX);
-        if ($result === false) {
-            throw new \Exception("Failed to save session to file: $filename");
-        }
-        chmod($filename, self::FILE_MODE);
     }
 
     /**
@@ -117,7 +132,7 @@ class File implements SessionStorageInterface
         $id = preg_replace('/[^\w\-]+/', '-', $sessionId);
         $dir = $this->getDirectory();
 
-        return "$dir/sess-$id/sess-$id.json";
+        return "{$dir}/sess-{$id}/sess-{$id}.json";
     }
 
     /**
@@ -137,29 +152,12 @@ class File implements SessionStorageInterface
      */
     protected function mkDir($dir)
     {
-        if (!file_exists($dir)) {
+        if (! file_exists($dir)) {
             mkdir($dir, self::DIR_MODE, true);
             chmod($dir, self::DIR_MODE);
         }
-        if (!is_dir($dir)) {
-            throw new \Exception("Failed to create directory: $dir");
+        if (! is_dir($dir)) {
+            throw new \Exception("Failed to create directory: {$dir}");
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function load($sessionId)
-    {
-        $data = [];
-        $filename = $this->getFilename($sessionId);
-        if (is_readable($filename)) {
-            $raw = file_get_contents($filename);
-            if ($raw !== false) {
-                $data = json_decode($raw, true);
-            }
-        }
-
-        return is_array($data) ? $data : [];
     }
 }

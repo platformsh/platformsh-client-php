@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
@@ -17,8 +19,11 @@ use Platformsh\Client\Model\Ref\Resolver;
 class Collection
 {
     private $data;
+
     private $client;
+
     private $baseUrl;
+
     private $resolver;
 
     public function __construct(array $data, ClientInterface $client, $baseUrl)
@@ -49,8 +54,6 @@ class Collection
 
     /**
      * @internal
-     * @param array $data
-     * @return void
      */
     public function setData(array $data)
     {
@@ -62,7 +65,7 @@ class Collection
      */
     public function hasNextPage()
     {
-        return !empty($this->data['_links']['next']['href']);
+        return ! empty($this->data['_links']['next']['href']);
     }
 
     /**
@@ -92,7 +95,7 @@ class Collection
      */
     public function hasPreviousPage()
     {
-        return !empty($this->data['_links']['previous']['href']);
+        return ! empty($this->data['_links']['previous']['href']);
     }
 
     /**

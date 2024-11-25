@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -17,9 +19,6 @@ class Region extends ApiResourceBase
 {
     protected static $collectionItemsKey = 'regions';
 
-    /**
-     * @inheritdoc
-     */
     public function operationAvailable($op, $refreshDuringCheck = false)
     {
         if ($op === 'edit') {
@@ -29,9 +28,6 @@ class Region extends ApiResourceBase
         return parent::operationAvailable($op, $refreshDuringCheck);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getLink($rel, $absolute = false)
     {
         if ($rel === '#edit') {

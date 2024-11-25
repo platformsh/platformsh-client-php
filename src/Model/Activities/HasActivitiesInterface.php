@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Activities;
 
 use DateTime;
@@ -13,7 +15,6 @@ use Platformsh\Client\Model\Activity;
  */
 interface HasActivitiesInterface
 {
-
     /**
      * Get a single activity.
      *
@@ -26,7 +27,6 @@ interface HasActivitiesInterface
     /**
      * Get a list of activities.
      *
-
      * @param int $limit
      *   Limit the number of activities to return. Zero for no limit.
      * @param string|string[]|null $type

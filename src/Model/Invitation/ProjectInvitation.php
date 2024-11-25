@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Invitation;
 
 use Platformsh\Client\Model\ApiResourceBase;
@@ -16,7 +18,6 @@ use Platformsh\Client\Model\ApiResourceBase;
  */
 class ProjectInvitation extends ApiResourceBase
 {
-
     /**
      * {@inheritDoc}
      *

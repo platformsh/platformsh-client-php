@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Deployment;
 
 use Platformsh\Client\Model\ApiResourceBase;
@@ -28,9 +30,6 @@ class EnvironmentDeployment extends ApiResourceBase
         'workers' => Worker::class,
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     public function __get($name)
     {
         if (isset(self::$types[$name])) {
@@ -54,14 +53,14 @@ class EnvironmentDeployment extends ApiResourceBase
         if (str_starts_with($name, 'get')) {
             $type = substr($name, 3);
             $property = strtolower($type) . 's';
-            if (!isset(self::$types[$property])) {
+            if (! isset(self::$types[$property])) {
                 throw new \BadMethodCallException(sprintf('Method not found: %s()', $name));
             }
             if (count($arguments) !== 1) {
                 throw new \InvalidArgumentException(sprintf('%s() expects exactly one argument', $name));
             }
             $key = $arguments[0];
-            if (!isset($this->data[$property][$key])) {
+            if (! isset($this->data[$property][$key])) {
                 throw new \InvalidArgumentException(sprintf('%s not found: %s', $type, $key));
             }
             $className = self::$types[$property];
@@ -86,7 +85,7 @@ class EnvironmentDeployment extends ApiResourceBase
     {
         $operations = [];
         foreach (['webapps', 'workers'] as $appType) {
-            foreach ($this->$appType as $appName => $app) {
+            foreach ($this->{$appType} as $appName => $app) {
                 /** @var AppBase $app */
                 $operations[$appName] = $app->getRuntimeOperations();
             }

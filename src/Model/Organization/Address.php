@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Organization;
 
 use GuzzleHttp\ClientInterface;
@@ -26,8 +28,6 @@ class Address extends ApiResourceBase
      *
      * This updates the resource's internal data with the API response.
      *
-     * @param array $values
-     *
      * @return Result
      */
     public function update(array $values)
@@ -35,14 +35,14 @@ class Address extends ApiResourceBase
         // @todo use getLink('#edit') when it is available
         $url = $this->getUri();
         $options = [];
-        if (!empty($values)) {
+        if (! empty($values)) {
             $options['json'] = $values;
         }
         $response = $this->client->patch($url, $options);
         $data = Utils::jsonDecode($response->getBody(), true);
         $this->setData($data);
 
-        return new Result($data, $this->baseUrl, $this->client, get_called_class());
+        return new Result($data, $this->baseUrl, $this->client, static::class);
     }
 
     public static function create(array $body, $collectionUrl, ClientInterface $client)
@@ -52,7 +52,7 @@ class Address extends ApiResourceBase
 
     public function getLink($rel, $absolute = true)
     {
-        if (!$this->hasLink($rel)) {
+        if (! $this->hasLink($rel)) {
             // The address API does not expose HAL links yet.
             if ($rel === 'self') {
                 return $this->baseUrl;

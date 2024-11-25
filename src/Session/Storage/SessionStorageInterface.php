@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Session\Storage;
 
 interface SessionStorageInterface
@@ -17,7 +19,6 @@ interface SessionStorageInterface
      * Save data to a session.
      *
      * @param string $sessionId
-     * @param array  $data
      */
     public function save($sessionId, array $data);
 }

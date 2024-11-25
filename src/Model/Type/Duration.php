@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Type;
 
 /**
@@ -7,8 +9,6 @@ namespace Platformsh\Client\Model\Type;
  */
 class Duration
 {
-    private $seconds;
-
     public static $suffixes = [
         's' => 1,
         'm' => 60,
@@ -19,22 +19,14 @@ class Duration
         'y' => 365 * 24 * 60 * 60,
     ];
 
+    private $seconds;
+
     /**
      * @param int|string $duration
      */
     public function __construct($duration)
     {
         $this->seconds = self::stringToSeconds((string) $duration);
-    }
-
-    /**
-     * Returns the duration as a number of seconds.
-     *
-     * @return int|float
-     */
-    public function getSeconds()
-    {
-        return $this->seconds;
     }
 
     /**
@@ -54,6 +46,28 @@ class Duration
     }
 
     /**
+     * Returns the duration as a number of seconds.
+     *
+     * @return int|float
+     */
+    public function getSeconds()
+    {
+        return $this->seconds;
+    }
+
+    /**
+     * Compares the current Duration object to another one.
+     *
+     * @return int
+     *     0 if the durations are equal, 1 if the current duration is greater,
+     *     and -1 if the $other duration is greater.
+     */
+    public function compare(self $other)
+    {
+        return $this->getSeconds() <=> $other->getSeconds();
+    }
+
+    /**
      * Converts a duration string to seconds.
      *
      * @param string $duration
@@ -70,24 +84,10 @@ class Duration
             $amount = $duration;
         }
 
-        if (!is_numeric($amount)) {
+        if (! is_numeric($amount)) {
             throw new \InvalidArgumentException('Invalid duration: ' . $duration);
         }
 
         return $unit * $amount;
-    }
-
-    /**
-     * Compares the current Duration object to another one.
-     *
-     * @param Duration $other
-     *
-     * @return int
-     *     0 if the durations are equal, 1 if the current duration is greater,
-     *     and -1 if the $other duration is greater.
-     */
-    public function compare(Duration $other)
-    {
-        return $this->getSeconds() <=> $other->getSeconds();
     }
 }

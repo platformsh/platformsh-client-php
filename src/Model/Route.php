@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -17,5 +19,4 @@ namespace Platformsh\Client\Model;
  */
 class Route extends ApiResourceBase
 {
-
 }

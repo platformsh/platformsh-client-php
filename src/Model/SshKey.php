@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -11,7 +13,6 @@ namespace Platformsh\Client\Model;
  */
 class SshKey extends ApiResourceBase
 {
-
     protected static $required = ['value'];
 
     protected static $allowedAlgorithms = [
@@ -24,17 +25,6 @@ class SshKey extends ApiResourceBase
     ];
 
     /**
-     * @inheritdoc
-     */
-    protected static function checkProperty($property, $value)
-    {
-        if ($property === 'value' && !self::validatePublicKey($value)) {
-            return ["The SSH key is invalid"];
-        }
-        return [];
-    }
-
-    /**
      * Validate an SSH public key.
      *
      * @param string $value
@@ -44,11 +34,11 @@ class SshKey extends ApiResourceBase
     public static function validatePublicKey($value)
     {
         $value = preg_replace('/\s+/', ' ', $value);
-        if (!strpos($value, ' ')) {
+        if (! strpos($value, ' ')) {
             return false;
         }
         list($type, $key) = explode(' ', $value, 3);
-        if (!in_array($type, static::$allowedAlgorithms) || base64_decode($key, true) === false) {
+        if (! in_array($type, static::$allowedAlgorithms, true) || base64_decode($key, true) === false) {
             return false;
         }
 
@@ -56,8 +46,6 @@ class SshKey extends ApiResourceBase
     }
 
     /**
-     * @inheritdoc
-     *
      * @throws \BadMethodCallException
      */
     public function update(array $values)
@@ -65,12 +53,17 @@ class SshKey extends ApiResourceBase
         throw new \BadMethodCallException('Update is not implemented for SSH keys');
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getUri($absolute = true)
     {
         // Work around absence of HAL links in the current API.
         return $this->baseUrl;
+    }
+
+    protected static function checkProperty($property, $value)
+    {
+        if ($property === 'value' && ! self::validatePublicKey($value)) {
+            return ['The SSH key is invalid'];
+        }
+        return [];
     }
 }

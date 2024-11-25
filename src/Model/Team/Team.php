@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Team;
 
 use GuzzleHttp\ClientInterface;
@@ -20,8 +22,6 @@ class Team extends ApiResourceBase
     protected static $collectionItemsKey = 'items';
 
     /**
-     * {@inheritdoc}
-     *
      * @internal Use Organization::createTeam() to create a team.
      *
      * @see \Platformsh\Client\Model\Organization\Organization::createTeam()
@@ -37,7 +37,9 @@ class Team extends ApiResourceBase
     public function update(array $values)
     {
         // A successful PATCH on this resource returns an empty 204 result.
-        $this->client->patch($this->getUri(), ['json' => $values]);
+        $this->client->patch($this->getUri(), [
+            'json' => $values,
+        ]);
 
         // TODO this may not be exactly the right merge semantics in general, but it works in this case as this resource only has 2 writable keys
         $this->data = array_replace_recursive($this->data, $values);

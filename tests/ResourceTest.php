@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -7,30 +9,29 @@ use Platformsh\Client\Model\ApiResourceBase;
 
 class ResourceTest extends TestCase
 {
-
     protected array $properties;
 
     protected ApiResourceBase $resource;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->properties = [
-          'id' => 'test-id',
-          'name' => 'test name',
-          'array' => [],
-          'integer' => 123,
+            'id' => 'test-id',
+            'name' => 'test name',
+            'array' => [],
+            'integer' => 123,
         ];
         $data = $this->properties + [
             '_embedded' => [],
             '_links' => [
-              'self' => [
-                'href' => 'https://example.com/resources/test-id',
-              ],
-              '#operate' => [
-                'href' => '/resources/test-id/operate',
-              ],
+                'self' => [
+                    'href' => 'https://example.com/resources/test-id',
+                ],
+                '#operate' => [
+                    'href' => '/resources/test-id/operate',
+                ],
             ],
-          ];
+        ];
         $this->resource = new MockApiResource($data, 'https://example.com/', null, true);
     }
 
@@ -90,6 +91,8 @@ class ResourceTest extends TestCase
     {
         $resource = new MockApiResource([]);
         $this->expectException('\InvalidArgumentException');
-        $resource->update(['testProperty' => 2]);
+        $resource->update([
+            'testProperty' => 2,
+        ]);
     }
 }

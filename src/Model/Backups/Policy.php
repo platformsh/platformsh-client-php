@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Backups;
 
 use Platformsh\Client\Model\Type\Duration;
@@ -7,6 +9,7 @@ use Platformsh\Client\Model\Type\Duration;
 class Policy
 {
     private $interval;
+
     private $count;
 
     /**

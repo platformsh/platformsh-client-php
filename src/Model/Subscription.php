@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
@@ -24,6 +26,17 @@ use Platformsh\Client\Model\Ref\OrganizationRef;
  */
 class Subscription extends ResourceWithReferences
 {
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_REQUESTED = 'requested';
+
+    public const STATUS_PROVISIONING = 'provisioning';
+
+    public const STATUS_FAILED = 'provisioning failure';
+
+    public const STATUS_SUSPENDED = 'suspended';
+
+    public const STATUS_DELETED = 'deleted';
 
     /**
      * List of available plans.
@@ -47,16 +60,7 @@ class Subscription extends ResourceWithReferences
 
     protected static $required = ['project_region'];
 
-    const STATUS_ACTIVE = 'active';
-    const STATUS_REQUESTED = 'requested';
-    const STATUS_PROVISIONING = 'provisioning';
-    const STATUS_FAILED = 'provisioning failure';
-    const STATUS_SUSPENDED = 'suspended';
-    const STATUS_DELETED = 'deleted';
-
     /**
-     * {@inheritdoc}
-     *
      * @internal Use PlatformClient::createSubscription() to create a new subscription.
      *
      * @see \Platformsh\Client\PlatformClient::createSubscription()
@@ -67,7 +71,7 @@ class Subscription extends ResourceWithReferences
     {
         $result = parent::create($body, $collectionUrl, $client);
 
-        return new Subscription($result->getData(), $collectionUrl, $client);
+        return new self($result->getData(), $collectionUrl, $client);
     }
 
     /**
@@ -87,26 +91,6 @@ class Subscription extends ResourceWithReferences
                 $onPoll($this);
             }
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected static function checkProperty($property, $value)
-    {
-        $errors = [];
-        if ($property === 'storage' && $value < 1024) {
-            $errors[] = "Storage must be at least 1024 MiB";
-        }
-        elseif ($property === 'activation_callback') {
-            if (!isset($value['uri'])) {
-                $errors[] = "A 'uri' key is required in the activation callback";
-            }
-            elseif (!filter_var($value['uri'], FILTER_VALIDATE_URL)) {
-                $errors[] = 'Invalid URI in activation callback';
-            }
-        }
-        return $errors;
     }
 
     /**
@@ -164,25 +148,13 @@ class Subscription extends ResourceWithReferences
      */
     public function getProject()
     {
-        if (!$this->hasLink('project') && !$this->isActive()) {
+        if (! $this->hasLink('project') && ! $this->isActive()) {
             throw new \BadMethodCallException('Inactive subscriptions do not have projects.');
         }
         $url = $this->getLink('project');
         return Project::get($url, null, $this->client);
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function setData(array $data)
-    {
-        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : $data;
-        $this->data = $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public static function wrapCollection($data, $baseUrl, ClientInterface $client)
     {
         $dataArray = $data instanceof Collection ? $data->getData() : $data;
@@ -194,9 +166,6 @@ class Subscription extends ResourceWithReferences
         return parent::wrapCollection($data, $baseUrl, $client);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function operationAvailable($op, $refreshDuringCheck = false)
     {
         if ($op === 'edit') {
@@ -206,9 +175,6 @@ class Subscription extends ResourceWithReferences
         return parent::operationAvailable($op, $refreshDuringCheck);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getLink($rel, $absolute = false)
     {
         if ($rel === '#edit') {
@@ -228,5 +194,26 @@ class Subscription extends ResourceWithReferences
             return $this->data['ref:organizations'][$this->data['organization_id']];
         }
         return null;
+    }
+
+    protected static function checkProperty($property, $value)
+    {
+        $errors = [];
+        if ($property === 'storage' && $value < 1024) {
+            $errors[] = 'Storage must be at least 1024 MiB';
+        } elseif ($property === 'activation_callback') {
+            if (! isset($value['uri'])) {
+                $errors[] = "A 'uri' key is required in the activation callback";
+            } elseif (! filter_var($value['uri'], FILTER_VALIDATE_URL)) {
+                $errors[] = 'Invalid URI in activation callback';
+            }
+        }
+        return $errors;
+    }
+
+    protected function setData(array $data)
+    {
+        $data = isset($data['subscriptions'][0]) ? $data['subscriptions'][0] : $data;
+        $this->data = $data;
     }
 }

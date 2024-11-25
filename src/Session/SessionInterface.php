@@ -1,16 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Session;
 
 use Platformsh\Client\Session\Storage\SessionStorageInterface;
 
 interface SessionInterface
 {
-
     /**
      * Set the storage for this session.
-     *
-     * @param SessionStorageInterface $storage
      */
     public function setStorage(SessionStorageInterface $storage);
 

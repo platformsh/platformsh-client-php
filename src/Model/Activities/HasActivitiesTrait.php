@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Activities;
 
 use Platformsh\Client\Model\Activity;
@@ -9,19 +11,13 @@ use Platformsh\Client\Model\Activity;
  *
  * @see HasActivitiesInterface
  */
-trait HasActivitiesTrait {
-
-    /**
-     * {@inheritDoc}
-     */
+trait HasActivitiesTrait
+{
     public function getActivity($id)
     {
         return Activity::get($id, $this->getUri() . '/activities', $this->client);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getActivities($limit = 0, $type = null, $startsAt = null, $state = null, $result = null)
     {
         $query = '';
@@ -33,7 +29,7 @@ trait HasActivitiesTrait {
         if ($startsAt !== null) {
             $query .= '&starts_at=' . Activity::formatStartsAt($startsAt);
         }
-        if (!empty($limit)) {
+        if (! empty($limit)) {
             $query .= '&count=' . $limit;
         }
         if ($result !== null) {

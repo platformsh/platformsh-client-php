@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use DateTime;
@@ -34,14 +36,17 @@ use Psr\Http\Message\StreamInterface;
  */
 class Activity extends ApiResourceBase
 {
+    public const RESULT_SUCCESS = 'success';
 
-    const RESULT_SUCCESS = 'success';
-    const RESULT_FAILURE = 'failure';
+    public const RESULT_FAILURE = 'failure';
 
-    const STATE_COMPLETE = 'complete';
-    const STATE_IN_PROGRESS = 'in_progress';
-    const STATE_PENDING = 'pending';
-    const STATE_CANCELLED = 'cancelled';
+    public const STATE_COMPLETE = 'complete';
+
+    public const STATE_IN_PROGRESS = 'in_progress';
+
+    public const STATE_PENDING = 'pending';
+
+    public const STATE_CANCELLED = 'cancelled';
 
     /**
      * Wait for the activity to complete.
@@ -67,10 +72,12 @@ class Activity extends ApiResourceBase
             }
         }
         $retries = 0;
-        while (!$this->isComplete() && $this->state !== self::STATE_CANCELLED) {
+        while (! $this->isComplete() && $this->state !== self::STATE_CANCELLED) {
             usleep($pollInterval * 1000000);
             try {
-                $this->refresh(['timeout' => $pollInterval + 5]);
+                $this->refresh([
+                    'timeout' => $pollInterval + 5,
+                ]);
                 if ($onPoll !== null) {
                     $onPoll($this);
                 }
@@ -92,7 +99,7 @@ class Activity extends ApiResourceBase
     /**
      * Allows reading the streaming activity log.
      *
-     * @param callable|NULL $onUpdate
+     * @param callable|null $onUpdate
      *   A callback that receives an array of LogItem objects when there are
      *   new ones available. Usually this will be 0 items or 1 item.
      *
@@ -111,27 +118,6 @@ class Activity extends ApiResourceBase
         }
 
         return LogItem::multipleFromJsonStream($body->__toString());
-    }
-
-    /**
-     * Reads the next line of a stream.
-     *
-     * @param StreamInterface $stream
-     * @param string $newline
-     *
-     * @return string
-     */
-    private function readline(StreamInterface $stream, $newline = "\n") {
-        $buffer = '';
-        while (!$stream->eof()) {
-            $byte = $stream->read(1);
-            $buffer .= $byte;
-            if ($byte === $newline) {
-                break;
-            }
-        }
-
-        return $buffer;
     }
 
     /**
@@ -174,7 +160,7 @@ class Activity extends ApiResourceBase
         if ($this->getProperty('type') !== 'environment.backup') {
             throw new \BadMethodCallException('Cannot restore activity (wrong type)');
         }
-        if (!$this->isComplete()) {
+        if (! $this->isComplete()) {
             throw new \BadMethodCallException('Cannot restore backup (not complete)');
         }
 
@@ -226,18 +212,39 @@ class Activity extends ApiResourceBase
         if ($timestamp instanceof DateTime) {
             // Override the timezone to produce a UTC ISO date
             $date = clone $timestamp;
-            $date->setTimezone(new DateTimeZone("UTC"));
+            $date->setTimezone(new DateTimeZone('UTC'));
         } else {
             // Parse the UNIX UTC timestamp (seconds) into a DateTime
-            $date = DateTime::createFromFormat('U', (string) $timestamp, new DateTimeZone("UTC"));
+            $date = DateTime::createFromFormat('U', (string) $timestamp, new DateTimeZone('UTC'));
         }
 
-        if (!$date) {
+        if (! $date) {
             throw new \RuntimeException(sprintf('Failed to format timestamp: %d', $timestamp));
         }
 
         # Sample: 2022-02-22T02:00:00.000000+00:00
         return $date->format('Y-m-d\TH:i:s.uP');
+    }
+
+    /**
+     * Reads the next line of a stream.
+     *
+     * @param string $newline
+     *
+     * @return string
+     */
+    private function readline(StreamInterface $stream, $newline = "\n")
+    {
+        $buffer = '';
+        while (! $stream->eof()) {
+            $byte = $stream->read(1);
+            $buffer .= $byte;
+            if ($byte === $newline) {
+                break;
+            }
+        }
+
+        return $buffer;
     }
 
     /**

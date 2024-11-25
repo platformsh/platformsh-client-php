@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
@@ -102,7 +104,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     public function getCurrentDeployment($required = true)
     {
         $deployment = EnvironmentDeployment::get('current', $this->getUri() . '/deployments', $this->client);
-        if (!$deployment && $required) {
+        if (! $deployment && $required) {
             throw new EnvironmentStateException('Current deployment not found', $this);
         }
 
@@ -156,7 +158,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         if (isset($urls[$app])) {
             return $urls[$app];
         }
-        if (!empty($instances)) {
+        if (! empty($instances)) {
             return reset($instances);
         }
 
@@ -178,7 +180,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         $urls = $sshUrls === null ? $this->getSshUrls() : $sshUrls;
         $instances = [];
         foreach ($urls as $key => $url) {
-            if (str_starts_with($key, "$app:")) {
+            if (str_starts_with($key, "{$app}:")) {
                 $parts = explode(':', $key, 3);
                 if (isset($parts[1])) {
                     $instances[$parts[1]] = $url;
@@ -204,7 +206,6 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * Workers themselves can be listed via getCurrentDeployment()->workers.
      *
-     * @param Worker $worker
      * @param string $instance
      *
      * @return string
@@ -212,59 +213,6 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     public function getWorkerSshUrl(Worker $worker, $instance = '')
     {
         return $this->getSshUrl($worker->name, $instance);
-    }
-
-    /**
-     * Get the SSH URL via the legacy 'ssh' link.
-     *
-     * @return string
-     */
-    private function constructLegacySshUrl()
-    {
-        if (!$this->hasLink('ssh')) {
-            if ($this->data['status'] !== 'active') {
-                throw new EnvironmentStateException(sprintf(
-                    "No SSH URL found for environment '%s'. It is not currently active (status: %s).",
-                    $this->data['id'], $this->data['status']
-                ), $this);
-            }
-            throw new OperationUnavailableException(sprintf(
-                "No SSH URL found for environment '%s'. You may not have permission to SSH.",
-                $this->data['id']
-            ));
-        }
-
-        return $this->convertSshUrl($this->getLink('ssh'));
-    }
-
-    /**
-     * Convert a full SSH URL (with scheme) into a normal SSH connection string.
-     *
-     * This can then be used with tools such as scp, etc.
-     *
-     * Only the username, host and path will be preserved (the port, password,
-     * query and fragment will be dropped).
-     *
-     * @param string $url The URL (starting with ssh://).
-     *
-     * @return string
-     */
-    private function convertSshUrl($url)
-    {
-        $parsed = parse_url($url);
-        if (!$parsed) {
-            throw new \InvalidArgumentException('Invalid URL: ' . $url);
-        }
-        $str = '';
-        if (!empty($parsed['user'])) {
-            $str .= $parsed['user'] . '@';
-        }
-        $str .= $parsed['host'];
-        if (!empty($parsed['path'])) {
-            $str .= ':' . $parsed['path'];
-        }
-
-        return $str;
     }
 
     /**
@@ -301,12 +249,12 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      */
     public function getPublicUrl()
     {
-        if (!$this->hasLink('public-url')) {
+        if (! $this->hasLink('public-url')) {
             $id = $this->data['id'];
-            if (!$this->isActive()) {
-                throw new EnvironmentStateException("No public URL found for environment '$id'. It is not currently active.", $this);
+            if (! $this->isActive()) {
+                throw new EnvironmentStateException("No public URL found for environment '{$id}'. It is not currently active.", $this);
             }
-            throw new OperationUnavailableException("No public URL found for environment '$id'.");
+            throw new OperationUnavailableException("No public URL found for environment '{$id}'.");
         }
 
         return $this->getLink('public-url');
@@ -338,8 +286,11 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     public function branch($title, $id = null, $cloneParent = true, $type = null)
     {
         $id = $id ?: $this->sanitizeId($title);
-        $body = ['name' => $id, 'title' => $title];
-        if (!$cloneParent) {
+        $body = [
+            'name' => $id,
+            'title' => $title,
+        ];
+        if (! $cloneParent) {
             $body['clone_parent'] = false;
         }
         if ($type !== null) {
@@ -373,7 +324,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      */
     public static function validateId($id)
     {
-        return !empty($id);
+        return ! empty($id);
     }
 
     /**
@@ -451,7 +402,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      */
     public function merge()
     {
-        if (!$this->getProperty('parent')) {
+        if (! $this->getProperty('parent')) {
             throw new OperationUnavailableException('The environment does not have a parent, so it cannot be merged');
         }
 
@@ -474,7 +425,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      */
     public function synchronize($data = false, $code = false, $rebase = false)
     {
-        if (!$data && !$code) {
+        if (! $data && ! $code) {
             throw new \InvalidArgumentException('Nothing to synchronize: you must specify $data or $code');
         }
         $body = [
@@ -541,13 +492,16 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
         $json = false,
         $enabled = true,
         $sensitive = false
-    )
-    {
-        if (!is_scalar($value)) {
+    ) {
+        if (! is_scalar($value)) {
             $value = json_encode($value);
             $json = true;
         }
-        $values = ['value' => $value, 'is_json' => $json, 'is_enabled' => $enabled];
+        $values = [
+            'value' => $value,
+            'is_json' => $json,
+            'is_enabled' => $enabled,
+        ];
         if ($sensitive) {
             $values['is_sensitive'] = $sensitive;
         }
@@ -624,14 +578,14 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return Activity
      */
-    public function initialize($profile, $repository, $files=[])
+    public function initialize($profile, $repository, $files = [])
     {
         $values = [
             'profile' => $profile,
             'repository' => $repository,
         ];
 
-        if (!empty($files)) {
+        if (! empty($files)) {
             $values['files'] = $files;
         }
 
@@ -677,7 +631,10 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     public function addUser($user, $role, $byUuid = true)
     {
         $property = $byUuid ? 'user' : 'email';
-        $body = [$property => $user, 'role' => $role];
+        $body = [
+            $property => $user,
+            'role' => $role,
+        ];
 
         return EnvironmentAccess::create($body, $this->getLink('#manage-access'), $this->client);
     }
@@ -733,8 +690,6 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Add a scheduled backup policy.
      *
-     * @param Policy $policy
-     *
      * @return Result
      */
     public function addBackupPolicy(Policy $policy)
@@ -745,14 +700,18 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
             'count' => $policy->getCount(),
         ];
 
-        $backups += ['manual_count' => 3];
+        $backups += [
+            'manual_count' => 3,
+        ];
 
         // Sort the backup schedule, by interval.
         usort($backups['schedule'], function (array $a, array $b) {
             return (new Duration($a['interval']))->compare(new Duration($b['interval']));
         });
 
-        return $this->update(['backups' => $backups]);
+        return $this->update([
+            'backups' => $backups,
+        ]);
     }
 
     /**
@@ -773,8 +732,6 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * @param array  $variables
      *   Variables to define during the operation, as a nested associative
      *   array, e.g. ['env'=>['foo'=>'bar']]
-     *
-     * @return Result
      */
     public function runSourceOperation(string $name, array $variables = []): Result
     {
@@ -816,5 +773,59 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     public function resume()
     {
         return $this->runLongOperation('resume');
+    }
+
+    /**
+     * Get the SSH URL via the legacy 'ssh' link.
+     *
+     * @return string
+     */
+    private function constructLegacySshUrl()
+    {
+        if (! $this->hasLink('ssh')) {
+            if ($this->data['status'] !== 'active') {
+                throw new EnvironmentStateException(sprintf(
+                    "No SSH URL found for environment '%s'. It is not currently active (status: %s).",
+                    $this->data['id'],
+                    $this->data['status']
+                ), $this);
+            }
+            throw new OperationUnavailableException(sprintf(
+                "No SSH URL found for environment '%s'. You may not have permission to SSH.",
+                $this->data['id']
+            ));
+        }
+
+        return $this->convertSshUrl($this->getLink('ssh'));
+    }
+
+    /**
+     * Convert a full SSH URL (with scheme) into a normal SSH connection string.
+     *
+     * This can then be used with tools such as scp, etc.
+     *
+     * Only the username, host and path will be preserved (the port, password,
+     * query and fragment will be dropped).
+     *
+     * @param string $url The URL (starting with ssh://).
+     *
+     * @return string
+     */
+    private function convertSshUrl($url)
+    {
+        $parsed = parse_url($url);
+        if (! $parsed) {
+            throw new \InvalidArgumentException('Invalid URL: ' . $url);
+        }
+        $str = '';
+        if (! empty($parsed['user'])) {
+            $str .= $parsed['user'] . '@';
+        }
+        $str .= $parsed['host'];
+        if (! empty($parsed['path'])) {
+            $str .= ':' . $parsed['path'];
+        }
+
+        return $str;
     }
 }

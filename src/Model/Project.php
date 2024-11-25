@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
-use GuzzleHttp\Exception\BadResponseException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
 use Platformsh\Client\Model\Activities\HasActivitiesTrait;
 use Platformsh\Client\Model\Invitation\AlreadyInvitedException;
-use Platformsh\Client\Model\Invitation\ProjectInvitation;
 use Platformsh\Client\Model\Invitation\Environment as InvitationEnvironment;
 use Platformsh\Client\Model\Invitation\Permission as InvitationPermission;
+use Platformsh\Client\Model\Invitation\ProjectInvitation;
 use Platformsh\Client\Model\Project\Capabilities;
 use Platformsh\Client\Model\Project\Settings;
 
@@ -51,7 +53,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function delete()
     {
-        throw new \BadMethodCallException("Projects should not be deleted directly. Delete the subscription instead.");
+        throw new \BadMethodCallException('Projects should not be deleted directly. Delete the subscription instead.');
     }
 
     /**
@@ -115,7 +117,10 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
         trigger_error('Calling Project::addUser() is deprecated; the method will be removed in a future version. Use Project::inviteUserByEmail() instead.', E_USER_DEPRECATED);
 
         $property = $byUuid ? 'user' : 'email';
-        $body = [$property => $user, 'role' => $role];
+        $body = [
+            $property => $user,
+            'role' => $role,
+        ];
 
         return ProjectAccess::create($body, $this->getLink('access'), $this->client);
     }
@@ -156,7 +161,6 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      *   A list of permissions for the invitation. Only used if the project role is not 'admin'.
      *
      * @throws AlreadyInvitedException if there is a pending invitation open with the same details
-     *
      */
     public function inviteUserByEmail($email, $role, array $environments = [], $force = false, array $permissions = [])
     {
@@ -165,17 +169,19 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
             'role' => $role,
         ];
 
-        if (!empty($permissions)) {
+        if (! empty($permissions)) {
             $data['permissions'] = InvitationPermission::listForApi($permissions);
         }
-        if (!empty($environments)) {
+        if (! empty($environments)) {
             $data['environments'] = InvitationEnvironment::listForApi($environments);
         }
         if ($force) {
             $data['force'] = true;
         }
 
-        $request = new Request('POST', $this->getLink('invitations'), ['Content-Type' => 'application/json'], \json_encode($data));
+        $request = new Request('POST', $this->getLink('invitations'), [
+            'Content-Type' => 'application/json',
+        ], \json_encode($data));
         try {
             $data = self::send($request, $this->client);
         } catch (BadResponseException $e) {
@@ -233,7 +239,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
          * @see makeAbsoluteUrl()
          */
         if ($rel === 'invitations' || $rel === 'access') {
-            if (!isset($this->urlViaGateway)) {
+            if (! isset($this->urlViaGateway)) {
                 throw new \RuntimeException('The API gateway URL must be set');
             }
         }
@@ -260,7 +266,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
         }
 
         if ($rel === 'invitations') {
-            if (!isset($this->urlViaGateway)) {
+            if (! isset($this->urlViaGateway)) {
                 throw new \RuntimeException('The API gateway URL must be set');
             }
             return rtrim($this->urlViaGateway, '/') . '/invitations';
@@ -344,14 +350,15 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * Add a domain to the project.
      *
      * @param string $name
-     * @param array  $ssl
      *
      * @return Result
      */
     public function addDomain($name, array $ssl = [])
     {
-        $body = ['name' => $name];
-        if (!empty($ssl)) {
+        $body = [
+            'name' => $name,
+        ];
+        if (! empty($ssl)) {
             $body['ssl'] = $ssl;
         }
 
@@ -386,13 +393,14 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * Add an integration to the project.
      *
      * @param string $type
-     * @param array $data
      *
      * @return Result
      */
     public function addIntegration($type, array $data = [])
     {
-        $body = ['type' => $type] + $data;
+        $body = [
+            'type' => $type,
+        ] + $data;
 
         return Integration::create($body, $this->getLink('integrations'), $this->client);
     }
@@ -404,7 +412,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      */
     public function isSuspended()
     {
-        return !empty($this->data['subscription']['suspended'])
+        return ! empty($this->data['subscription']['suspended'])
             || (isset($this->data['status']) && $this->data['status'] === 'suspended');
     }
 
@@ -447,7 +455,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
         $sensitive = false
     ) {
         // If $value isn't a scalar, assume it's supposed to be JSON.
-        if (!is_scalar($value)) {
+        if (! is_scalar($value)) {
             $value = json_encode($value);
             $json = true;
         }
@@ -455,7 +463,8 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
             'value' => $value,
             'is_json' => $json,
             'visible_build' => $visibleBuild,
-            'visible_runtime' => $visibleRuntime];
+            'visible_runtime' => $visibleRuntime,
+        ];
         if ($sensitive) {
             $values['is_sensitive'] = $sensitive;
         }
@@ -510,13 +519,16 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      *
      * @param string $certificate
      * @param string $key
-     * @param array  $chain
      *
      * @return Result
      */
     public function addCertificate($certificate, $key, array $chain = [])
     {
-        $options = ['key' => $key, 'certificate' => $certificate, 'chain' => $chain];
+        $options = [
+            'key' => $key,
+            'certificate' => $certificate,
+            'chain' => $chain,
+        ];
 
         return Certificate::create($options, $this->getUri() . '/certificates', $this->client);
     }

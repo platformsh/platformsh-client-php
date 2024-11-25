@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Ref;
 
 use GuzzleHttp\ClientInterface;
@@ -8,11 +10,10 @@ use GuzzleHttp\Psr7\Utils;
 class Resolver
 {
     private $client;
+
     private $baseUrl;
 
     /**
-     * Resolver constructor.
-     *
      * @param ClientInterface $client An authenticated Guzzle HTTP client.
      * @param string $baseUrl The API base URL (for making URLs absolute).
      */
@@ -33,7 +34,7 @@ class Resolver
      */
     public function resolveReferences(array $data)
     {
-        if (!isset($data['_links'])) {
+        if (! isset($data['_links'])) {
             return $data;
         }
         foreach ($data['_links'] as $key => $link) {
@@ -41,7 +42,7 @@ class Resolver
                 $set = $parts[1];
                 $linkUri = Utils::uriFor($link['href']);
                 $absoluteUrl = Utils::uriFor($this->baseUrl)->withPath($linkUri->getPath())->withQuery($linkUri->getQuery());
-                if (!isset($data['ref:' . $set])) {
+                if (! isset($data['ref:' . $set])) {
                     $data['ref:' . $set] = [];
                 }
                 $data['ref:' . $set] += \GuzzleHttp\Utils::jsonDecode($this->client->get($absoluteUrl)->getBody(), true);
@@ -51,28 +52,28 @@ class Resolver
         // Transform arrays into objects.
         if (isset($data['ref:users'])) {
             foreach ($data['ref:users'] as &$item) {
-                if ($item !== null && !$item instanceof UserRef) {
+                if ($item !== null && ! $item instanceof UserRef) {
                     $item = UserRef::fromData($item);
                 }
             }
         }
         if (isset($data['ref:organizations'])) {
             foreach ($data['ref:organizations'] as &$item) {
-                if ($item !== null && !$item instanceof OrganizationRef) {
+                if ($item !== null && ! $item instanceof OrganizationRef) {
                     $item = OrganizationRef::fromData($item);
                 }
             }
         }
         if (isset($data['ref:projects'])) {
             foreach ($data['ref:projects'] as &$item) {
-                if ($item !== null && !$item instanceof ProjectRef) {
+                if ($item !== null && ! $item instanceof ProjectRef) {
                     $item = ProjectRef::fromData($item);
                 }
             }
         }
         if (isset($data['ref:teams'])) {
             foreach ($data['ref:teams'] as &$item) {
-                if ($item !== null && !$item instanceof TeamRef) {
+                if ($item !== null && ! $item instanceof TeamRef) {
                     $item = TeamRef::fromData($item);
                 }
             }

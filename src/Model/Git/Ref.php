@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Git;
 
 use GuzzleHttp\ClientInterface;
-use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\ApiResourceBase;
+use Platformsh\Client\Model\Project;
 
 /**
  * Git ref resource.
@@ -22,8 +24,6 @@ class Ref extends ApiResourceBase
      * Get a Ref object in a project.
      *
      * @param string          $refName
-     * @param Project         $project
-     * @param ClientInterface $client
      *
      * @return static|false
      */

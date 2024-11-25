@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model\Git;
 
 use GuzzleHttp\ClientInterface;
-use Platformsh\Client\Model\Project;
 use Platformsh\Client\Model\ApiResourceBase;
+use Platformsh\Client\Model\Project;
 
 /**
  * Git blob resource.
@@ -21,7 +23,6 @@ class Blob extends ApiResourceBase
      *
      * @param string          $sha
      * @param string          $baseUrl
-     * @param ClientInterface $client
      *
      * @return static|false
      */
@@ -39,7 +40,7 @@ class Blob extends ApiResourceBase
      */
     public function getRawContent()
     {
-        if ($this->size == 0) {
+        if ($this->size === 0) {
             return '';
         }
 
