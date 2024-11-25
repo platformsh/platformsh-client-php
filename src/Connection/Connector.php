@@ -423,19 +423,18 @@ class Connector implements ConnectorInterface
                 $this->oauthMiddleware->setAccessToken($accessToken);
             }
 
-// @todo
-//            if ($this->config['on_refresh_start'] !== null) {
-//                $this->oauth2Plugin->setOnRefreshStart($this->config['on_refresh_start']);
-//            }
-//            if ($this->config['on_refresh_end'] !== null) {
-//                $this->oauth2Plugin->setOnRefreshEnd($this->config['on_refresh_end']);
-//            }
-//            if ($this->config['on_refresh_error'] !== null) {
-//                $this->oauth2Plugin->setOnRefreshError($this->config['on_refresh_error']);
-//            }
-//            if ($this->config['on_step_up_auth_response'] !== null) {
-//                $this->oauth2Plugin->setOnStepUpAuthResponse($this->config['on_step_up_auth_response']);
-//            }
+            if ($this->config['on_refresh_start'] !== null) {
+                $this->oauthMiddleware->setOnRefreshStart($this->config['on_refresh_start']);
+            }
+            if ($this->config['on_refresh_end'] !== null) {
+                $this->oauthMiddleware->setOnRefreshEnd($this->config['on_refresh_end']);
+            }
+            if ($this->config['on_refresh_error'] !== null) {
+                $this->oauthMiddleware->setOnRefreshError($this->config['on_refresh_error']);
+            }
+            if ($this->config['on_step_up_auth_response'] !== null) {
+                $this->oauthMiddleware->setOnStepUpAuthResponse($this->config['on_step_up_auth_response']);
+            }
         }
 
         return $this->oauthMiddleware;
