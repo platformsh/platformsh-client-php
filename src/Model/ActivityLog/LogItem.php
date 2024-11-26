@@ -78,12 +78,14 @@ class LogItem
                 continue;
             }
             $data = static::decode($line);
-            if (! empty($data['seal'])) {
-                $seal = true;
-            }
-            if (isset($data['data']['timestamp'], $data['data']['message'])) {
-                $id = isset($data['_id']) ? (string) $data['_id'] : '';
-                $items[] = new static($data['data']['timestamp'], $data['data']['message'], $id);
+            if (is_array($data)) {
+                if (! empty($data['seal'])) {
+                    $seal = true;
+                }
+                if (isset($data['data']['timestamp'], $data['data']['message'])) {
+                    $id = isset($data['_id']) ? (string) $data['_id'] : '';
+                    $items[] = new static($data['data']['timestamp'], $data['data']['message'], $id);
+                }
             }
         }
 
@@ -111,7 +113,7 @@ class LogItem
         return $this->id;
     }
 
-    private static function decode(string $str): ?array
+    private static function decode(string $str): mixed
     {
         $data = json_decode($str, true);
         if ($data === null) {
