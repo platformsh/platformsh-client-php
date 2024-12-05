@@ -23,8 +23,15 @@ composer require platformsh/client
 
 Example:
 ```php
-
+use Platformsh\Client\Connection\Connector;
 use Platformsh\Client\PlatformClient;
+
+// Set up configuration.
+$connector = new Connector([
+    'api_url' => 'https://api.platform.sh',
+    'accounts' => 'https://api.platform.sh/',
+    'centralized_permissions_enabled' => true,
+]);
 
 // Initialize the client.
 $client = new PlatformClient();
@@ -32,20 +39,30 @@ $client = new PlatformClient();
 // Set the API token to use.
 //
 // N.B. you must keep your API token(s) safe!
-$client->getConnector()->setApiToken($myToken, 'exchange');
+$client->getConnector()->setApiToken('test', 'exchange');
 
-// Get the user's first project.
-$projects = $client->getProjects();
-$project = reset($projects);
+// Get a project.
+$project = $client->getProject('my_project_id');
 if ($project) {
     // Get the default (production) environment.
     $environment = $project->getEnvironment($project->default_branch);
 
-    // Create a new branch.
-    $activity = $environment->branch('Sprint 1', 'sprint-1');
+    // Create a new environment.
+    $result = $environment->runOperation('branch', body: ['name' => 'sprint-1', 'title' => 'Sprint 1']);
 
-    // Wait for the activity to complete.
-    $activity->wait();
+    // Wait for the operation to complete.
+    $activities = $result->getActivities();
+    while (count($activities) > 0) {
+        foreach ($activities as $key => $activity) {
+            if ($activity->isComplete() || $activity->state === \Platformsh\Client\Model\Activity::STATE_CANCELLED) {
+                unset($activities[$key]);
+            } else {
+                echo "Waiting for the activity: {$activity->getDescription()}\n";
+                $activity->wait(function () { echo '.'; });
+                echo "\n";
+            }
+        }
+    }
 
     // Get the new branch.
     $sprint1 = $project->getEnvironment('sprint-1');
