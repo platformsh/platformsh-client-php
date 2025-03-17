@@ -48,7 +48,6 @@ class Connector implements ConnectorInterface
         'scope' => 'scope',
         'expires' => 'expires',
         'expires_in' => 'expiresIn',
-        'resource_owner_id' => 'resourceOwnerId,',
     ];
 
     /**
@@ -62,6 +61,10 @@ class Connector implements ConnectorInterface
      *     - revoke_url (string): The OAuth 2.0 revocation URL. Can be empty if auth_url is set.
      *     - certifier_url (string): The SSH certificate issuer URL. Can be empty if auth_url is set.
      *     - client_id (string): The OAuth2 client ID for this client.
+     *     - api_token (string): An API token to use for authentication.
+     *     - client_secret (string): The OAuth2 client secret for this client.
+     *       If set, and api_token is empty, then client credentials-based authentication will be used.
+     *     - scopes (string[]): Scope(s) to request when using client credentials-based authentication.
      *     - debug (bool): Whether or not Guzzle debugging should be enabled
      *       (default: false).
      *     - verify (bool): Whether or not SSL verification should be enabled
@@ -97,6 +100,7 @@ class Connector implements ConnectorInterface
             'accounts' => 'https://api.platform.sh/',
             'client_id' => 'platformsh-client-php',
             'client_secret' => '',
+            'scopes' => [],
             'debug' => false,
             'verify' => true,
             'user_agent' => null,
@@ -207,7 +211,7 @@ class Connector implements ConnectorInterface
     /**
      * Returns the access token saved in the session, if any.
      */
-    public function getAccessToken(): false|string
+    public function getAccessToken(): false|string|null
     {
         return $this->session->get('accessToken');
     }
@@ -251,7 +255,7 @@ class Connector implements ConnectorInterface
 
     public function isLoggedIn(): bool
     {
-        return $this->session->get($this->storageKeys['access_token']) || $this->config['api_token'];
+        return $this->session->get($this->storageKeys['access_token']) || $this->config['api_token'] || $this->config['client_secret'];
     }
 
     public function setApiToken(string $token, string $type): void
@@ -371,6 +375,14 @@ class Connector implements ConnectorInterface
             if ($this->config['api_token'] && $this->config['api_token_type'] !== 'access') {
                 $grant = new ApiToken();
                 $grantOptions['api_token'] = $this->config['api_token'];
+            }
+
+            if ($this->config['client_secret']) {
+                $grantOptions['client_secret'] = $this->config['client_secret'];
+            }
+
+            if ($this->config['scopes']) {
+                $grantOptions['scope'] = implode(' ', (array) $this->config['scopes']);
             }
 
             $this->oauthMiddleware = new GuzzleMiddleware($this->getOAuth2Provider(), $grant, $grantOptions);
