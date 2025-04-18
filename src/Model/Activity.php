@@ -48,6 +48,8 @@ class Activity extends ApiResourceBase
 
     public const STATE_CANCELLED = 'cancelled';
 
+    public const STATE_STAGED = 'staged';
+
     /**
      * Wait for the activity to complete.
      *
