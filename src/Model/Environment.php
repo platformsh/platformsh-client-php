@@ -756,6 +756,20 @@ class Environment extends Resource implements HasActivitiesInterface
     }
 
     /**
+     * Lists environment settings.
+     *
+     * @return Settings
+     */
+    public function getSettings()
+    {
+        $url = $this->getUri() . '/settings';
+        $request = $this->client->createRequest('get', $url);
+        $data = self::send($request, $this->client);
+
+        return new Settings($data, $url, $this->client);
+    }
+
+    /**
      * Runs a source operation.
      *
      * @param string $name
