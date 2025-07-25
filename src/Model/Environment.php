@@ -780,7 +780,7 @@ class Environment extends Resource implements HasActivitiesInterface
         $request = $this->client->createRequest('patch', $url, ['json' => ['enable_manual_deployments' => $on]]);
         $data = self::send($request, $this->client);
 
-        return new Result($data, $url, $this->client, get_called_class());
+        return new Result($data, $url, $this->client, Settings::class);
     }
 
     /**
