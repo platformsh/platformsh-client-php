@@ -770,20 +770,6 @@ class Environment extends Resource implements HasActivitiesInterface
     }
 
     /**
-     * Set manual deployments.
-     *
-     * @return Result
-     */
-    public function setManualDeployments($on = false)
-    {
-        $url = $this->getUri() . '/settings';
-        $request = $this->client->createRequest('patch', $url, ['json' => ['enable_manual_deployments' => $on]]);
-        $data = self::send($request, $this->client);
-
-        return new Result($data, $url, $this->client, Settings::class);
-    }
-
-    /**
      * Runs a source operation.
      *
      * @param string $name
