@@ -776,11 +776,21 @@ class Environment extends Resource implements HasActivitiesInterface
      */
     public function getAutoscalingSettings()
     {
-        $url = $this->getUri() . '/autoscaling/settings';
-        $request = $this->client->createRequest('get', $url);
-        $data = self::send($request, $this->client);
+        $settings = $this->runOperation('autoscaling', 'get');
+        return new AutoscalingSettings($settings->getData(), null, $this->client);
+    }
 
-        return new AutoscalingSettings($data, $url, $this->client);
+    /**
+     * Set autoscaling settings for services on environment.
+     *
+     * @param AutoscalingSettings $settings
+     *
+     * @return AutoscalingSettings
+     */
+    public function setAutoscalingSettings(AutoscalingSettings $settings)
+    {
+        $settings = $this->runOperation('manage-autoscaling', 'patch', $settings->getData());
+        return new AutoscalingSettings($settings->getData(), null, $this->client);
     }
 
     /**
