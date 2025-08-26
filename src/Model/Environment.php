@@ -63,6 +63,8 @@ use Platformsh\Client\Model\Type\Duration;
  * @property-read string      $type
  *   The type of the environment. This is predominantly used for access control and is usually one of: production,
  *   development, or staging.
+ * @property-read string      $can_rolling_deploy
+ *   If the environment can use rolling deployments, ie zero downtime.
  */
 class Environment extends Resource implements HasActivitiesInterface
 {
