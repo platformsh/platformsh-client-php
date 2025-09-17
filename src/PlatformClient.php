@@ -702,10 +702,11 @@ class PlatformClient
      * @param string $label
      * @param string $country An ISO 2-letter country code.
      * @param string $owner The organization owner ID. Leave empty to use the current user.
+     * @param string $type The organization type. Leave blank to use the default.
      *
      * @return Organization
      */
-    public function createOrganization($name, $label = '', $country = '', $owner = '')
+    public function createOrganization($name, $label = '', $country = '', $owner = '', $type = '')
     {
         if (!$this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -714,6 +715,9 @@ class PlatformClient
         $values = ['name' => $name, 'label' => $label, 'country' => $country];
         if ($owner !== '') {
             $values['owner_id'] = $owner;
+        }
+        if ($type !== '') {
+            $values['type'] = $type;
         }
         return Organization::create($values, $url, $this->connector->getClient());
     }
