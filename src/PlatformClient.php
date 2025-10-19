@@ -587,10 +587,15 @@ class PlatformClient
      * that are concerned with subscriptions or billing. The old API path will
      * only continue to work for users who own just 1 organization (or 0).
      *
+     * @param string $name The organization name (unique, "machine-readable", used in the URL path).
+     * @param string $label The organization label ("human-readable").
      * @param string $country An ISO 2-letter country code.
      * @param string $owner The organization owner ID. Leave empty to use the current user.
+     * @param string $type The organization type. Leave blank to use the default.
+     *
+     * @return Organization
      */
-    public function createOrganization(string $name, string $label = '', string $country = '', string $owner = ''): Organization
+    public function createOrganization(string $name, string $label = '', string $country = '', string $owner = '', string $type = ''): Organization
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -603,6 +608,9 @@ class PlatformClient
         ];
         if ($owner !== '') {
             $values['owner_id'] = $owner;
+        }
+        if ($type !== '') {
+            $values['type'] = $type;
         }
         return Organization::create($values, $url, $this->connector->getClient());
     }

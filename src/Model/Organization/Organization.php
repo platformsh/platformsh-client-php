@@ -19,6 +19,7 @@ use Platformsh\Client\Model\Team\Team;
 
 /**
  * @property-read string $id The organization ID
+ * @property-read string $type The organization type
  * @property-read string $owner_id The user ID of the organization owner
  * @property-read string $name The organization's machine name (used in URLs)
  * @property-read string $label The organization's "human-readable" name

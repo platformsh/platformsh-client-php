@@ -39,7 +39,7 @@ $client = new PlatformClient();
 // Set the API token to use.
 //
 // N.B. you must keep your API token(s) safe!
-$client->getConnector()->setApiToken('test', 'exchange');
+$client->getConnector()->setApiToken($myToken, 'exchange');
 
 // Get a project.
 $project = $client->getProject('my_project_id');

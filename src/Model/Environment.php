@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Platformsh\Client\Model;
 
 use Cocur\Slugify\Slugify;
+use GuzzleHttp\Psr7\Request;
 use Platformsh\Client\Exception\EnvironmentStateException;
 use Platformsh\Client\Exception\OperationUnavailableException;
 use Platformsh\Client\Model\Activities\HasActivitiesInterface;
@@ -658,6 +659,30 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
     public function getSourceOperations(): array
     {
         return SourceOperation::getCollection($this->getLink('#source-operations'), 0, [], $this->client);
+    }
+
+    /**
+     * Lists environment settings.
+     */
+    public function getSettings(): Settings
+    {
+        $url = $this->getUri() . '/settings';
+        $request = new Request('GET', $url);
+        $data = self::send($request, $this->client);
+
+        return new Settings($data, $url, $this->client);
+    }
+
+    /**
+     * Lists environment autoscaling settings.
+     */
+    public function getAutoscalingSettings(): AutoscalingSettings
+    {
+        $url = $this->getUri() . '/autoscaling/settings';
+        $request = new Request('GET', $url);
+        $data = self::send($request, $this->client);
+
+        return new AutoscalingSettings($data, $url, $this->client);
     }
 
     /**
