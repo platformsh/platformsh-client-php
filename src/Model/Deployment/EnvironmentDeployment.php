@@ -100,16 +100,23 @@ class EnvironmentDeployment extends ApiResourceBase
      *   The operation name.
      * @param string $service
      *   The name of the service or application to run the operation on.
+     * @param array<string, string> $parameters
+     *   Parameters to pass to the operation, as key-value pairs.
      *
      *@see RuntimeOperation
      * @see AppBase::getRuntimeOperations()
      * @see AppBase::getRuntimeOperation()
      */
-    public function execRuntimeOperation(string $name, string $service): \Platformsh\Client\Model\Result
+    public function execRuntimeOperation(string $name, string $service, array $parameters = []): \Platformsh\Client\Model\Result
     {
-        return $this->runOperation('operations', 'post', [
+        $body = [
             'operation' => $name,
             'service' => $service,
-        ]);
+        ];
+        if ($parameters) {
+            $body['parameters'] = (object) $parameters;
+        }
+
+        return $this->runOperation('operations', 'post', $body);
     }
 }
