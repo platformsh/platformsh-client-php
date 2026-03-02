@@ -114,7 +114,7 @@ class EnvironmentDeployment extends ApiResourceBase
             'service' => $service,
         ];
         if ($parameters) {
-            $body['parameters'] = (object) $parameters;
+            $body['parameters'] = $parameters;
         }
 
         return $this->runOperation('operations', 'post', $body);
