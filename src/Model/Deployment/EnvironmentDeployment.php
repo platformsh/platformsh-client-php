@@ -100,7 +100,7 @@ class EnvironmentDeployment extends ApiResourceBase
      *   The operation name.
      * @param string $service
      *   The name of the service or application to run the operation on.
-     * @param array<string, string> $parameters
+     * @param string[] $parameters
      *   Parameters to pass to the operation, as key-value pairs.
      *
      *@see RuntimeOperation
@@ -114,7 +114,7 @@ class EnvironmentDeployment extends ApiResourceBase
             'service' => $service,
         ];
         if ($parameters) {
-            $body['parameters'] = (object) $parameters;
+            $body['parameters'] = $parameters;
         }
 
         return $this->runOperation('operations', 'post', $body);
