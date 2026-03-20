@@ -207,7 +207,7 @@ class Connector implements ConnectorInterface
     /**
      * Returns the access token saved in the session, if any.
      */
-    public function getAccessToken(): false|string
+    public function getAccessToken(): ?string
     {
         return $this->session->get('accessToken');
     }
