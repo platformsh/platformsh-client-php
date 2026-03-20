@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Platformsh\Client\Model;
 
 /**
@@ -7,4 +9,6 @@ namespace Platformsh\Client\Model;
  *
  * @property-read bool $enable_manual_deployments
  */
-class Settings extends ApiResourceBase {}
+class Settings extends ApiResourceBase
+{
+}

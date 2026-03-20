@@ -69,7 +69,7 @@ class Subscription extends ResourceWithReferences
     {
         $result = parent::create($body, $collectionUrl, $client);
 
-        return new self($result->getData(), $collectionUrl, $client);
+        return new static($result->getData(), $collectionUrl, $client);
     }
 
     /**

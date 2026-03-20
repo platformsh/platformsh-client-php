@@ -26,5 +26,11 @@ jobs:
             - name: Install dependencies
               run: composer install --no-progress --no-suggest --no-interaction
 
+            - name: Run ECS
+              run: ./vendor/bin/ecs check
+
+            - name: Run PHPStan
+              run: ./vendor/bin/phpstan analyse
+
             - name: Run PHPUnit tests
               run: ./vendor/bin/phpunit

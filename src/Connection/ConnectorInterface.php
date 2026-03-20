@@ -54,6 +54,16 @@ interface ConnectorInterface
     public function setApiToken(string $token, string $type);
 
     /**
+     * Get the connector configuration.
+     */
+    public function getConfig(): array;
+
+    /**
+     * Returns the access token saved in the session, if any.
+     */
+    public function getAccessToken(): ?string;
+
+    /**
      * Get the configured API gateway URL (without trailing slash).
      */
     public function getApiUrl(): string;

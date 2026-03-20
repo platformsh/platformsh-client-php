@@ -592,8 +592,6 @@ class PlatformClient
      * @param string $country An ISO 2-letter country code.
      * @param string $owner The organization owner ID. Leave empty to use the current user.
      * @param string $type The organization type. Leave blank to use the default.
-     *
-     * @return Organization
      */
     public function createOrganization(string $name, string $label = '', string $country = '', string $owner = '', string $type = ''): Organization
     {
@@ -643,6 +641,9 @@ class PlatformClient
      */
     protected function locateProject(string $id): false|string
     {
+        if (! $this->connector instanceof Connector) {
+            return false;
+        }
         $url = rtrim($this->connector->getAccountsEndpoint(), '/') . '/projects/' . rawurlencode($id);
         try {
             $result = $this->simpleGet($url);
@@ -678,7 +679,12 @@ class PlatformClient
      */
     private function apiUrl(): string
     {
-        return $this->connector->getApiUrl() ?: rtrim($this->connector->getAccountsEndpoint(), '/');
+        $url = $this->connector->getApiUrl();
+        if ($url === '' && $this->connector instanceof Connector) {
+            $url = rtrim($this->connector->getAccountsEndpoint(), '/');
+        }
+
+        return $url;
     }
 
     /**

@@ -75,7 +75,7 @@ class Result extends ApiResourceBase
      */
     public function getEntity(): ApiResourceBase
     {
-        if (! isset($this->data['_embedded']['entity']) || ! isset($this->resourceClass)) {
+        if (! isset($this->data['_embedded']['entity'])) {
             throw new \Exception('No entity found in result');
         }
 

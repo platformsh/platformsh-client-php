@@ -16,45 +16,30 @@ class RestoreOptions
 
     private ?string $resourcesInit;
 
-    /**
-     * @return RestoreOptions
-     */
     public function setEnvironmentName(?string $environmentName): static
     {
         $this->environmentName = $environmentName;
         return $this;
     }
 
-    /**
-     * @return RestoreOptions
-     */
     public function setBranchFrom(?string $branchFrom): static
     {
         $this->branchFrom = $branchFrom;
         return $this;
     }
 
-    /**
-     * @return RestoreOptions
-     */
     public function setRestoreCode(?bool $restoreCode): static
     {
         $this->restoreCode = $restoreCode;
         return $this;
     }
 
-    /**
-     * @return RestoreOptions
-     */
     public function setRestoreResources(?bool $restoreResources): static
     {
         $this->restoreResources = $restoreResources;
         return $this;
     }
 
-    /**
-     * @return RestoreOptions
-     */
     public function setResourcesInit(?string $init): static
     {
         $this->resourcesInit = $init;

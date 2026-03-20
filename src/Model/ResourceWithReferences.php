@@ -106,7 +106,7 @@ class ResourceWithReferences extends ApiResourceBase
                 $data = $resolver->resolveReferences($data);
             } catch (\Exception $e) {
                 $message = $e->getMessage();
-                if ($e instanceof BadResponseException && $e->getResponse()) {
+                if ($e instanceof BadResponseException) {
                     $message = \sprintf('status code %d', $e->getResponse()->getStatusCode());
                 }
                 \trigger_error('Unable to resolve references: ' . $message, E_USER_WARNING);
