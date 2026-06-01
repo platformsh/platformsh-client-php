@@ -19,7 +19,7 @@ trait HasActivitiesTrait
         return Activity::get($id, $this->getUri() . '/activities', $this->client);
     }
 
-    public function getActivities(int $limit = 0, array|string $type = null, DateTime|int $startsAt = null, array|string $state = null, array|string $result = null): array
+    public function getActivities(int $limit = 0, null|array|string $type = null, null|DateTime|int $startsAt = null, null|array|string $state = null, null|array|string $result = null): array
     {
         $query = '';
         if ($type !== null) {

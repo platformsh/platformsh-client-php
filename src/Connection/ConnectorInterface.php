@@ -23,7 +23,7 @@ interface ConnectorInterface
      * @param int|string|null $totp
      *   Time-based one-time password (two-factor authentication).
      */
-    public function logIn(string $username, string $password, bool $force = false, int|string $totp = null);
+    public function logIn(string $username, string $password, bool $force = false, null|int|string $totp = null);
 
     /**
      * Log out.

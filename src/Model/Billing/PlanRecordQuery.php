@@ -11,7 +11,7 @@ class PlanRecordQuery
     /**
      * Restrict the query to a date/time period.
      */
-    public function setPeriod(\DateTime $start = null, \DateTime $end = null): void
+    public function setPeriod(?\DateTime $start = null, ?\DateTime $end = null): void
     {
         $this->filters['start'] = $start?->format('c');
         $this->filters['end'] = $end?->format('c');

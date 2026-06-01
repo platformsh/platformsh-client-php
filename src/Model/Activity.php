@@ -63,7 +63,7 @@ class Activity extends ApiResourceBase
      *                                string. Deprecated: use readLog() instead.
      * @param float|int $pollInterval The polling interval, in seconds.
      */
-    public function wait(callable $onPoll = null, callable $onLog = null, float|int $pollInterval = 1): void
+    public function wait(?callable $onPoll = null, ?callable $onLog = null, float|int $pollInterval = 1): void
     {
         $log = $this->getProperty('log');
         $length = strlen($log);
@@ -109,7 +109,7 @@ class Activity extends ApiResourceBase
      *
      * @return LogItem[]
      */
-    public function readLog(callable $onUpdate = null): array
+    public function readLog(?callable $onUpdate = null): array
     {
         $response = $this->fetchLog($onUpdate !== null);
         $body = $response->getBody();
@@ -151,7 +151,7 @@ class Activity extends ApiResourceBase
      *                                (depending on $target), this specifies
      *                                the name of the parent branch.
      */
-    public function restore(string $target = null, string $branchFrom = null): self
+    public function restore(?string $target = null, ?string $branchFrom = null): self
     {
         if ($this->getProperty('type') !== 'environment.backup') {
             throw new \BadMethodCallException('Cannot restore activity (wrong type)');
