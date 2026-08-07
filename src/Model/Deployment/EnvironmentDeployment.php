@@ -13,6 +13,7 @@ use Platformsh\Client\Model\ApiResourceBase;
  * @property-read Service[] $services
  * @property-read WebApp[]  $webapps
  * @property-read Worker[]  $workers
+ * @property-read Task[]    $tasks
  *
  * @property-read array $container_profiles
  *
@@ -20,6 +21,7 @@ use Platformsh\Client\Model\ApiResourceBase;
  * @method Service getService(string $name)
  * @method WebApp getWebApp(string $name)
  * @method Worker getWorker(string $name)
+ * @method Task getTask(string $name)
  */
 class EnvironmentDeployment extends ApiResourceBase
 {
@@ -28,6 +30,7 @@ class EnvironmentDeployment extends ApiResourceBase
         'routes' => Route::class,
         'webapps' => WebApp::class,
         'workers' => Worker::class,
+        'tasks' => Task::class,
     ];
 
     public function __get(string $name)
