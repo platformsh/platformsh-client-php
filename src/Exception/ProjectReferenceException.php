@@ -14,7 +14,7 @@ class ProjectReferenceException extends \RuntimeException
     /**
      * @param string|null $message
      */
-    public function __construct(string $projectId, $message = null, \Exception $previous = null)
+    public function __construct(string $projectId, $message = null, ?\Exception $previous = null)
     {
         $this->projectId = $projectId;
         $message = $message ?: 'Cannot resolve reference for project: ' . $projectId;

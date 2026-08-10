@@ -45,7 +45,7 @@ abstract class ApiResourceBase implements \ArrayAccess
      * @param bool $full    Whether the data is a complete
      *                                 representation of the resource.
      */
-    public function __construct(array $data, string $baseUrl = null, ClientInterface $client = null, bool $full = true)
+    public function __construct(array $data, ?string $baseUrl = null, ?ClientInterface $client = null, bool $full = true)
     {
         $this->client = $client ?: new Client();
         $this->baseUrl = (string) $baseUrl;
@@ -565,7 +565,7 @@ abstract class ApiResourceBase implements \ArrayAccess
     /**
      * Make a URL absolute, based on the base URL.
      */
-    protected function makeAbsoluteUrl(string $relativeUrl, string $baseUrl = null): string
+    protected function makeAbsoluteUrl(string $relativeUrl, ?string $baseUrl = null): string
     {
         $baseUrl = $baseUrl ?: $this->baseUrl;
         if (empty($baseUrl)) {

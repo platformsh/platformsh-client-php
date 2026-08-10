@@ -17,7 +17,7 @@ class File implements SessionStorageInterface
      *   A writable directory where session files will be saved. Leave null
      *   to use the default.
      */
-    public function __construct(string $directory = null)
+    public function __construct(?string $directory = null)
     {
         $this->directory = $directory ?: $this->getDefaultDirectory();
     }

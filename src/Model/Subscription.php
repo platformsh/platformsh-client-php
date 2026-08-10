@@ -80,7 +80,7 @@ class Subscription extends ResourceWithReferences
      *                            one argument: the Subscription object.
      * @param int $interval The polling interval, in seconds.
      */
-    public function wait(callable $onPoll = null, int $interval = 2): void
+    public function wait(?callable $onPoll = null, int $interval = 2): void
     {
         while ($this->isPending()) {
             sleep(max($interval, 1));

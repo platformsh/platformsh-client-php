@@ -45,7 +45,7 @@ class PlatformClient
      */
     protected false|null|string $userId;
 
-    public function __construct(ConnectorInterface $connector = null)
+    public function __construct(?ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?: new Connector();
     }
@@ -58,7 +58,7 @@ class PlatformClient
     /**
      * Get a single project by its ID.
      */
-    public function getProject(string $id, string $hostname = null, bool $https = true): Project|false
+    public function getProject(string $id, ?string $hostname = null, bool $https = true): Project|false
     {
         // Look for a project directly if the hostname is known.
         if ($hostname !== null) {
@@ -128,7 +128,7 @@ class PlatformClient
      * @return BasicProjectInfo[]
      *   A list of basic project information.
      */
-    public function getMyProjects(string $vendor = null): array
+    public function getMyProjects(?string $vendor = null): array
     {
         $projects = [];
         if (! empty($this->connector->getConfig()['centralized_permissions_enabled'])) {
@@ -242,7 +242,7 @@ class PlatformClient
      * @param string $value The SSH key value.
      * @param string|null $title A title for the key (optional).
      */
-    public function addSshKey(string $value, string $title = null): Result
+    public function addSshKey(string $value, ?string $title = null): Result
     {
         $values = $this->cleanRequest([
             'value' => $value,
@@ -275,7 +275,7 @@ class PlatformClient
      * @see PlatformClient::getRegions()
      * @see Subscription::wait()
      */
-    public function createSubscription(SubscriptionOptions|string $options, string $plan = null, string $title = null, int $storage = null, int $environments = null, array $activation_callback = null, string $options_url = null): Subscription
+    public function createSubscription(SubscriptionOptions|string $options, ?string $plan = null, ?string $title = null, ?int $storage = null, ?int $environments = null, ?array $activation_callback = null, ?string $options_url = null): Subscription
     {
         if ($options instanceof SubscriptionOptions) {
             $values = $options->toArray();
@@ -310,7 +310,7 @@ class PlatformClient
      *
      * @return Subscription[]
      */
-    public function getSubscriptions(string $organizationId = null): array
+    public function getSubscriptions(?string $organizationId = null): array
     {
         if (isset($organizationId)) {
             $url = $this->apiUrl() . '/organizations/' . $organizationId . '/subscriptions';
@@ -341,7 +341,7 @@ class PlatformClient
      *
      * @return array An array containing at least 'total' (a formatted price).
      */
-    public function getSubscriptionEstimate(string $plan, int $storage, int $environments, int $users, string $countryCode = null, string $organizationId = null): array
+    public function getSubscriptionEstimate(string $plan, int $storage, int $environments, int $users, ?string $countryCode = null, ?string $organizationId = null): array
     {
         $options = [];
         $options['query'] = [
@@ -390,7 +390,7 @@ class PlatformClient
      *
      * @return PlanRecord[]
      */
-    public function getPlanRecords(PlanRecordQuery $query = null): array
+    public function getPlanRecords(?PlanRecordQuery $query = null): array
     {
         $url = $this->apiUrl() . '/records/plan';
         $options = [];
@@ -446,7 +446,7 @@ class PlatformClient
      * @param string|null $username           The name of the account for which the project is to be created.
      * @param string|null $organization       The name of the organization for which the project is to be created.
      */
-    public function getSetupOptions(string $vendor = null, string $plan = null, string $options_url = null, string $username = null, string $organization = null): SetupOptions
+    public function getSetupOptions(?string $vendor = null, ?string $plan = null, ?string $options_url = null, ?string $username = null, ?string $organization = null): SetupOptions
     {
         $url = $this->apiUrl() . '/setup/options';
         $options = $this->cleanRequest([
@@ -466,7 +466,7 @@ class PlatformClient
      * @param string|null $id
      *   The user ID. Defaults to the current user.
      */
-    public function getUser(string $id = null): false|User
+    public function getUser(?string $id = null): false|User
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');
@@ -620,7 +620,7 @@ class PlatformClient
      *
      *@throws \RuntimeException if the given organization and team IDs conflict
      */
-    public function getTeam(string $id, Organization $organization = null): false|Team
+    public function getTeam(string $id, ?Organization $organization = null): false|Team
     {
         if (! $this->connector->getApiUrl()) {
             throw new \RuntimeException('No API URL configured');

@@ -169,7 +169,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      * @return array<mixed, string>
      *     An array of SSH URLs for the given app, keyed by instance ID.
      */
-    public function getSshInstanceURLs(string $app, array $sshUrls = null): array
+    public function getSshInstanceURLs(string $app, ?array $sshUrls = null): array
     {
         $urls = $sshUrls === null ? $this->getSshUrls() : $sshUrls;
         $instances = [];
@@ -270,7 +270,7 @@ class Environment extends ApiResourceBase implements HasActivitiesInterface
      *
      * @deprecated use instead: runOperation('branch', 'POST', ['name' => 'git-branch-name', 'title' => 'Untitled', 'clone_parent' => true, 'type' => 'development'])
      */
-    public function branch(string $title, string $id = null, bool $cloneParent = true, string $type = null): Activity
+    public function branch(string $title, ?string $id = null, bool $cloneParent = true, ?string $type = null): Activity
     {
         $id = $id ?: $this->sanitizeId($title);
         $body = [

@@ -22,7 +22,7 @@ class Session implements SessionInterface
      * @param string $id   A unique session ID.
      * @param array                   $data Initial session data.
      */
-    public function __construct(string $id = 'default', array $data = [], SessionStorageInterface $storage = null)
+    public function __construct(string $id = 'default', array $data = [], ?SessionStorageInterface $storage = null)
     {
         $this->id = $id;
         $this->data = $data;

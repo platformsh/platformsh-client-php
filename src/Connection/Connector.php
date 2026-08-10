@@ -86,7 +86,7 @@ class Connector implements ConnectorInterface
      *       received. It will be passed a Guzzle ResponseInterface, and
      *       should return an AccessToken or null.
      */
-    public function __construct(array $config = [], SessionInterface $session = null)
+    public function __construct(array $config = [], ?SessionInterface $session = null)
     {
         if (isset($config['accounts'])) {
             \trigger_error('The "accounts" URL option is deprecated. APIs are accessed based on the "api_url" and OAuth 2.0 URL options instead.', E_USER_DEPRECATED);
@@ -216,7 +216,7 @@ class Connector implements ConnectorInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
      */
-    public function logIn(string $username, string $password, bool $force = false, int|string $totp = null): void
+    public function logIn(string $username, string $password, bool $force = false, null|int|string $totp = null): void
     {
         if (! $force && $this->isLoggedIn() && $this->session->get('username') === $username) {
             return;

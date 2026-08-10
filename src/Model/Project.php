@@ -41,7 +41,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      * do not always contain full information about each project. So this
      * overrides the Resource constructor to default $full to false.
      */
-    public function __construct(array $data, $baseUrl = null, ClientInterface $client = null, $full = false)
+    public function __construct(array $data, $baseUrl = null, ?ClientInterface $client = null, $full = false)
     {
         parent::__construct($data, $baseUrl, $client, $full);
     }
@@ -278,7 +278,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
      *
      * @return Environment[]
      */
-    public function getEnvironments(int $limit = 0, string $type = null, bool $active = null): array
+    public function getEnvironments(int $limit = 0, ?string $type = null, ?bool $active = null): array
     {
         $options = [];
         if ($type !== null) {
