@@ -76,7 +76,6 @@ class EnvironmentTest extends TestCase
             ],
         ];
 
-        /** @var array{'_links': string[], 'app': string, 'instance': string, 'result': string|false}[] $cases */
         $cases = [
             [
                 '_links' => $multiApp,

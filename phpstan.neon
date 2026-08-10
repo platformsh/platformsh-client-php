@@ -1,0 +1,12 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+	level: 5
+	paths:
+		- src
+		- tests
+	ignoreErrors:
+		# Deliberate pattern: resource classes use new static() for polymorphism.
+		-
+			identifier: new.static

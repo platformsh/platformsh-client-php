@@ -34,7 +34,7 @@ class LogItem
      */
     public static function singleFromJson(string $str): self|false
     {
-        $data = static::decode($str);
+        $data = self::decode($str);
         if (isset($data['data']['timestamp'], $data['data']['message'])) {
             $id = isset($data['_id']) ? (string) $data['_id'] : '';
             return new static($data['data']['timestamp'], $data['data']['message'], $id);
@@ -43,7 +43,7 @@ class LogItem
     }
 
     /**
-     * @return static[]
+     * @return self[]
      *@deprecated use LogItem::multipleFromJsonStreamWithSeal() instead
      */
     public static function multipleFromJsonStream(string $str): array
@@ -77,7 +77,7 @@ class LogItem
             if ($line === '') {
                 continue;
             }
-            $data = static::decode($line);
+            $data = self::decode($line);
             if (is_array($data)) {
                 if (! empty($data['seal'])) {
                     $seal = true;

@@ -38,7 +38,7 @@ class Resolver
             return $data;
         }
         foreach ($data['_links'] as $key => $link) {
-            if (str_starts_with($key, 'ref:') && ($parts = \explode(':', $key, 3)) && \count($parts) === 3) {
+            if (str_starts_with($key, 'ref:') && \count($parts = \explode(':', $key, 3)) === 3) {
                 $set = $parts[1];
                 $linkUri = Utils::uriFor($link['href']);
                 $absoluteUrl = Utils::uriFor($this->baseUrl)->withPath($linkUri->getPath())->withQuery($linkUri->getQuery());

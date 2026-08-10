@@ -68,14 +68,11 @@ class Tree extends ApiResourceBase
         if ($object === false) {
             return false;
         }
-        if ($object instanceof Blob) {
-            return $object;
-        }
         if ($object instanceof self) {
             throw new GitObjectTypeException('The requested file is a directory', $path);
         }
 
-        return false;
+        return $object;
     }
 
     /**

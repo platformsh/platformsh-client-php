@@ -508,7 +508,7 @@ class Project extends ApiResourceBase implements HasActivitiesInterface
     /**
      * Returns system information about the project, e.g. the API version.
      */
-    public function systemInformation(): System
+    public function systemInformation(): System|false
     {
         return System::get($this->getLink('#system'), '', $this->client);
     }
