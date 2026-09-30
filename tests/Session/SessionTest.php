@@ -38,6 +38,49 @@ class SessionTest extends TestCase
         $this->assertSame('foo', (new Session('foo'))->getId());
     }
 
+    public function testSaveOnlyWritesChanges(): void
+    {
+        $session = new Session('test', [], $this->storage);
+        $session->save();
+        $this->assertSame(0, $this->storage->saveCount);
+
+        $session->set('token', 'foo');
+        $session->save();
+        $this->assertSame(1, $this->storage->saveCount);
+        $this->assertSame([
+            'token' => 'foo',
+        ], $this->storage->sessions['test']);
+
+        $session->save();
+        $session->set('token', 'foo');
+        $session->save();
+        $this->assertSame(1, $this->storage->saveCount);
+
+        $session->set('token', 'bar');
+        $session->save();
+        $this->assertSame(2, $this->storage->saveCount);
+    }
+
+    public function testSaveWritesChangedObject(): void
+    {
+        $value = new class() implements \JsonSerializable {
+            public string $token = 'foo';
+
+            public function jsonSerialize(): mixed
+            {
+                return $this->token;
+            }
+        };
+        $session = new Session('test', [], $this->storage);
+        $session->set('token', $value);
+        $session->save();
+        $this->assertSame(1, $this->storage->saveCount);
+
+        $value->token = 'bar';
+        $session->save();
+        $this->assertSame(2, $this->storage->saveCount);
+    }
+
     public function testReload(): void
     {
         $session = new Session('test', [], $this->storage);
