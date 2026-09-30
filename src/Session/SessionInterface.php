@@ -9,6 +9,11 @@ use Platformsh\Client\Session\Storage\SessionStorageInterface;
 interface SessionInterface
 {
     /**
+     * Get the session ID.
+     */
+    public function getId(): string;
+
+    /**
      * Set the storage for this session.
      */
     public function setStorage(SessionStorageInterface $storage);
@@ -29,6 +34,13 @@ interface SessionInterface
      * Save the session, if storage is defined.
      */
     public function save();
+
+    /**
+     * Reload the session data from storage, if storage is defined.
+     *
+     * Unsaved changes are discarded.
+     */
+    public function reload();
 
     /**
      * Clear the session data.

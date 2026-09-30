@@ -29,6 +29,11 @@ class Session implements SessionInterface
         $this->storage = $storage;
     }
 
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
     public function setStorage(SessionStorageInterface $storage): void
     {
         $this->storage = $storage;
@@ -67,6 +72,12 @@ class Session implements SessionInterface
         }
 
         $this->storage->save($this->id, $this->data);
+    }
+
+    public function reload(): void
+    {
+        $this->loaded = false;
+        $this->lazyLoad();
     }
 
     /**
