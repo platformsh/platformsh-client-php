@@ -49,7 +49,9 @@ class File implements SessionStorageInterface
             return [];
         }
         // A shared lock avoids reading a file that save() has truncated but not yet written.
-        $raw = flock($handle, LOCK_SH) ? stream_get_contents($handle) : false;
+        // If locking is unsupported, read anyway.
+        flock($handle, LOCK_SH);
+        $raw = stream_get_contents($handle);
         flock($handle, LOCK_UN);
         fclose($handle);
         $data = $raw !== false ? json_decode($raw, true) : [];
