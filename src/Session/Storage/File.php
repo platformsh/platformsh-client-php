@@ -44,14 +44,17 @@ class File implements SessionStorageInterface
 
     public function load(string $sessionId): array
     {
-        $data = [];
         $filename = $this->getFilename($sessionId);
-        if (is_readable($filename)) {
-            $raw = file_get_contents($filename);
-            if ($raw !== false) {
-                $data = json_decode($raw, true);
-            }
+        if (! is_readable($filename) || ! ($handle = fopen($filename, 'r'))) {
+            return [];
         }
+        // A shared lock avoids reading a file that save() has truncated but not yet written.
+        // If locking is unsupported, read anyway.
+        flock($handle, LOCK_SH);
+        $raw = stream_get_contents($handle);
+        flock($handle, LOCK_UN);
+        fclose($handle);
+        $data = $raw !== false ? json_decode($raw, true) : [];
 
         return is_array($data) ? $data : [];
     }

@@ -12,7 +12,10 @@ class Session implements SessionInterface
 
     private array $data;
 
-    private array $original = [];
+    /**
+     * The JSON encoding of the data as last loaded or saved.
+     */
+    private ?string $original = null;
 
     private bool $loaded = false;
 
@@ -27,6 +30,11 @@ class Session implements SessionInterface
         $this->id = $id;
         $this->data = $data;
         $this->storage = $storage;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     public function setStorage(SessionStorageInterface $storage): void
@@ -62,11 +70,19 @@ class Session implements SessionInterface
             return;
         }
         $this->lazyLoad();
-        if ($this->data === $this->original) {
+        $encoded = $this->encode();
+        if ($encoded !== null && $encoded === $this->original) {
             return;
         }
 
         $this->storage->save($this->id, $this->data);
+        $this->original = $encoded;
+    }
+
+    public function reload(): void
+    {
+        $this->loaded = false;
+        $this->lazyLoad();
     }
 
     /**
@@ -76,8 +92,18 @@ class Session implements SessionInterface
     {
         if (! $this->loaded && isset($this->storage)) {
             $this->data = $this->storage->load($this->id);
-            $this->original = $this->data;
+            $this->original = $this->encode();
             $this->loaded = true;
         }
+    }
+
+    /**
+     * Encode the data as JSON, so that changes within objects are detected.
+     */
+    private function encode(): ?string
+    {
+        $encoded = json_encode($this->data);
+
+        return $encoded === false ? null : $encoded;
     }
 }
