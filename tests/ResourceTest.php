@@ -109,7 +109,8 @@ class ResourceTest extends TestCase
             'POST with a body' => ['post', [
                 'foo' => 'bar',
             ], '{"foo":"bar"}'],
-            'PATCH without a body' => ['PATCH', [], '{}'],
+            'lowercase POST' => ['post', [], '{}'],
+            'PATCH without a body' => ['PATCH', [], ''],
             'GET' => ['GET', [], ''],
             'lowercase GET' => ['get', [], ''],
             'GET with a body' => ['GET', [
