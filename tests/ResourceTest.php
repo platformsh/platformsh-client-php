@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Platformsh\Client\Tests;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Platformsh\Client\Model\ApiResourceBase;
 
@@ -94,5 +100,53 @@ class ResourceTest extends TestCase
         $resource->update([
             'testProperty' => 2,
         ]);
+    }
+
+    public static function operationBodyProvider(): array
+    {
+        return [
+            'POST without a body' => ['POST', [], '{}'],
+            'POST with a body' => ['post', [
+                'foo' => 'bar',
+            ], '{"foo":"bar"}'],
+            'lowercase POST' => ['post', [], '{}'],
+            'PATCH without a body' => ['PATCH', [], '{}'],
+            'PUT without a body' => ['PUT', [], ''],
+            'GET' => ['GET', [], ''],
+            'lowercase GET' => ['get', [], ''],
+            'GET with a body' => ['GET', [
+                'foo' => 'bar',
+            ], '{"foo":"bar"}'],
+            'DELETE' => ['DELETE', [], ''],
+        ];
+    }
+
+    /**
+     * Test the request body sent by Resource::runOperation().
+     */
+    #[DataProvider('operationBodyProvider')]
+    public function testRunOperationBody(string $method, array $body, string $expected): void
+    {
+        $history = [];
+        $stack = HandlerStack::create(new MockHandler([new Response(200)]));
+        $stack->push(Middleware::history($history));
+        $resource = new MockApiResource([
+            '_links' => [
+                'self' => [
+                    'href' => 'https://example.com/resources/test-id',
+                ],
+                '#operate' => [
+                    'href' => '/resources/test-id/operate',
+                ],
+            ],
+        ], 'https://example.com/', new Client([
+            'handler' => $stack,
+        ]));
+
+        $resource->runOperation('operate', $method, $body);
+
+        $this->assertCount(1, $history);
+        $this->assertSame(strtoupper($method), $history[0]['request']->getMethod());
+        $this->assertSame($expected, (string) $history[0]['request']->getBody());
     }
 }
