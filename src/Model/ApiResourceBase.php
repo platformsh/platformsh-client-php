@@ -303,8 +303,8 @@ abstract class ApiResourceBase implements \ArrayAccess
         if (! $this->operationAvailable($op, true)) {
             throw new OperationUnavailableException("Operation not available: {$op}");
         }
-        // Send an empty JSON object rather than no body, for POST requests.
-        $encoded = $body ? \json_encode($body) : (strtoupper($method) === 'POST' ? '{}' : null);
+        // Send an empty JSON object rather than no body, for POST and PATCH requests.
+        $encoded = $body ? \json_encode($body) : (in_array(strtoupper($method), ['POST', 'PATCH'], true) ? '{}' : null);
         $request = new Request($method, $this->getLink("#{$op}"), [
             'Content-Type' => 'application/json',
         ], $encoded);
